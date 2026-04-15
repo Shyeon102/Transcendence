@@ -40,7 +40,7 @@ A web service for discovering, recommandation and discussing movies, anime, and 
 
 
 ## 📁 Project Structure
-
+```bash
 root-workspace/  
 ├── frontend/                # React + TypeScript  
 ├── backend/                 # Django + DRF + Channels  
@@ -51,7 +51,7 @@ root-workspace/
 ├── docker-compose.prod.yml  # production enviroment  
 ├── .env.example             # .env template  
 └── .gitignore
-
+```
 ## 🌿 Branching Strategy
 
 
