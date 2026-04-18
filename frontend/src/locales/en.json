@@ -1,0 +1,48 @@
+{
+  "common": {
+    "error": "Something went wrong while processing your request.",
+    "backHome": "Back to home",
+    "login": "Log in",
+    "signup": "Sign up",
+    "logout": "Log out"
+  },
+  "home": {
+    "welcomePrefix": "Welcome,",
+    "welcomeSuffix": ""
+  },
+  "login": {
+    "title": "Log in",
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "submit": "Log in",
+    "loading": "Logging in...",
+    "oauth42": "Continue with 42 OAuth",
+    "oauthPending": "42 OAuth will be connected in Week 2.",
+    "demoHint": "demo@demo.demo / demo1234",
+    "noAccount": "Need an account?",
+    "toSignup": "Sign up"
+  },
+  "signup": {
+    "title": "Sign up",
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "nickname": "Nickname",
+    "nicknamePlaceholder": "At least 2 characters",
+    "password": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "passwordConfirm": "Confirm password",
+    "passwordConfirmPlaceholder": "Enter your password again",
+    "submit": "Create account",
+    "loading": "Creating account...",
+    "hasAccount": "Already have an account?",
+    "toLogin": "Log in"
+  },
+  "validation": {
+    "required": "Please fill in every field.",
+    "invalidEmail": "Please enter a valid email address.",
+    "passwordTooShort": "Password must be at least 8 characters.",
+    "passwordMismatch": "Passwords do not match."
+  }
+}

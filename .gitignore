@@ -1,3 +1,7 @@
 # /.gitignore
 
 .env
+.codex
+frontend/.codex
+frontend/node_modules/
+frontend/dist/
