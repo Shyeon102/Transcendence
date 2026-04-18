@@ -1,0 +1,48 @@
+{
+  "common": {
+    "error": "요청 처리 중 오류가 발생했습니다.",
+    "backHome": "홈으로 돌아가기",
+    "login": "로그인",
+    "signup": "회원가입",
+    "logout": "로그아웃"
+  },
+  "home": {
+    "welcomePrefix": "환영합니다,",
+    "welcomeSuffix": "님"
+  },
+  "login": {
+    "title": "로그인",
+    "email": "이메일",
+    "emailPlaceholder": "name@example.com",
+    "password": "비밀번호",
+    "passwordPlaceholder": "비밀번호를 입력하세요",
+    "submit": "로그인",
+    "loading": "로그인 중...",
+    "oauth42": "42 OAuth로 로그인",
+    "oauthPending": "42 OAuth 연결은 Week 2에서 붙입니다.",
+    "demoHint": "demo@demo.demo / demo1234",
+    "noAccount": "계정이 없나요?",
+    "toSignup": "회원가입"
+  },
+  "signup": {
+    "title": "회원가입",
+    "email": "이메일",
+    "emailPlaceholder": "name@example.com",
+    "nickname": "닉네임",
+    "nicknamePlaceholder": "2자 이상 입력",
+    "password": "비밀번호",
+    "passwordPlaceholder": "8자 이상 입력",
+    "passwordConfirm": "비밀번호 확인",
+    "passwordConfirmPlaceholder": "비밀번호를 한 번 더 입력",
+    "submit": "회원가입",
+    "loading": "가입 중...",
+    "hasAccount": "이미 계정이 있나요?",
+    "toLogin": "로그인"
+  },
+  "validation": {
+    "required": "모든 필드를 입력해주세요.",
+    "invalidEmail": "올바른 이메일 형식이 아닙니다.",
+    "passwordTooShort": "비밀번호는 8자 이상이어야 합니다.",
+    "passwordMismatch": "비밀번호가 일치하지 않습니다."
+  }
+}
