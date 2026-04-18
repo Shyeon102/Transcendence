@@ -2,6 +2,13 @@
 
 > This project has been created as part of the 42 curriculum by [llarrey](https://github.com/Angeuh), [jihyeki2](https://github.com/JesuisJ), [seong-ki](https://github.com/Shyeon102), [thelee](https://github.com/thelee42), [jaoh](https://github.com/aejone1013)
 
+## 🚀 Getting Started
+```bash
+git clone https://github.com/Shyeon102/Transcendence.git
+cp .env.example .env   # Write .env file
+docker compose up --build
+```
+
 ## 👥 Team
 
 
@@ -30,7 +37,7 @@ A web service for discovering, recommandation and discussing movies, anime, and 
 ## Tech Stack
 
 
-|              |                                                |
+|     **PART** |               **STACK**                        |
 | ------------ | ---------------------------------------------- |
 | **Frontend** | React + TypeScript + Redux Toolkit (RTK Query) |
 | **Backend**  | Django + DRF + Django Channels                 |
@@ -40,18 +47,20 @@ A web service for discovering, recommandation and discussing movies, anime, and 
 
 
 ## 📁 Project Structure
+
 ```bash
 root-workspace/  
 ├── frontend/                # React + TypeScript  
 ├── backend/                 # Django + DRF + Channels  
-├── ai/                            # recommand pipeline + RAG  
+├── ai/                      # recommand pipeline + RAG + Celery 
 ├── .github/  
 │   └── workflows/           # GitHub Actions CI/CD  
 ├── docker-compose.yml       # local dev enviroment  
-├── docker-compose.prod.yml  # production enviroment  
+├── docker-compose.prod.yml  # production enviroment  (WIP)
 ├── .env.example             # .env template  
 └── .gitignore
 ```
+
 ## 🌿 Branching Strategy
 
 
@@ -66,7 +75,7 @@ root-workspace/
 
 
 - All work should be branched from `dev`.
-- Pull Requests (PR) flow: `feature/`*, `fix/*`, `test/*`, `docs/*` → `dev`.
+- Pull Requests (PR) flow: `feature/`*, `fix/`*, `test/*`, `docs/*` → `dev`.
 - Merge to `main` only upon completion of a major milestone.
 
 ## 📝 Commit Convention
