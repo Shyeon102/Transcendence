@@ -1,0 +1,48 @@
+{
+  "common": {
+    "error": "Une erreur est survenue pendant le traitement de la requete.",
+    "backHome": "Retour a l'accueil",
+    "login": "Connexion",
+    "signup": "Inscription",
+    "logout": "Se deconnecter"
+  },
+  "home": {
+    "welcomePrefix": "Bienvenue,",
+    "welcomeSuffix": ""
+  },
+  "login": {
+    "title": "Connexion",
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "submit": "Connexion",
+    "loading": "Connexion en cours...",
+    "oauth42": "Continuer avec 42 OAuth",
+    "oauthPending": "La connexion 42 OAuth sera branchee en semaine 2.",
+    "demoHint": "demo@demo.demo / demo1234",
+    "noAccount": "Pas encore de compte ?",
+    "toSignup": "Inscription"
+  },
+  "signup": {
+    "title": "Inscription",
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "nickname": "Pseudo",
+    "nicknamePlaceholder": "Au moins 2 caracteres",
+    "password": "Mot de passe",
+    "passwordPlaceholder": "Au moins 8 caracteres",
+    "passwordConfirm": "Confirmation du mot de passe",
+    "passwordConfirmPlaceholder": "Entrez encore le mot de passe",
+    "submit": "Creer un compte",
+    "loading": "Creation du compte...",
+    "hasAccount": "Vous avez deja un compte ?",
+    "toLogin": "Connexion"
+  },
+  "validation": {
+    "required": "Veuillez remplir tous les champs.",
+    "invalidEmail": "Veuillez saisir une adresse email valide.",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 8 caracteres.",
+    "passwordMismatch": "Les mots de passe ne correspondent pas."
+  }
+}

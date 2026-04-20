@@ -42,18 +42,18 @@ services:
       start_period: 30s
     command: python manage.py runserver 0.0.0.0:8000
 
-  worker:
-    build: ./ai
-    restart: unless-stopped
-    volumes:
-      - ./ai:/app
-    env_file: .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    command: celery -A core worker --loglevel=info
+  # worker:
+  #   build: ./ai
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./ai:/app
+  #   env_file: .env
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #   command: celery -A project worker --loglevel=info
 
   frontend:
     build: ./frontend
