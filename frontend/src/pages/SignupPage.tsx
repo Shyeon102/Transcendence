@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { useI18n } from '../lib/i18n';
-import SiteHeader from '../components/SiteHeader';
-import { useSignupMutation } from '../store/api/authApi';
-import type { AuthErrorResponse } from '../types';
+import type { AppDispatch } from '../store';
+import { setCredentials } from '../store/slices/authSlice';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -16,11 +16,11 @@ export default function SignupPage() {
   });
   const [errorMsg, setErrorMsg] = useState('');
 
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { t } = useI18n();
-  const [signup, { isLoading }] = useSignupMutation();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -44,7 +44,7 @@ export default function SignupPage() {
     return '';
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationError = validateForm();
     setErrorMsg(validationError);
@@ -54,17 +54,24 @@ export default function SignupPage() {
     }
 
     try {
-      await signup(formData).unwrap();
-      navigate('/');
-    } catch (err) {
-      const apiError = err as AuthErrorResponse;
-      setErrorMsg(apiError.message ?? t('common.error'));
+      dispatch(
+        setCredentials({
+          user: {
+            id: Date.now(),
+            email: formData.email.trim(),
+            username: formData.username.trim(),
+          },
+          token: 'mock-token',
+        })
+      );
+      navigate('/home');
+    } catch {
+      setErrorMsg(t('common.error'));
     }
   };
 
   return (
     <div className="min-h-screen">
-      <SiteHeader />
       <main className="mx-auto flex min-h-[calc(100vh-85px)] w-full max-w-6xl items-center justify-center px-4 py-10">
         <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/20 backdrop-blur">
           <div className="mb-8">
@@ -119,10 +126,9 @@ export default function SignupPage() {
             {errorMsg && <p className="text-sm text-rose-400">{errorMsg}</p>}
             <button
               type="submit"
-              disabled={isLoading}
               className="w-full rounded-md bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading ? t('signup.loading') : t('signup.submit')}
+              {t('signup.submit')}
             </button>
           </form>
 

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useI18n } from '../lib/i18n';
-import SiteHeader from '../components/SiteHeader';
-import { useLoginMutation } from '../store/api/authApi';
-import type { AuthErrorResponse } from '../types';
+import { setCredentials } from '../store/slices/authSlice';
+import { useDispatch } from 'react-redux';
+import type { AppDispatch } from '../store';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -12,9 +12,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { t } = useI18n();
-  const [login, { isLoading }] = useLoginMutation();
 
   const validateForm = () => {
     if (!email.trim() || !password.trim()) {
@@ -28,7 +28,7 @@ export default function LoginPage() {
     return '';
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationError = validateForm();
     setErrorMsg(validationError);
@@ -38,17 +38,24 @@ export default function LoginPage() {
     }
 
     try {
-      await login({ email, password }).unwrap();
-      navigate('/');
-    } catch (err) {
-      const apiError = err as AuthErrorResponse;
-      setErrorMsg(apiError.message ?? t('common.error'));
+      dispatch(
+        setCredentials({
+          user: {
+            id: Date.now(),
+            email: email.trim(),
+            username: email.split('@')[0] || 'user',
+          },
+          token: 'mock-token',
+        })
+      );
+      navigate('/home');
+    } catch {
+      setErrorMsg(t('common.error'));
     }
   };
 
   return (
     <div className="min-h-screen">
-      <SiteHeader />
       <main className="mx-auto flex min-h-[calc(100vh-85px)] w-full max-w-6xl items-center justify-center px-4 py-10">
         <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/20 backdrop-blur">
           <div className="mb-8">
@@ -79,10 +86,9 @@ export default function LoginPage() {
             {errorMsg && <p className="text-sm text-rose-400">{errorMsg}</p>}
             <button
               type="submit"
-              disabled={isLoading}
               className="w-full rounded-md bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading ? t('login.loading') : t('login.submit')}
+              {t('login.submit')}
             </button>
             <button
               type="button"

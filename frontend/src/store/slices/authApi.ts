@@ -1,13 +1,21 @@
 import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
-import { setCredentials } from '../../features/auth/authSlice';
-import { mockLogin, mockSignup } from '../../features/auth/mockAuth';
 import type {
   AuthErrorResponse,
   LoginRequest,
   LoginResponse,
   SignupRequest,
   SignupResponse,
-} from '../../types';
+} from '../index';
+import { setCredentials } from './authSlice';
+
+const buildMockSession = (email: string, username?: string) => ({
+  user: {
+    id: Date.now(),
+    email: email.trim(),
+    username: username?.trim() || email.split('@')[0] || 'user',
+  },
+  token: 'mock-token',
+});
 
 export const authApi = createApi({
   reducerPath: 'authApi',
@@ -16,7 +24,7 @@ export const authApi = createApi({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials) {
         try {
-          const data = await mockLogin(credentials);
+          const data = buildMockSession(credentials.email);
           return { data };
         } catch (error) {
           return {
@@ -34,7 +42,7 @@ export const authApi = createApi({
     signup: builder.mutation<SignupResponse, SignupRequest>({
       async queryFn(payload) {
         try {
-          const data = await mockSignup(payload);
+          const data = buildMockSession(payload.email, payload.username);
           return { data };
         } catch (error) {
           return {
