@@ -63,7 +63,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "authentication.User"
+AUTH_USER_MODEL = "users.User"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_URL = "/static/"
