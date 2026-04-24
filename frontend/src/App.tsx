@@ -2,9 +2,9 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
-import HomePage from './pages/HomePage';
 import InfoPage from './pages/InfoPage';
 import LoginPage from './pages/LoginPage';
+import ProfilePage from './pages/ProfilePage';
 import SignupPage from './pages/SignupPage';
 
 export default function App() {
@@ -20,7 +20,7 @@ export default function App() {
               path="/home"
               element={
                 <PrivateRoute>
-                  <HomePage />
+                  <ProfilePage />
                 </PrivateRoute>
               }
             />
