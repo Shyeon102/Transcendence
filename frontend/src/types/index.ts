@@ -2,6 +2,8 @@ export interface AuthUser {
   id: number;
   email: string;
   username: string;
+  firstName?: string;
+  lastName?: string;
   avatarUrl?: string;
   bio?: string;
   favoriteGenres?: number[];
@@ -26,6 +28,8 @@ export interface LoginResponse {
 export interface SignupRequest {
   email: string;
   username: string;
+  firstName: string;
+  lastName: string;
   password: string;
   passwordConfirm: string;
   favoriteGenres?: number[];

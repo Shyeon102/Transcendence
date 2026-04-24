@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import type { RootState } from '../app/store';
+import type { RootState } from '../store';
 import ko from '../locales/ko.json';
 import en from '../locales/en.json';
 import fr from '../locales/fr.json';

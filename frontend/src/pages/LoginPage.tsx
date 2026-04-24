@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import AuthShell from '../components/AuthShell';
 import { useI18n } from '../lib/i18n';
-import SiteHeader from '../components/SiteHeader';
-import { useLoginMutation } from '../store/api/authApi';
-import type { AuthErrorResponse } from '../types';
+import { useLoginMutation } from '../store/slices/authApi';
+import type { AuthErrorResponse } from '../store';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -28,7 +28,7 @@ export default function LoginPage() {
     return '';
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationError = validateForm();
     setErrorMsg(validationError);
@@ -39,7 +39,7 @@ export default function LoginPage() {
 
     try {
       await login({ email, password }).unwrap();
-      navigate('/');
+      navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
       setErrorMsg(apiError.message ?? t('common.error'));
@@ -47,70 +47,84 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen">
-      <SiteHeader />
-      <main className="mx-auto flex min-h-[calc(100vh-85px)] w-full max-w-6xl items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/20 backdrop-blur">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white">{t('login.title')}</h1>
-          </div>
+    <AuthShell
+      eyebrow={t('login.eyebrow')}
+      title={
+        <>
+          {t('login.heroLine1')}
+          <br />
+          {t('login.heroLine2')}
+        </>
+      }
+      subtitle={t('login.subtitle')}
+      backgroundText={t('login.bgText')}
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label className="mb-2 block text-[9px] uppercase tracking-[0.18em] text-[#8a8474]">
+            {t('login.email')}
+          </label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[13px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
+          />
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-200">{t('login.email')}</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t('login.emailPlaceholder')}
-                className="w-full rounded-xl border border-white/10 bg-[#131820] px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-200"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-200">{t('login.password')}</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder={t('login.passwordPlaceholder')}
-                className="w-full rounded-xl border border-white/10 bg-[#131820] px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-200"
-              />
-            </div>
-            {errorMsg && <p className="text-sm text-rose-400">{errorMsg}</p>}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full rounded-md bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isLoading ? t('login.loading') : t('login.submit')}
+        <div>
+          <label className="mb-2 block text-[9px] uppercase tracking-[0.18em] text-[#8a8474]">
+            {t('login.password')}
+          </label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[13px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
+          />
+          <p className="mt-1.5 text-[9px] tracking-[0.08em] text-[#8a8474]">
+            <button type="button" className="border-b border-[#f0ead0]/10 text-[#8a8474]">
+              {t('login.forgotPassword')}
             </button>
-            <button
-              type="button"
-              onClick={() => setErrorMsg(t('login.oauthPending'))}
-              className="w-full rounded-md border border-white/12 bg-white/[0.03] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.07]"
-            >
-              {t('login.oauth42')}
-            </button>
-          </form>
-
-          <p className="mt-4 rounded-xl border border-white/10 bg-black/10 px-4 py-3 text-xs leading-5 text-slate-400">
-            {t('login.demoHint')}
-          </p>
-
-          <p className="mt-6 text-center text-sm text-slate-400">
-            {t('login.noAccount')}{' '}
-            <Link to="/signup" className="font-semibold text-white hover:text-cyan-200">
-              {t('login.toSignup')}
-            </Link>
-          </p>
-
-          <p className="mt-2 text-center text-sm text-slate-500">
-            <Link to="/" className="hover:text-white hover:underline">
-              {t('common.backHome')}
-            </Link>
           </p>
         </div>
-      </main>
-    </div>
+
+        {errorMsg ? <p className="text-[11px] tracking-[0.06em] text-[#ff4f38]">{errorMsg}</p> : null}
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-[#d63e2a] px-4 py-[15px] text-[11px] uppercase tracking-[0.15em] text-[#f0ead0] transition hover:bg-[#ff4f38] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isLoading ? t('login.loading') : t('login.submitDisplay')}
+        </button>
+
+        <div className="flex items-center gap-3 py-1">
+          <div className="h-px flex-1 bg-[#f0ead0]/10" />
+          <span className="text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">{t('login.oauthDivider')}</span>
+          <div className="h-px flex-1 bg-[#f0ead0]/10" />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setErrorMsg(t('login.oauthPending'))}
+          className="flex w-full items-center justify-center gap-3 border border-[#f0ead0]/25 bg-transparent px-4 py-[13px] text-[11px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#c8c2a8] hover:text-[#f0ead0]"
+        >
+          <span className="font-['Bebas_Neue'] text-base tracking-[0.05em] text-[#f0ead0]">42</span>
+          {t('login.oauth42')}
+        </button>
+      </form>
+
+      <p className="mt-7 text-center text-[11px] tracking-[0.05em] text-[#8a8474]">
+        {t('login.noAccount')}{' '}
+        <Link to="/signup" className="border-b border-[#f0ead0]/25 text-[#c8c2a8]">
+          {t('login.toSignupCta')}
+        </Link>
+      </p>
+
+      <p className="mt-4 border border-[#f0ead0]/10 bg-[#141412] px-4 py-3 text-center text-[10px] tracking-[0.08em] text-[#8a8474]">
+        {t('login.demoHint')}
+      </p>
+    </AuthShell>
   );
 }

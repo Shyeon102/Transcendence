@@ -12,6 +12,8 @@ const mockUsers: StoredUser[] = [
     id: 1,
     email: 'demo@demo.demo',
     username: 'demo',
+    firstName: 'Demo',
+    lastName: 'User',
     password: 'demo1234',
   },
 ];
@@ -51,6 +53,8 @@ export async function mockSignup(req: SignupRequest): Promise<SignupResponse> {
     id: Date.now(),
     email: req.email,
     username: req.username,
+    firstName: req.firstName,
+    lastName: req.lastName,
     password: req.password,
   };
   mockUsers.push(newUser);
