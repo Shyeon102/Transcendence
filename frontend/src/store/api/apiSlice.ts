@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { RootState } from '../index'
-import { setCredentials, logout } from '../slices/authSlice'
+import { setCredentials, updateTokens, logout } from '../slices/authSlice'
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
@@ -23,19 +23,31 @@ const baseQueryWithReauth = async (
 
   if (result.error?.status === 401) {
     // 401 에러 = 토큰 만료
-    const refreshResult = await baseQuery(
-      { url: '/auth/refresh', method: 'POST' },
-      api,
-      extraOptions
-    )
+    const refreshToken = (api.getState() as RootState).auth.refreshToken
 
-    if (refreshResult.data) {
-      // 새 토큰 받으면 스토어에 저장
-      api.dispatch(setCredentials(refreshResult.data as any))
-      // 원래 요청 재시도
-      result = await baseQuery(args, api, extraOptions)
+    if (refreshToken) {
+      const refreshResult = await baseQuery(
+        {
+          url: '/auth/token/refresh/',
+          method: 'POST',
+          body: { refresh: refreshToken }
+        },
+        api,
+        extraOptions
+      )
+
+      if (refreshResult.data) {
+        // 새 토큰 받으면 스토어에 저장
+        const { access, refresh } = refreshResult.data as any
+        api.dispatch(updateTokens({ access, refresh }))
+        // 원래 요청 재시도
+        result = await baseQuery(args, api, extraOptions)
+      } else {
+        // refresh도 실패하면 로그아웃
+        api.dispatch(logout())
+      }
     } else {
-      // refresh도 실패하면 로그아웃
+      // refresh 토큰 없으면 로그아웃
       api.dispatch(logout())
     }
   }
@@ -54,5 +66,24 @@ export const apiSlice = createApi({
     'Reviews',
     'ChatRooms',
   ],
-  endpoints: () => ({}),
+  endpoints: (builder) => ({
+    // 로그인 엔드포인트
+    login: builder.mutation({
+      query: (credentials: { username: string; password: string }) => ({
+        url: '/auth/token/',
+        method: 'POST',
+        body: credentials,
+      }),
+    }),
+    // 토큰 갱신 엔드포인트
+    refreshToken: builder.mutation({
+      query: (refreshToken: string) => ({
+        url: '/auth/token/refresh/',
+        method: 'POST',
+        body: { refresh: refreshToken },
+      }),
+    }),
+  }),
 })
+
+export const { useLoginMutation, useRefreshTokenMutation } = apiSlice

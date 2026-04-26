@@ -10,7 +10,8 @@ interface User {
 
 interface AuthState {
   user: User | null        // 로그인한 유저 정보
-  accessToken: string | null  // JWT 토큰
+  accessToken: string | null  // JWT 액세스 토큰
+  refreshToken: string | null // JWT 리프레시 토큰
   isAuthenticated: boolean    // 로그인 여부
 }
 
@@ -18,6 +19,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   accessToken: null,
+  refreshToken: null,
   isAuthenticated: false,
 }
 
@@ -26,19 +28,35 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     // 로그인 성공했을 때
-    setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
+    setCredentials: (state, action: PayloadAction<{
+      user: User;
+      access: string;
+      refresh: string;
+    }>) => {
       state.user = action.payload.user
-      state.accessToken = action.payload.token
+      state.accessToken = action.payload.access
+      state.refreshToken = action.payload.refresh
       state.isAuthenticated = true
+    },
+    // 토큰 갱신했을 때
+    updateTokens: (state, action: PayloadAction<{
+      access: string;
+      refresh?: string;
+    }>) => {
+      state.accessToken = action.payload.access
+      if (action.payload.refresh) {
+        state.refreshToken = action.payload.refresh
+      }
     },
     // 로그아웃했을 때
     logout: (state) => {
       state.user = null
       state.accessToken = null
+      state.refreshToken = null
       state.isAuthenticated = false
     },
   },
 })
 
-export const { setCredentials, logout } = authSlice.actions
+export const { setCredentials, updateTokens, logout } = authSlice.actions
 export default authSlice.reducer

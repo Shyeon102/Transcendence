@@ -12,6 +12,8 @@
   },
   "login": {
     "title": "Log in",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
     "email": "Email",
     "emailPlaceholder": "name@example.com",
     "password": "Password",
@@ -20,7 +22,7 @@
     "loading": "Logging in...",
     "oauth42": "Continue with 42 OAuth",
     "oauthPending": "42 OAuth will be connected in Week 2.",
-    "demoHint": "demo@demo.demo / demo1234",
+    "demoHint": "testuser / testpass123",
     "noAccount": "Need an account?",
     "toSignup": "Sign up"
   },

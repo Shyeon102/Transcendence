@@ -12,6 +12,8 @@
   },
   "login": {
     "title": "로그인",
+    "username": "사용자명",
+    "usernamePlaceholder": "사용자명을 입력하세요",
     "email": "이메일",
     "emailPlaceholder": "name@example.com",
     "password": "비밀번호",
@@ -20,7 +22,7 @@
     "loading": "로그인 중...",
     "oauth42": "42 OAuth로 로그인",
     "oauthPending": "42 OAuth 연결은 Week 2에서 붙입니다.",
-    "demoHint": "demo@demo.demo / demo1234",
+    "demoHint": "testuser / testpass123",
     "noAccount": "계정이 없나요?",
     "toSignup": "회원가입"
   },

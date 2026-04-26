@@ -3,26 +3,24 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useI18n } from '../lib/i18n';
 import { setCredentials } from '../store/slices/authSlice';
 import { useDispatch } from 'react-redux';
+import { useLoginMutation } from '../store/api/apiSlice';
 import type { AppDispatch } from '../store';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { t } = useI18n();
+  const [login, { isLoading }] = useLoginMutation();
 
   const validateForm = () => {
-    if (!email.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim()) {
       return t('validation.required');
-    }
-
-    if (!EMAIL_REGEX.test(email)) {
-      return t('validation.invalidEmail');
     }
 
     return '';
@@ -38,19 +36,28 @@ export default function LoginPage() {
     }
 
     try {
+      const result = await login({
+        username: username.trim(),
+        password: password.trim()
+      }).unwrap();
+
+      // JWT 토큰과 유저 정보 저장
       dispatch(
         setCredentials({
           user: {
-            id: Date.now(),
-            email: email.trim(),
-            username: email.split('@')[0] || 'user',
+            id: Date.now(), // 임시 ID, 실제로는 API에서 받아와야 함
+            username: username.trim(),
+            email: '', // 실제로는 API에서 받아와야 함
           },
-          token: 'mock-token',
+          access: result.access,
+          refresh: result.refresh,
         })
       );
+
       navigate('/home');
-    } catch {
-      setErrorMsg(t('common.error'));
+    } catch (error: any) {
+      console.error('Login failed:', error);
+      setErrorMsg(error?.data?.detail || t('common.error'));
     }
   };
 
@@ -64,12 +71,12 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-200">{t('login.email')}</label>
+              <label className="mb-1 block text-sm font-medium text-slate-200">{t('login.username')}</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={t('login.emailPlaceholder')}
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder={t('login.usernamePlaceholder')}
                 className="w-full rounded-xl border border-white/10 bg-[#131820] px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-200"
               />
             </div>
@@ -86,9 +93,10 @@ export default function LoginPage() {
             {errorMsg && <p className="text-sm text-rose-400">{errorMsg}</p>}
             <button
               type="submit"
+              disabled={isLoading}
               className="w-full rounded-md bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {t('login.submit')}
+              {isLoading ? t('common.loading') : t('login.submit')}
             </button>
             <button
               type="button"
