@@ -1,4 +1,4 @@
-import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fakeBaseQuery, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type {
   AuthErrorResponse,
   LoginRequest,
@@ -19,7 +19,9 @@ const buildMockSession = (email: string, username?: string) => ({
 
 export const authApi = createApi({
   reducerPath: 'authApi',
-  baseQuery: fakeBaseQuery<AuthErrorResponse>(),
+  baseQuery: fetchBaseQuery({
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
+  }),
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials) {
@@ -40,18 +42,11 @@ export const authApi = createApi({
       },
     }),
     signup: builder.mutation<SignupResponse, SignupRequest>({
-      async queryFn(payload) {
-        try {
-          const data = buildMockSession(payload.email, payload.username);
-          return { data };
-        } catch (error) {
-          return {
-            error: {
-              message: error instanceof Error ? error.message : 'Signup failed.',
-            },
-          };
-        }
-      },
+      query: (payload) => ({
+        url: '/auth/register/',
+        method: 'POST',
+        body: payload,
+      }),
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         const { data } = await queryFulfilled;
         dispatch(setCredentials(data));

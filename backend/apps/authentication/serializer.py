@@ -25,10 +25,11 @@ class LoginSerializer(serializers.Serializer):
     
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    passwordConfirm = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ["email", "username", "password"]
+        fields = ["email", "username", "password", "passwordConfirm"]
 
     def create(self, validated_data):
         user = User.objects.create_user(

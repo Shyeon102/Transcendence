@@ -4,6 +4,8 @@ import { useDispatch } from 'react-redux';
 import { useI18n } from '../lib/i18n';
 import type { AppDispatch } from '../store';
 import { setCredentials } from '../store/slices/authSlice';
+import { useSignupMutation } from '../store/slices/authApi';
+
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -19,6 +21,7 @@ export default function SignupPage() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { t } = useI18n();
+  const [signup] = useSignupMutation();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -53,21 +56,19 @@ export default function SignupPage() {
       return;
     }
 
-    try {
-      dispatch(
-        setCredentials({
-          user: {
-            id: Date.now(),
-            email: formData.email.trim(),
-            username: formData.username.trim(),
-          },
-          token: 'mock-token',
-        })
-      );
-      navigate('/home');
-    } catch {
-      setErrorMsg(t('common.error'));
-    }
+  try {
+    const result = await signup({
+      email: formData.email.trim(),
+      username: formData.username.trim(),
+      password: formData.password,
+      passwordConfirm: formData.passwordConfirm,
+    }).unwrap();
+    
+    dispatch(setCredentials(result));
+    navigate('/home');
+  } catch {
+    setErrorMsg(t('common.error'));
+  }
   };
 
   return (

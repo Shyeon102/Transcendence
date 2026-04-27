@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { apiSlice } from './api/apiSlice'
+import { authApi } from './slices/authApi'
 import authReducer from './slices/authSlice'
 import uiReducer from './slices/uiSlice'
 
@@ -7,10 +8,11 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     ui: uiReducer,
-    [apiSlice.reducerPath]: apiSlice.reducer,  // apiSlice 연결
+    [apiSlice.reducerPath]: apiSlice.reducer,
+    [authApi.reducerPath]: authApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(apiSlice.middleware),  // RTK Query 미들웨어 추가
+    getDefaultMiddleware().concat(apiSlice.middleware, authApi.middleware),
 })
 
 export type RootState = ReturnType<typeof store.getState>

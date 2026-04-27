@@ -75,6 +75,27 @@ export const apiSlice = createApi({
         body: credentials,
       }),
     }),
+    logout: builder.mutation({
+      query: (refreshToken: string) => ({
+        url: 'auth/logout/',
+        method: 'POST',
+        body: { refresh: refreshToken },
+      }),
+    }),
+    register: builder.mutation({
+      query: (userData: { username: string; password: string; email: string }) => ({
+        url: '/auth/register/',
+        method: 'POST',
+        body: userData,
+      }),
+    }),
+    signup: builder.mutation({
+      query: (credentials) => ({
+        url: '/auth/register/',
+        method: 'POST',
+        body: credentials,
+      }),
+    }),
     // 토큰 갱신 엔드포인트
     refreshToken: builder.mutation({
       query: (refreshToken: string) => ({
