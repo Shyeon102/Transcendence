@@ -1,0 +1,23 @@
+name: Discord Notify
+
+on:
+  pull_request:
+    branches: [dev]
+    types: [opened, reopened]
+
+jobs:
+  notify:
+    name: Notify Discord
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Discord notification
+        uses: sarisia/actions-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "📬 New PR is opened in [dev] branch !"
+          description: |
+            **${{ github.event.pull_request.title }}**
+            by `${{ github.event.pull_request.user.login }}`
+          url: ${{ github.event.pull_request.html_url }}
+          color: 0x5865F2
