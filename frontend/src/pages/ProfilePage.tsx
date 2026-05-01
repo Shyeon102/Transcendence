@@ -82,13 +82,14 @@ export default function ProfilePage() {
   const dispatch = useDispatch();
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
-  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || user?.username || 'User';
+  const displayUsername = user?.username?.trim() || 'demo';
+  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || displayUsername || 'User';
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
   const [isEditing, setIsEditing] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
   const [profileForm, setProfileForm] = useState({
-    username: user?.username ?? 'jaeho_42',
+    username: user?.username ?? '',
     firstName: user?.firstName ?? '',
     lastName: user?.lastName ?? '',
     bio: user?.bio ?? t('home.profileBioDefault'),
@@ -103,7 +104,7 @@ export default function ProfilePage() {
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('') || user.username.slice(0, 2).toUpperCase();
+    .join('') || displayUsername.slice(0, 2).toUpperCase();
 
   const handleProfileSave = () => {
     dispatch(
@@ -140,9 +141,9 @@ export default function ProfilePage() {
               {t('home.verifiedMember')}
             </span>
             <h1 className="mb-2 font-['Bebas_Neue'] text-[46px] leading-none tracking-[0.03em]">
-              {([profileForm.firstName, profileForm.lastName].filter(Boolean).join(' ') || user.username).toUpperCase()}
+              {([profileForm.firstName, profileForm.lastName].filter(Boolean).join(' ') || displayUsername).toUpperCase()}
             </h1>
-            <p className="mb-3 text-xs tracking-[0.08em] text-[#8a8474]">@{user.username} · {t('home.joinedYear')}</p>
+            <p className="mb-3 text-xs tracking-[0.08em] text-[#8a8474]">@{displayUsername} · {t('home.joinedYear')}</p>
             <p className="max-w-[440px] font-['IBM_Plex_Serif'] text-sm font-light italic leading-7 text-[#c8c2a8]">
               {profileForm.bio}
             </p>
