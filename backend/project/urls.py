@@ -1,8 +1,10 @@
 from django.http import JsonResponse
 from django.urls import path, include
 
+
 def home(request):
     return JsonResponse({"message": "API is running 🚀"})
+
 
 urlpatterns = [
     path("", home), 
