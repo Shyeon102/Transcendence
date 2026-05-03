@@ -18,8 +18,8 @@ jobs:
             context: ./backend
           - name: frontend
             context: ./frontend
-          - name: worker
-            context: ./ai
+          # - name: worker
+          #   context: ./ai
 
     steps:
       - uses: actions/checkout@v4
