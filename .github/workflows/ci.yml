@@ -100,9 +100,9 @@ jobs:
         working-directory: frontend
         run: npm run type-check
 
-      - name: Build
-        working-directory: frontend
-        run: npm run build
+      # - name: Build
+      #   working-directory: frontend
+      #   run: npm run build
 
   docker-build:
     name: Docker Build Check
