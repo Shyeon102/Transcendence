@@ -9,9 +9,9 @@ class ChatRoom(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,
                                    on_delete=models.CASCADE,
                                    related_name='created_rooms')
-    
+
     max_members = models.IntegerField(default=4)
-    
+
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     ended_at = models.DateTimeField(null=True, blank=True)
@@ -25,7 +25,7 @@ class ChatRoomMember(models.Model):
                              on_delete=models.CASCADE,
                              related_name='chat_memberships')
     joined_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         unique_together = ('room', 'user')
 
@@ -37,7 +37,7 @@ class ChatMessage(models.Model):
         ('join', 'Join notification'),
         ('leave', 'Leave notification'),
     )
-    
+
     room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE,
                              related_name='messages')
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -46,9 +46,9 @@ class ChatMessage(models.Model):
     content = models.TextField()
     message_type = models.CharField(max_length=10, choices=MESSAGE_TYPES,
                                     default='message')
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['created_at']
         indexes = [

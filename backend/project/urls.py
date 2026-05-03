@@ -7,7 +7,7 @@ def home(request):
 
 
 urlpatterns = [
-    path("", home), 
+    path("", home),
     path("api/auth/", include("apps.authentication.urls")),
     path("api/users/", include("apps.users.urls")),
     path("api/chat/", include("apps.chat.urls")),
