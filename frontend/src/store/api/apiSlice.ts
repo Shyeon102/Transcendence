@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { RootState } from '../index'
 import { setCredentials, logout } from '../slices/authSlice'
 
@@ -13,12 +14,9 @@ const baseQuery = fetchBaseQuery({
   },
 })
 
-// 토큰 만료시 자동 갱신 미들웨어
-const baseQueryWithReauth = async (
-  args: any,
-  api: any,
-  extraOptions: any
-) => {
+type ReauthBaseQuery = BaseQueryFn<FetchArgs | string, unknown, FetchBaseQueryError>
+
+const baseQueryWithReauth: ReauthBaseQuery = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions)
 
   if (result.error?.status === 401) {
@@ -31,7 +29,8 @@ const baseQueryWithReauth = async (
 
     if (refreshResult.data) {
       // 새 토큰 받으면 스토어에 저장
-      api.dispatch(setCredentials(refreshResult.data as any))
+      const data = refreshResult.data as { user: { id: number; email: string; username: string }; token: string }
+      api.dispatch(setCredentials(data))
       // 원래 요청 재시도
       result = await baseQuery(args, api, extraOptions)
     } else {
