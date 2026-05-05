@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 
+
 class CommonErrorResponseMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response

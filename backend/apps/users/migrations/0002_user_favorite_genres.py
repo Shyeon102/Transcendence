@@ -14,6 +14,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='favorite_genres',
-            field=models.ManyToManyField(blank=True, related_name='interested_users', to='media.genre'),
+            field=models.ManyToManyField(blank=True,
+                                         related_name='interested_users',
+                                         to='media.genre'),
         ),
     ]

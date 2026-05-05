@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from .services import login_user
-from .serializer import RegisterSerializer, LoginSerializer
+from .serializer import RegisterSerializer
 from apps.users.serializers import UserSerializer
 
 
@@ -14,10 +14,11 @@ class LoginView(APIView):
             request.data.get("password")
         )
         return Response({"success": bool(user)})
-    
+
+
 class RegisterView(APIView):
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():

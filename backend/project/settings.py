@@ -28,7 +28,7 @@ INSTALLED_APPS = [
     "corsheaders",
 ]
 
-#send email, now to console, change later to actual email
+# send email, now to console, change later to actual email
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 
@@ -56,7 +56,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'ALGORITHM': 'HS256', #signing algorithm, do we need one ?
+    'ALGORITHM': 'HS256',  # signing algorithm, do we need one ?
 }
 
 TEMPLATES = [
@@ -109,7 +109,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False #not sure yet
+ACCOUNT_USERNAME_REQUIRED = False  # not sure yet
 ACCOUNT_UNIQUE_EMAIL = True
 
 STATIC_URL = "/static/"
