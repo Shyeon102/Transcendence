@@ -7,6 +7,11 @@ import type {
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
 
+type RefreshResponse = {
+  access: string;
+  refresh: string;
+};
+
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
   prepareHeaders: (headers, { getState }) => {
@@ -43,7 +48,7 @@ const baseQuery = fetchBaseQuery({
 
       if (refreshResult.data) {
         // 새 토큰 받으면 스토어에 저장
-        const { access, refresh } = refreshResult.data as any
+        const { access, refresh } = refreshResult.data as RefreshResponse;
         api.dispatch(updateTokens({ access, refresh }))
         // 원래 요청 재시도
         result = await baseQuery(args, api, extraOptions)
