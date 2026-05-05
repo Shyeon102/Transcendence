@@ -6,7 +6,7 @@
   import { useLoginMutation } from '../store/api/apiSlice';
   import type { AppDispatch } from '../store';
 
-  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   export default function LoginPage() {
     const [username, setUsername] = useState('');
@@ -55,10 +55,13 @@
         );
 
         navigate('/home');
-      } catch (error: any) {
-        console.error('Login failed:', error);
-        setErrorMsg(error?.data?.detail || t('common.error'));
-      }
+      } catch (error: unknown) {
+          if (error instanceof Error) {
+            console.error(error.message);
+          } else {
+            console.error(String(error));
+          }
+        }
     };
 
     return (
