@@ -8,11 +8,11 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     ui: uiReducer,
-    [apiSlice.reducerPath]: apiSlice.reducer,  // apiSlice 연결
-    [authApi.reducerPath]: authApi.reducer, // authApi 연결 추가
+    [apiSlice.reducerPath]: apiSlice.reducer,
+    [authApi.reducerPath]: authApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(apiSlice.middleware).concat(authApi.middleware) ,  // RTK Query 미들웨어 추가
+    getDefaultMiddleware().concat(apiSlice.middleware, authApi.middleware),
 })
 
 export type RootState = ReturnType<typeof store.getState>

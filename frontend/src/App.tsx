@@ -6,7 +6,6 @@ import InfoPage from './pages/InfoPage'
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 import SignupPage from './pages/SignupPage'
-import ProfilePage from './pages/ProfilePage'
 
 const App = () => {
   return (
@@ -22,14 +21,6 @@ const App = () => {
               element={
                 <PrivateRoute>
                   <HomePage />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <PrivateRoute>
-                  <ProfilePage />
                 </PrivateRoute>
               }
             />
