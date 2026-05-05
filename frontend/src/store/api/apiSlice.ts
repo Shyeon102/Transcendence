@@ -1,6 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { RootState } from '../index'
-import { setCredentials, updateTokens, logout } from '../slices/authSlice'
+import { updateTokens, logout } from '../slices/authSlice'
+import type {
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError,
+} from "@reduxjs/toolkit/query";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
@@ -14,11 +19,11 @@ const baseQuery = fetchBaseQuery({
 })
 
 // 토큰 만료시 자동 갱신 미들웨어
-const baseQueryWithReauth = async (
-  args: any,
-  api: any,
-  extraOptions: any
-) => {
+  const baseQueryWithReauth: BaseQueryFn<
+    string | FetchArgs,
+    unknown,
+    FetchBaseQueryError
+  > = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions)
 
   if (result.error?.status === 401) {

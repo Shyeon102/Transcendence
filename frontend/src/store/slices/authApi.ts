@@ -1,6 +1,5 @@
-import { createApi, fakeBaseQuery, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type {
-  AuthErrorResponse,
   LoginRequest,
   LoginResponse,
   SignupRequest,
