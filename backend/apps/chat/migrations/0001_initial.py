@@ -17,23 +17,36 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ChatRoom',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True,
+                                           serialize=False,
+                                           verbose_name='ID')),
                 ('title', models.CharField(max_length=200)),
                 ('description', models.TextField(blank=True)),
                 ('max_members', models.IntegerField(default=4)),
                 ('is_active', models.BooleanField(default=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('ended_at', models.DateTimeField(blank=True, null=True)),
-                ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='created_rooms', to=settings.AUTH_USER_MODEL)),
+                ('created_by', models.ForeignKey(on_delete=django.db.models.
+                                                 deletion.CASCADE,
+                                                 related_name='created_rooms',
+                                                 to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
             name='ChatRoomMember',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True,
+                                           serialize=False,
+                                           verbose_name='ID')),
                 ('joined_at', models.DateTimeField(auto_now_add=True)),
-                ('room', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='members', to='chat.chatroom')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='chat_memberships', to=settings.AUTH_USER_MODEL)),
+                ('room', models.ForeignKey(on_delete=django.db.models.
+                                           deletion.CASCADE,
+                                           related_name='members',
+                                           to='chat.chatroom')),
+                ('user', models.ForeignKey(on_delete=django.db.models.
+                                           deletion.CASCADE,
+                                           related_name='chat_memberships',
+                                           to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'unique_together': {('room', 'user')},
@@ -42,16 +55,30 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ChatMessage',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True, primary_key=True,
+                                           serialize=False,
+                                           verbose_name='ID')),
                 ('content', models.TextField()),
-                ('message_type', models.CharField(choices=[('message', 'Message'), ('join', 'Join notification'), ('leave', 'Leave notification')], default='message', max_length=10)),
+                ('message_type', models.
+                 CharField(choices=[('message', 'Message'),
+                                    ('join', 'Join notification'),
+                                    ('leave', 'Leave notification')],
+                           default='message', max_length=10)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('room', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='messages', to='chat.chatroom')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='chat_messages', to=settings.AUTH_USER_MODEL)),
+                ('room', models.ForeignKey(on_delete=django.db.
+                                           models.deletion.CASCADE,
+                                           related_name='messages',
+                                           to='chat.chatroom')),
+                ('user', models.ForeignKey(on_delete=django.db.
+                                           models.deletion.CASCADE,
+                                           related_name='chat_messages',
+                                           to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'ordering': ['created_at'],
-                'indexes': [models.Index(fields=['room', 'created_at'], name='chat_chatme_room_id_466ea2_idx')],
+                'indexes': [models.Index
+                            (fields=['room', 'created_at'],
+                             name='chat_chatme_room_id_466ea2_idx')],
             },
         ),
     ]
