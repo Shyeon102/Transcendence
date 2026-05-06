@@ -1,8 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
+import type { User } from '../../types/user'
 
 // 저장할 데이터 타입 정의
-interface User {
+// src/types/user.ts 로 옮기고 import로 가져와서 진행
+/*interface User {
   id: number
   email: string
   username: string
@@ -13,7 +15,7 @@ interface User {
   favoriteGenres?: number[]
   favoriteCountries?: string[]
   isStaff?: boolean
-}
+}*/
 
 interface AuthState {
   user: User | null        // 로그인한 유저 정보
