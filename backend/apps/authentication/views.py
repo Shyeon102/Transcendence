@@ -1,10 +1,31 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .services import login_user
 from .serializer import RegisterSerializer
 from apps.users.serializers import UserSerializer
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response({
+                "success": True,
+                "message": "Logged out successfully"
+            })
+
+        except Exception as e:
+            return Response({
+                "success": False,
+                "error": str(e)
+            }, status=400)
 
 
 class LoginView(APIView):
