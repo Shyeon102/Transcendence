@@ -21,9 +21,7 @@ const App = () => {
             <Route
               path="/home"
               element={
-                <PrivateRoute>
-                  <HomePage />
-                </PrivateRoute>
+                  <HomePage /> // 개발 확인용:private 임시제거
               }
             />
             <Route
