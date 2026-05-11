@@ -36,18 +36,33 @@ const HomePage = () => {
     <div className="flex items-center gap-8">
       <MediaCard media={mockMedia} onSelect={setSelectedMedia} />
       {selectedMedia && (
-        <div>
-          <p>
-            {selectedMedia.genre.map((g) => (
-              <span key={g.id}>{g.name}</span>
-            ))}
-          </p>
-          <p>{selectedMedia.ageRating}</p>
-          <p>{selectedMedia.releaseDate}</p>
-          <p>{selectedMedia.country}</p>
-          <p>{selectedMedia.language}</p>
-          <p>{selectedMedia.cast}</p>
-          <p>{selectedMedia.story}</p>
+        <div className="bg-[#1a1a1a] p-6 text-white">
+          <div className="flex gap-2">
+            <span className="px-3 py-1 bg-gray-600 text-white rounded-full text-sm">
+              {selectedMedia.genre.map((g) => g.name).join("/")}
+            </span>
+            <span className="px-3 py-1 bg-gray-600 text-white rounded-full text-sm">
+              {selectedMedia.ageRating}
+            </span>
+          </div>
+          <div className="flex flex-col gap-2 mt-4">
+            <div className="flex gap-4">
+              <span className="font-bold w-28">Release Date</span>
+              <span>{selectedMedia.releaseDate}</span>
+            </div>
+            <div className="flex gap-4">
+              <span className="font-bold w-28">Country</span>
+              <span>{selectedMedia.country}</span>
+            </div>
+            <div className="flex gap-4">
+              <span className="font-bold w-28">Language</span>
+              <span>{selectedMedia.language}</span>
+            </div>
+            <div className="flex gap-4">
+              <span className="font-bold w-28">Cast</span>
+              <span>{selectedMedia.cast.join(", ")}</span>
+            </div>
+          </div>
         </div>
       )}
     </div>
