@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { useI18n } from '../lib/i18n';
 
-export default function InfoPage() {
+export default function HomePage() {
   const user = useSelector((state: RootState) => state.auth.user);
   const { t } = useI18n();
 

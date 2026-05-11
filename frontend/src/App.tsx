@@ -1,13 +1,13 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout";
-import PrivateRoute from "./components/PrivateRoute";
-import ErrorBoundary from "./components/ErrorBoundary";
-import InfoPage from "./pages/InfoPage";
-import LoginPage from "./pages/LoginPage";
-import HomePage from "./pages/HomePage";
-import SignupPage from "./pages/SignupPage";
-import ProfilePage from "./pages/ProfilePage";
-import MediaDetailPage from "./pages/MediaDetailPage";
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Layout from './components/Layout'
+import PrivateRoute from './components/PrivateRoute'
+import ErrorBoundary from './components/ErrorBoundary'
+import InfoPage from './pages/InfoPage'
+import LoginPage from './pages/LoginPage'
+import HomePage from './pages/HomePage'
+import SignupPage from './pages/SignupPage'
+import ProfilePage from './pages/ProfilePage'
+import MediaDetailPage from './pages/MediaDetailPage'
 
 const App = () => {
   return (

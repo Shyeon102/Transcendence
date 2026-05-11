@@ -2,24 +2,10 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import type { User } from '../../types/user'
 
-// 저장할 데이터 타입 정의
-// src/types/user.ts 로 옮기고 import로 가져와서 진행
-/*interface User {
-  id: number
-  email: string
-  username: string
-  firstName?: string
-  lastName?: string
-  avatarUrl?: string
-  bio?: string
-  favoriteGenres?: number[]
-  favoriteCountries?: string[]
-  isStaff?: boolean
-}*/
-
 interface AuthState {
   user: User | null        // 로그인한 유저 정보
-  accessToken: string | null  // JWT 토큰
+  accessToken: string | null  // JWT 액세스 토큰
+  refreshToken: string | null // JWT 리프레시 토큰
   isAuthenticated: boolean    // 로그인 여부
 }
 
@@ -27,6 +13,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   accessToken: null,
+  refreshToken: null,
   isAuthenticated: false,
 }
 
@@ -35,24 +22,35 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     // 로그인 성공했을 때
-    setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
+    setCredentials: (state, action: PayloadAction<{
+      user: User;
+      access: string;
+      refresh: string;
+    }>) => {
       state.user = action.payload.user
-      state.accessToken = action.payload.token
+      state.accessToken = action.payload.access
+      state.refreshToken = action.payload.refresh
       state.isAuthenticated = true
+    },
+    // 토큰 갱신했을 때
+    updateTokens: (state, action: PayloadAction<{
+      access: string;
+      refresh?: string;
+    }>) => {
+      state.accessToken = action.payload.access
+      if (action.payload.refresh) {
+        state.refreshToken = action.payload.refresh
+      }
     },
     // 로그아웃했을 때
     logout: (state) => {
       state.user = null
       state.accessToken = null
+      state.refreshToken = null
       state.isAuthenticated = false
-    },
-    updateProfile: (state, action: PayloadAction<Partial<User>>) => {
-      if (state.user) {
-        Object.assign(state.user, action.payload);
-      }
     },
   },
 })
 
-export const { setCredentials, logout, updateProfile } = authSlice.actions
+export const { setCredentials, updateTokens, logout } = authSlice.actions
 export default authSlice.reducer
