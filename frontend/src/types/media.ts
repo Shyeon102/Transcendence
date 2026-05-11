@@ -1,6 +1,7 @@
 export interface Media {
   id: number;
   title: string;
+  director: string;
   genre: Genre[]; // ex) [Crime] [Thriller]
   releaseDate: string; // ex) "1994-10-26"
   country: string;
@@ -9,7 +10,7 @@ export interface Media {
   story: string;
   ageRating: string; // ex) "PG-15", "R", "18+"
   starRating: number;
-  runtime: number;
+  runtime: string;
   type: string; // (Movie/Series/Animation)
   posterUrl: string;
 }
