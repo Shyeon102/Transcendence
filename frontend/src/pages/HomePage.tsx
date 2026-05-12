@@ -1,6 +1,7 @@
 import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom' //  페이지 이동, URL 관리 등을 도와주는 라이브러리
 
 const genreCrime: Genre = {
   id: 1,
@@ -32,6 +33,7 @@ const mockMedia: Media = {
 
 const HomePage = () => {
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null); // Media 타입이거나 null (선택 안된 상태)
+  const navigate = useNavigate()
   return (
     <div className="flex items-center gap-8">
       <MediaCard media={mockMedia} onSelect={setSelectedMedia} />
@@ -62,7 +64,17 @@ const HomePage = () => {
               <span className="font-bold w-28">Cast</span>
               <span>{selectedMedia.cast.join(", ")}</span>
             </div>
+            <p className="mt-4 text-sm text-gray-300">{selectedMedia.story}</p>
           </div>
+          <div className="flex gap-4 mt-4">
+            <span>👁</span>
+            <span>🤍</span>
+            <span>💔</span>
+            <span>✅</span>
+          </div>
+          <button onClick={() => navigate(`/media/${selectedMedia.id}`)}>
+            Go to detail
+          </button>
         </div>
       )}
     </div>

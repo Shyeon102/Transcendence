@@ -35,9 +35,9 @@ const App = () => {
             <Route
               path="/media/:id" // media가 여러개이니까 id(아무숫자) 다 받을 수 있게 설정
               element={
-                <PrivateRoute>
+                //<PrivateRoute>
                   <MediaDetailPage />
-                </PrivateRoute>
+                //</PrivateRoute>
               }
             />
           </Route>
