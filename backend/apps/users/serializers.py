@@ -14,7 +14,3 @@ class UserSerializer(serializers.ModelSerializer):
             "onboarding_completed",
             "favorite_genres",
         ]
-
-
-
-
