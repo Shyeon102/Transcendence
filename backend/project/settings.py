@@ -11,6 +11,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -20,6 +21,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
 
     "rest_framework",
+    "channels",
 
     "apps.authentication",
     "apps.users",
@@ -28,6 +30,9 @@ INSTALLED_APPS = [
     "apps.media",
     "corsheaders",
 ]
+
+# daphne
+ASGI_APPLICATION = "project.asgi.application"
 
 # send email, now to console, change later to actual email
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -57,7 +62,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'ALGORITHM': 'HS256',  # signing algorithm, do we need one ?
+    'ALGORITHM': 'HS256',  # signing algorithm
 }
 
 TEMPLATES = [
@@ -119,4 +124,10 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 AUTHENTICATION_BACKENDS = {
     'django.contrib.auth.backends.ModelBackend',
+}
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
 }

@@ -4,8 +4,10 @@ django-cors-headers
 djangorestframework-simplejwt
 
 channels
+daphne
 
 psycopg2-binary
 django-redis
 
-celery 
+celery
+requests
