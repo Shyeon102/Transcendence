@@ -1,28 +1,24 @@
-import type { Media } from '../types/media'
+import type { Media } from "../types/media";
 
 interface MediaCardProps {
-	media: Media
-	onSelect: (media: Media) => void
+  media: Media;
+  onSelect: (media: Media) => void;
+  isSelected?: boolean;
 }
 
-const MediaCard = ({ media, onSelect }: MediaCardProps ) => {
-	return (
-		<div onClick={() => onSelect(media)} className="relative w-[237px] h-[416px] cursor-pointer overflow-hidden">
-			<img
-				src="/vhs-front.png"
-				className="absolute inset-0 w-full h-full object-cover"
-			/>
-			<img
-				src={media.posterUrl}
-				alt={media.title}
-				className="absolute inset-0 w-full h-full object-cover"
-			/>
-			<img
-				src="/vhs-cover.png"
-				className="absolute inset-0 w-full h-full object-cover mix-blend-screen opacity-35"
-			/>
-		</div>
-	)
-}
+const MediaCard = ({ media, onSelect, isSelected }: MediaCardProps) => {
+  return (
+    <div
+      onClick={() => onSelect(media)}
+      className={`relative ${isSelected ? "w-[237px] h-[416px]" : "w-[59px] h-[425px]"} cursor-pointer overflow-hidden`}
+    >
+      <img
+        src={isSelected ? media.frontPosterUrl : media.sidePosterUrl}
+        alt={media.title}
+        className="absolute inset-0 w-full h-full object-fill"
+      />
+    </div>
+  );
+};
 
-export default MediaCard
+export default MediaCard;

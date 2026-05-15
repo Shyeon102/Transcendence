@@ -28,8 +28,28 @@ const mockMedia: Media = {
   starRating: 5,
   runtime: "2h 34m",
   type: "Movie",
-  posterUrl: "/pulp-fiction.jpg",
+  frontPosterUrl: "/pulp-fiction.jpg",
+  sidePosterUrl: "/pulp-fiction-side.png",
 };
+
+const mockMediaList: Media[] = [
+  mockMedia,
+  {
+    ...mockMedia,
+    id: 2,
+    title: "Joker",
+    frontPosterUrl: "/jocker.jpg",
+    sidePosterUrl: "/jocker-side.png",
+  },
+  // mockMedia 복사 + id/title만 바꿈
+  {
+    ...mockMedia,
+    id: 3,
+    title: "Dune",
+    frontPosterUrl: "/dune.jpg",
+    sidePosterUrl: "/dune-side.png",
+  },
+];
 
 const HomePage = () => {
   const filterBtnClass =
@@ -57,7 +77,10 @@ const HomePage = () => {
       </div>
       {/* 카드 + 정보 패널 영역 */}
       <div className="flex items-center gap-8">
-        <MediaCard media={mockMedia} onSelect={setSelectedMedia} />
+        {/*<MediaCard media={mockMedia} onSelect={setSelectedMedia} />*/}
+        {mockMediaList.map((media) => (
+          <MediaCard key={media.id} media={media} onSelect={setSelectedMedia} isSelected={selectedMedia?.id === media.id} />
+        ))}
         {selectedMedia && (
           <div>
             <div className="flex gap-2">

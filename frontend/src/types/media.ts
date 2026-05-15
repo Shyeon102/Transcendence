@@ -12,7 +12,8 @@ export interface Media {
   starRating: number;
   runtime: string;
   type: string; // (Movie/Series/Animation)
-  posterUrl: string;
+  frontPosterUrl: string;
+  sidePosterUrl: string;
 }
 
 export interface Genre {
