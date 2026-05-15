@@ -29,6 +29,13 @@ class Media(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['media_type', '-avg_rating']),
+            models.Index(fields=['country', 'media_type']),
+            models.Index(fields=['-created_at']),
+        ]
+
 
 class Review(models.Model):
     """Media review (My Space)"""
@@ -53,7 +60,11 @@ class Review(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('user', 'media')  # One review / user / media item
+        unique_together = ('user', 'media')
+        indexes = [
+            models.Index(fields=['media', '-created_at']),
+            models.Index(fields=['user', '-created_at']),
+        ]
 
 
 class MediaInteraction(models.Model):
@@ -74,4 +85,8 @@ class MediaInteraction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'media')  # One status per user per media
+        unique_together = ('user', 'media')
+        indexes = [
+            models.Index(fields=['user', 'action']),
+            models.Index(fields=['media', 'action']),
+        ]
