@@ -4,7 +4,7 @@ import SiteHeader from './SiteHeader'
 const Layout = () => {
   return (
     <div>
-      <SiteHeader />
+      {/* <SiteHeader /> */} {/* home/main 테스트 잠시 주석처리 */}
       <main>
         <Outlet />
       </main>
