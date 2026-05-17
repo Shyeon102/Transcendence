@@ -11,6 +11,7 @@ class User(AbstractUser):
     # Profile extension
     avatar_url = models.URLField(blank=True)
     bio = models.TextField(blank=True, max_length=500)
+    onboarding_completed = models.BooleanField(default=False)
 
     # Preference info
     favorite_genres = models.ManyToManyField('media.Genre', blank=True,

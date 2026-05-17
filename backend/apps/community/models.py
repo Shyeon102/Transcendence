@@ -18,6 +18,13 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['-like_count']),
+            models.Index(fields=['is_hidden', '-created_at']),
+        ]
+
 
 class Comment(models.Model):
     """Board comments (supports replies)"""
@@ -41,6 +48,12 @@ class Comment(models.Model):
     is_hidden = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['post', 'created_at']),
+            models.Index(fields=['parent_comment', 'created_at']),
+        ]
 
 
 class PostLike(models.Model):
@@ -101,6 +114,9 @@ class Report(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        indexes = [
+            models.Index(fields=['status', '-created_at']),
+        ]
         constraints = [
             models.CheckConstraint(
                 check=(
@@ -124,7 +140,11 @@ class Follow(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('follower', 'following')  # Prevent duplicate follow
+        unique_together = ('follower', 'following')
+        indexes = [
+            models.Index(fields=['follower']),
+            models.Index(fields=['following']),
+        ]
         constraints = [
             models.CheckConstraint(
                 check=~models.Q(follower=models.F('following')),
@@ -138,3 +158,9 @@ class TrendingPost(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     score = models.FloatField()
     calculated_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['-score']),
+            models.Index(fields=['-calculated_at']),
+        ]
