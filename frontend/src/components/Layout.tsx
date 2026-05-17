@@ -1,10 +1,10 @@
 import { Outlet } from 'react-router-dom'
-import Header from './Header'
+//import SiteHeader from './SiteHeader'
 
 const Layout = () => {
   return (
     <div>
-      <Header />
+      {/* <SiteHeader /> */} {/* home/main 테스트 잠시 주석처리 */}
       <main>
         <Outlet />
       </main>

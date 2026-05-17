@@ -1,37 +1,35 @@
-import { useNavigate } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
-import type { RootState } from '../store/index'
-import { logout } from '../store/slices/authSlice'
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
-  const user = useSelector((state: RootState) => state.auth.user)
-
-  const handleLogout = () => {
-    dispatch(logout())
-    navigate('/login')
-  }
-
+  // 42로고 페이지 이동 함수
+  const navigate = useNavigate();
   return (
-    <header>
-      <h1 onClick={() => navigate('/')}>미디어 플랫폼 navigate</h1>
-      <nav>
-        {isAuthenticated ? (
-          <>
-            <span>{user?.username}</span>
-            <button onClick={() => navigate('/home')}>홈</button>
-            <button onClick={handleLogout}>로그아웃</button>
-          </>
-        ) : (
-          <>
-            <button onClick={() => navigate('/login')}>로그인</button>
-          </>
-        )}
-      </nav>
-    </header>
-  )
-}
+    <div className="flex justify-between pt-[3.2vh] px-[4.72vw]">
+      {/* 왼쪽: 로고 */}
+      <div>
+        <button onClick={() => navigate(`/home`)}>
+          <img
+            src="/42-logo.png"
+            alt="logo"
+            className="w-[2.8vw] h-[3.11vh] object-contain"
+          />
+        </button>
+      </div>
+      {/* 오른쪽: MEDIA / LIVE CHAT / FORUM / 프로필 아이콘 */}
+      <div className="flex gap-[2.99vw]">
+        <button className="text-[0.90vw]">MEDIA</button>
+        <button className="text-[0.90vw]">LIVE CHAT</button>
+        <button className="text-[0.90vw]">FORUM</button>
+        <button>
+          <img
+            src="/profile.png"
+            alt="profile"
+            className="w-[1.94vw] h-[3.11vh] object-contain"
+          />
+        </button>
+      </div>
+    </div>
+  );
+};
 
-export default Header
+export default Header;
