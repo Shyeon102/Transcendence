@@ -10,7 +10,7 @@ const Footer = () => {
       {/* 오른쪽 */}
       <div className="flex gap-[2vw]">
         <p>© 2026 Project. All Rights Reserved</p>
-        <button className="border" onClick={() => {}}>
+        <button className="border border-white/30 rounded-full px-[1vw] py-[0.3vh] text-[0.8vw] -mt-[0.2vh]" onClick={() => {}}>
           English
         </button>
       </div>
