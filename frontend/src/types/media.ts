@@ -18,9 +18,9 @@ export interface Media {
 }
 
 export interface Review {
-  id: number; // 미디어
-  userId: number;
-  userName: string;
+  id: number; // 리뷰 자체 고유번호: DB에 저장될 때 순서대로 번호 (미디어 id랑 다름)
+  userId: number; // 리뷰 쓴 유저 번호
+  userName: string; // "jihyeki2"
   content: string; // review text
   rating: number; // (1-5)
   visibility: "public" | "followers" | "private";
