@@ -28,6 +28,7 @@ const mockMedia: Media = {
   type: "Movie",
   frontPosterUrl: "/pulp-fiction.jpg",
   sidePosterUrl: "/pulp-fiction-side.png",
+  reviews: [], // 리뷰가 화면에 표시되진 않으니까 그냥 빈 배열
 };
 
 // mockMedia를 기반으로 id/title/poster만 바꿔서 15개 생성
