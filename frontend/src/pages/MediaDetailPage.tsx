@@ -86,27 +86,29 @@ const MediaDetailPage = () => {
   const [myRating, setMyRating] = useState(0); // star rating
 
   return (
-    <div>
+    <div className="bg-[#0c0c0b] min-h-screen text-white flex flex-col">
       {/* 헤더 */}
       <Header />
 
       {/* 레이아웃: 가로로 3등분 */}
-      <div className="flex">
+      <div className="flex mt-[10vh]">
         {/* 미디어 변환 탭: 제일 왼쪽 */}
-        <div className="">
-          <button onClick={() => setActiveTab("Movie")}>Movie</button>
-          <button onClick={() => setActiveTab("Series")}>Series</button>
-          <button onClick={() => setActiveTab("Animation")}>Animation</button>
+        <div className="flex flex-col w-[5vw] text-white gap-[8vh] w-[5vw] mt-[10vh]">
+          <button className="text-[1vw] -rotate-90" onClick={() => setActiveTab("Movie")}>Movie</button>
+          <div className="-rotate-90 w-[4px] h-[2vh] bg-white mx-auto" /> {/* 구분선 */}       
+          <button className="text-[1vw] -rotate-90" onClick={() => setActiveTab("Series")}>Series</button>
+          <div className="rotate-90 w-[4px] h-[2vh] bg-white mx-auto" />
+          <button className="text-[1vw] -rotate-90" onClick={() => setActiveTab("Animation")}>Animation</button>
         </div>
 
         {/* 중간 왼쪽 vhs 포스터 + 별점 레이아웃 */}
-        <div>
+        <div className="w-[35vw] ml-[8vw] mt-[3vh]">
           {/* vhs 미디어 포스터 */}
           <div className="relative w-[15vw] h-[55vh]">
             {/* 1. vhs 테이프 목업 */}
             <img
               src="/vhs-back.png"
-              className="absolute inset-0 w-[90%] h-[90%] object-fill translate-x-[45%] translate-y-[4%]"
+              className="absolute inset-0 w-[90%] h-[90%] object-fill translate-x-[103%] translate-y-[4%]"
             />
             {/* 2. 포스터 (중간) */}
             <img
@@ -121,18 +123,24 @@ const MediaDetailPage = () => {
           </div>
 
           {/* 별점 */}
-          <div>
-            {/* 별 아이콘 이미지 */}
-            <button onClick={() => setMyRating()}>
-              <img src="/star-line" />
-            </button>
+          <div className="flex">
+            {/* 별 5개 */}
+            {[1, 2, 3, 4, 5].map((n) => (
+              <img
+                key={n}
+                src={n <= myRating ? "/star-full.png" : "/star-line.png"}
+                onClick={() => setMyRating(n)}
+                className="w-6 h-6 cursor-pointer"
+              />
+            ))}
 
             <p>MY RATING</p>
 
             {/* 내 (숫자) 별점 */}
             <div>
-              {/* set my rating에 따라 숫자 변경 -> 별 몇개 주느냐에 따라 점수다름 */}
-              <p>/10</p>
+              {/* setMyRating에 따라 숫자 변경 -> 별 몇개 주느냐에 따라 점수다름 */}
+              {/* 숫자 자동으로 바뀜 */}
+              <p>{myRating}/5</p>
             </div>
 
             {/* 내 리뷰 */}
@@ -141,7 +149,7 @@ const MediaDetailPage = () => {
         </div>
 
         {/* 오른쪽 미디어 정보 레이아웃 */}
-        <div>
+        <div className="w-[60vw]">
           {/* 1994 | Crime, Thriller | Quentin Tarantino */}
           <div className="flex text-white ">
             <p>{mockMedia.releaseDate.slice(0, 4)}</p>{" "}
@@ -154,7 +162,7 @@ const MediaDetailPage = () => {
           </div>
 
           {/* 타이틀 */}
-          <p className="text-8xl text-white">{mockMedia.title}</p>
+          <p className="text-8xl text-white font-bebas">{mockMedia.title}</p>
 
           {/* 2h 34m | USA | Cast: John Travolta, Samuel L. Jackson, ... */}
           <div className="flex text-white">
@@ -167,37 +175,37 @@ const MediaDetailPage = () => {
           </div>
 
           {/* story */}
-          <div className="flex">
-            <p className="text-2xl">The Story</p>
-            <p>{mockMedia.story}</p>
+          <div className="flex gap-[5vw] mt-[5vh]">
+            <p className="text-2xl text-[1.2vw] max-w-[1vw]">The Story</p>
+            <p className="font-ibm text-[0.9vw] max-w-[23vw]">{mockMedia.story}</p>
           </div>
 
           {/* 아이콘 인터렉션 */}
-          <div className="flex">
+          <div className="flex max-w-[28vw] justify-end gap-[0.3vw] mt-[2vh]">
             <button onClick={() => setActiveIcon({ ...icon, eye: !icon.eye })}>
               {/* 이미지 교체 (삼항연산자): 조건 ? 참일 때 : 거짓일 때 */}
-              <img src={icon.eye ? "/view.png" : "/non-view.png"} />
+              <img src={icon.eye ? "/view.png" : "/non-view.png"} className="w-[1.3vw] h-[1.3vw] mr-[0.2vw]"/>
             </button>
             <button
               onClick={() => setActiveIcon({ ...icon, like: !icon.like })}
             >
-              <img src={icon.like ? "/like.png" : "/non-like.png"} />
+              <img src={icon.like ? "/like.png" : "/non-like.png"} className="w-[1.2vw] h-[1.2vw]"/>
             </button>
             <button
               onClick={() => setActiveIcon({ ...icon, dislike: !icon.dislike })}
             >
-              <img src={icon.dislike ? "/dislike.png" : "/non-dislike.png"} />
+              <img src={icon.dislike ? "/dislike.png" : "/non-dislike.png"} className="w-[1.4vw] h-[1.4vw]"/>
             </button>
             <button
               onClick={() => setActiveIcon({ ...icon, wish: !icon.wish })}
             >
-              <img src={icon.wish ? "/wish.png" : "/non-wish.png"} />
+              <img src={icon.wish ? "/wish.png" : "/non-wish.png"} className="w-[1.2vw] h-[1.2vw] ml-[0.1vw]"/>
             </button>
           </div>
 
           {/* 오른쪽: 리뷰 섹션: Reviews 제목 + 리뷰 목록 (가로정렬) */}
-          <div className="flex">
-            <p className="text-2xl">Reviews</p>
+          <div className="flex flex gap-[5vw] mt-[5vh]">
+            <p className="text-2xl text-[1.2vw] max-w-[1vw]">Reviews</p>
 
             {/* 유저 리스트 div */}
             <div className="flex flex-col">
@@ -205,13 +213,13 @@ const MediaDetailPage = () => {
               {mockMedia.reviews.map((review) => (
                 <div key={review.id} className="flex flex-col">
                   {/* 위: visibility 뱃지 */}
-                  <p className="border border-white px-2 py-1 text-xs">
+                  <p className="border border-white px-2 py-1 text-xs rounded-full w-fit">
                     {review.visibility}
                   </p>
 
                   {/* 아래: 가로 나열 */}
                   {/* 이 div가 리뷰 하나의 덩어리: reviews[0] 같이 인덱스로 구분 */}
-                  <div className="flex gap-4">
+                  <div className="flex gap-4 text-[0.8vw]">
                     <p>{review.userName}</p>
                     <p>{review.content}</p>
 
@@ -229,6 +237,8 @@ const MediaDetailPage = () => {
                   </div>
                 </div>
               ))}
+
+              <button>Read More →</button>
             </div>
           </div>
         </div>
