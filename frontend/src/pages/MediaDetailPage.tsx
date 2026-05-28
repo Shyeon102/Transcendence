@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import type { Media, Genre, Review } from "../types/media";
+import type { Media, Genre } from "../types/media";
 
 // 임시 목업 데이터: 현재 백엔드가 없으므로 목업 데이터 임시 선언
 // TODO) 추후 백엔드 연동후 useParams()로 받은 id로 API 호출, 그 영화 데이터를 받아오기
@@ -72,11 +72,12 @@ const mockMedia: Media = {
 };
 
 const MediaDetailPage = () => {
-  const navigate = useNavigate(); // 미디어 탭 이동
-  const { id } = useParams(); // React Router에서  URL 파라미터 읽는 훅. URL: /media/:id
+  //const navigate = useNavigate(); // 미디어 탭 이동
+  //const { id } = useParams(); // React Router에서  URL 파라미터 읽는 훅. URL: /media/:id
+  useParams(); // TODO: 백엔드 연동 후 id 사용
 
   // TODO) setActive 초기값 : 홈에서 필터 선택하고 들어오면 그 타입이 기본값. 추후 백엔드 연동 후에 URL params에서 읽어와서 초기값 설정하기 : "" 이건 백엔드 연동전 초기값
-  const [tab, setActiveTab] = useState(""); // Movie / Series / Animation
+  const [_tab, setActiveTab] = useState(""); // Movie / Series / Animation
   const [icon, setActiveIcon] = useState({
     eye: false,
     like: false,
@@ -93,7 +94,7 @@ const MediaDetailPage = () => {
       {/* 레이아웃: 가로로 3등분 */}
       <div className="flex mt-[7vh]">
         {/* 미디어 변환 탭: 제일 왼쪽 */}
-        <div className="flex flex-col w-[5vw] text-white gap-[8vh] w-[5vw] mt-[10vh] pl-[1vw]">
+        <div className="flex flex-col w-[5vw] text-white gap-[8vh] mt-[10vh] pl-[1vw]">
           <button
             className={`text-[1vw] -rotate-90 ${mockMedia.type === "Movie" ? "text-teal-600" : "text-white"}`}
             onClick={() => setActiveTab("Movie")}
@@ -243,7 +244,7 @@ const MediaDetailPage = () => {
           </div>
 
           {/* 오른쪽: 리뷰 섹션: Reviews 제목 + 리뷰 목록 (가로정렬) */}
-          <div className="flex flex gap-[3vw] mt-[3.6vh]">
+          <div className="flex gap-[3vw] mt-[3.6vh]">
             <p className="font-thin text-[1.8vw] w-[5vw] leading-tight">Reviews</p>
 
             {/* 유저 리스트 div */}
@@ -258,6 +259,7 @@ const MediaDetailPage = () => {
 
                   {/* visibility 뱃지 + 커멘트 세로로 */}
                   <div className="flex flex-col">
+                    {/* TODO: 백엔드 연동 후 visibility 뱃지 표시 예정 */}
                     {/*<p className="border border-teal-600 px-2 py-[0.2vh] text-[0.6vw] rounded-full w-fit">
                       {review.visibility}
                     </p>*/}
