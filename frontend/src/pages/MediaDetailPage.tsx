@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+//import { useParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import type { Media, Genre } from "../types/media";
@@ -74,10 +74,10 @@ const mockMedia: Media = {
 const MediaDetailPage = () => {
   //const navigate = useNavigate(); // 미디어 탭 이동
   //const { id } = useParams(); // React Router에서  URL 파라미터 읽는 훅. URL: /media/:id
-  useParams(); // TODO: 백엔드 연동 후 id 사용
+  //useParams(); // // TODO: 백엔드 연동 후 useParams()로 id 받아서 API 호출
 
   // TODO) setActive 초기값 : 홈에서 필터 선택하고 들어오면 그 타입이 기본값. 추후 백엔드 연동 후에 URL params에서 읽어와서 초기값 설정하기 : "" 이건 백엔드 연동전 초기값
-  const [_tab, setActiveTab] = useState(""); // Movie / Series / Animation
+  //const [_tab, setActiveTab] = useState(""); // Movie / Series / Animation
   const [icon, setActiveIcon] = useState({
     eye: false,
     like: false,
@@ -97,7 +97,7 @@ const MediaDetailPage = () => {
         <div className="flex flex-col w-[5vw] text-white gap-[8vh] mt-[10vh] pl-[1vw]">
           <button
             className={`text-[1vw] -rotate-90 ${mockMedia.type === "Movie" ? "text-teal-600" : "text-white"}`}
-            onClick={() => setActiveTab("Movie")}
+            onClick={() => {}} // TODO: 백엔드 연동 후 추가
           >
             Movie
           </button>
@@ -105,14 +105,14 @@ const MediaDetailPage = () => {
           {/* 구분선 */}
           <button
             className={`text-[1vw] -rotate-90 ${mockMedia.type === "Series" ? "text-teal-600" : "text-white"}`}
-            onClick={() => setActiveTab("Series")}
+            onClick={() => {}}
           >
             Series
           </button>
           <div className="rotate-90 w-[4px] h-[2vh] bg-white mx-auto" />
           <button
             className={`text-[1vw] -rotate-90 ${mockMedia.type === "Animation" ? "text-teal-600" : "text-white"}`}
-            onClick={() => setActiveTab("Animation")}
+            onClick={() => {}}
           >
             Animation
           </button>
