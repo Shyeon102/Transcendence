@@ -91,18 +91,34 @@ const MediaDetailPage = () => {
       <Header />
 
       {/* 레이아웃: 가로로 3등분 */}
-      <div className="flex mt-[10vh]">
+      <div className="flex mt-[7vh]">
         {/* 미디어 변환 탭: 제일 왼쪽 */}
-        <div className="flex flex-col w-[5vw] text-white gap-[8vh] w-[5vw] mt-[10vh]">
-          <button className="text-[1vw] -rotate-90" onClick={() => setActiveTab("Movie")}>Movie</button>
-          <div className="-rotate-90 w-[4px] h-[2vh] bg-white mx-auto" /> {/* 구분선 */}       
-          <button className="text-[1vw] -rotate-90" onClick={() => setActiveTab("Series")}>Series</button>
+        <div className="flex flex-col w-[5vw] text-white gap-[8vh] w-[5vw] mt-[10vh] pl-[1vw]">
+          <button
+            className={`text-[1vw] -rotate-90 ${mockMedia.type === "Movie" ? "text-teal-600" : "text-white"}`}
+            onClick={() => setActiveTab("Movie")}
+          >
+            Movie
+          </button>
+          <div className="-rotate-90 w-[4px] h-[2vh] bg-white mx-auto" />{" "}
+          {/* 구분선 */}
+          <button
+            className={`text-[1vw] -rotate-90 ${mockMedia.type === "Series" ? "text-teal-600" : "text-white"}`}
+            onClick={() => setActiveTab("Series")}
+          >
+            Series
+          </button>
           <div className="rotate-90 w-[4px] h-[2vh] bg-white mx-auto" />
-          <button className="text-[1vw] -rotate-90" onClick={() => setActiveTab("Animation")}>Animation</button>
+          <button
+            className={`text-[1vw] -rotate-90 ${mockMedia.type === "Animation" ? "text-teal-600" : "text-white"}`}
+            onClick={() => setActiveTab("Animation")}
+          >
+            Animation
+          </button>
         </div>
 
         {/* 중간 왼쪽 vhs 포스터 + 별점 레이아웃 */}
-        <div className="w-[35vw] ml-[8vw] mt-[3vh]">
+        <div className="w-[35vw] ml-[12vw] mt-[5vh]">
           {/* vhs 미디어 포스터 */}
           <div className="relative w-[15vw] h-[55vh]">
             {/* 1. vhs 테이프 목업 */}
@@ -123,122 +139,150 @@ const MediaDetailPage = () => {
           </div>
 
           {/* 별점 */}
-          <div className="flex">
+          <div className="flex flex-col mt-[2.5vh]">
             {/* 별 5개 */}
-            {[1, 2, 3, 4, 5].map((n) => (
-              <img
-                key={n}
-                src={n <= myRating ? "/star-full.png" : "/star-line.png"}
-                onClick={() => setMyRating(n)}
-                className="w-6 h-6 cursor-pointer"
-              />
-            ))}
-
-            <p>MY RATING</p>
-
-            {/* 내 (숫자) 별점 */}
-            <div>
-              {/* setMyRating에 따라 숫자 변경 -> 별 몇개 주느냐에 따라 점수다름 */}
-              {/* 숫자 자동으로 바뀜 */}
-              <p>{myRating}/5</p>
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <img
+                  key={n}
+                  src={n <= myRating ? "/star-full.png" : "/star-line.png"}
+                  onClick={() => setMyRating(n)}
+                  className="w-[1.6vw] h-[1.6vw] cursor-pointer"
+                />
+              ))}
             </div>
 
-            {/* 내 리뷰 */}
-            <button>My review</button>
+            {/* MY RATING + 숫자 + My review 버튼 */}
+            <div className="flex items-center gap-[1vw] mt-[0.2vh]">
+              <p className="text-[1.2vw] font-semibold">MY RATING</p>
+              {/* setMyRating에 따라 숫자 변경 -> 별 몇개 주느냐에 따라 점수다름 */}
+              {/* 숫자 자동으로 바뀜 + toFixed(1) : "1.0", "2,0", "3.0" ... */}
+              <p className="text-[1.5vw] text-teal-600 font-bold">{myRating.toFixed(1)}</p>
+              <p className="text-[1.2vw] font-semibold self-end mb-[0.2vh] ml-[-0.8vw]">/ 5</p>
+              {/* 내 리뷰 */}
+              <button onClick={() => alert("The review writing feature is scheduled to be developed later.")} className="border border-teal-600 bg-teal-600 text-white px-[0.5vw] py-[0.1vh] text-[0.9vw] rounded-xl">
+                My review
+              </button>
+            </div>
           </div>
         </div>
 
         {/* 오른쪽 미디어 정보 레이아웃 */}
-        <div className="w-[60vw]">
+        <div className="w-[60vw] ml-[12vw]">
           {/* 1994 | Crime, Thriller | Quentin Tarantino */}
-          <div className="flex text-white ">
-            <p>{mockMedia.releaseDate.slice(0, 4)}</p>{" "}
+          <div className="flex items-center gap-[1vw] text-[0.9vw]">
+            <p>{mockMedia.releaseDate.slice(0, 4)}</p>
             {/* "1994-10-26" -> "1994" */}
-            <p>|</p>
+            <p className="font-bold">|</p>
             {/* 각 객체에서 name만 꺼내서 배열을 문자열로 합치기 */}
-            <p>{mockMedia.genre.map((g) => g.name).join(",")}</p>
-            <p>|</p>
+            <p>{mockMedia.genre.map((g) => g.name).join(", ")}</p>
+            <p className="font-bold">|</p>
             <p>{mockMedia.director}</p>
           </div>
 
           {/* 타이틀 */}
-          <p className="text-8xl text-white font-bebas">{mockMedia.title}</p>
+          <p className="text-[8vw] font-bebas mt-[-2.5vh]">{mockMedia.title}</p>
 
           {/* 2h 34m | USA | Cast: John Travolta, Samuel L. Jackson, ... */}
-          <div className="flex text-white">
+          <div className="flex items-center gap-[0.5vw] text-[0.9vw] mt-[-3vh]">
             <p>{mockMedia.runtime}</p>
-            <p>|</p>
+            <p className="font-bold">|</p>
             <p>{mockMedia.country}</p>
-            <p>|</p>
-            <p>Cast: </p>
-            <p>{mockMedia.cast.join(", ")}</p>
+            <p className="font-bold">|</p>
+            <p>
+              <span className="font-semibold">Cast: </span>
+              {mockMedia.cast.join(", ")}
+            </p>
           </div>
 
           {/* story */}
-          <div className="flex gap-[5vw] mt-[5vh]">
-            <p className="text-2xl text-[1.2vw] max-w-[1vw]">The Story</p>
-            <p className="font-ibm text-[0.9vw] max-w-[23vw]">{mockMedia.story}</p>
+          <div className="flex gap-[3vw] mt-[6.2vh] items-start">
+            <p className="font-thin text-[1.8vw] w-[5vw] leading-tight">
+              The
+              <br />
+              Story
+            </p>
+            <p className="font-ibm text-[0.9vw] max-w-[23vw] leading-relaxed">
+              {mockMedia.story}
+            </p>
           </div>
 
           {/* 아이콘 인터렉션 */}
-          <div className="flex max-w-[28vw] justify-end gap-[0.3vw] mt-[2vh]">
+          <div className="flex max-w-[31.5vw] justify-end gap-[0.3vw] mt-[2vh]">
             <button onClick={() => setActiveIcon({ ...icon, eye: !icon.eye })}>
               {/* 이미지 교체 (삼항연산자): 조건 ? 참일 때 : 거짓일 때 */}
-              <img src={icon.eye ? "/view.png" : "/non-view.png"} className="w-[1.3vw] h-[1.3vw] mr-[0.2vw]"/>
+              <img
+                src={icon.eye ? "/view.png" : "/non-view.png"}
+                className="w-[1.3vw] h-[1.3vw] mr-[0.2vw]"
+              />
             </button>
             <button
               onClick={() => setActiveIcon({ ...icon, like: !icon.like })}
             >
-              <img src={icon.like ? "/like.png" : "/non-like.png"} className="w-[1.2vw] h-[1.2vw]"/>
+              <img
+                src={icon.like ? "/like.png" : "/non-like.png"}
+                className="w-[1.2vw] h-[1.2vw]"
+              />
             </button>
             <button
               onClick={() => setActiveIcon({ ...icon, dislike: !icon.dislike })}
             >
-              <img src={icon.dislike ? "/dislike.png" : "/non-dislike.png"} className="w-[1.4vw] h-[1.4vw]"/>
+              <img
+                src={icon.dislike ? "/dislike.png" : "/non-dislike.png"}
+                className="w-[1.4vw] h-[1.4vw]"
+              />
             </button>
             <button
               onClick={() => setActiveIcon({ ...icon, wish: !icon.wish })}
             >
-              <img src={icon.wish ? "/wish.png" : "/non-wish.png"} className="w-[1.2vw] h-[1.2vw] ml-[0.1vw]"/>
+              <img
+                src={icon.wish ? "/wish.png" : "/non-wish.png"}
+                className="w-[1.2vw] h-[1.2vw] ml-[0.1vw]"
+              />
             </button>
           </div>
 
           {/* 오른쪽: 리뷰 섹션: Reviews 제목 + 리뷰 목록 (가로정렬) */}
-          <div className="flex flex gap-[5vw] mt-[5vh]">
-            <p className="text-2xl text-[1.2vw] max-w-[1vw]">Reviews</p>
+          <div className="flex flex gap-[3vw] mt-[3.6vh]">
+            <p className="font-thin text-[1.8vw] w-[5vw] leading-tight">Reviews</p>
 
             {/* 유저 리스트 div */}
-            <div className="flex flex-col">
-              {/* 세로정렬: 각 리뷰 한개 (visibility 때문에) */}
+            <div className="flex flex-col gap-[1vh]">
               {mockMedia.reviews.map((review) => (
-                <div key={review.id} className="flex flex-col">
-                  {/* 위: visibility 뱃지 */}
-                  <p className="border border-white px-2 py-1 text-xs rounded-full w-fit">
-                    {review.visibility}
-                  </p>
+                <div
+                  key={review.id}
+                  className="flex gap-4 text-[0.8vw] items-start"
+                >
+                  {/* 유저명 */}
+                  <p className="w-[5vw]">{review.userName}</p>
 
-                  {/* 아래: 가로 나열 */}
-                  {/* 이 div가 리뷰 하나의 덩어리: reviews[0] 같이 인덱스로 구분 */}
-                  <div className="flex gap-4 text-[0.8vw]">
-                    <p>{review.userName}</p>
+                  {/* visibility 뱃지 + 커멘트 세로로 */}
+                  <div className="flex flex-col">
+                    {/*<p className="border border-teal-600 px-2 py-[0.2vh] text-[0.6vw] rounded-full w-fit">
+                      {review.visibility}
+                    </p>*/}
                     <p>{review.content}</p>
+                  </div>
 
-                    {/* 별 rating + 숫자 rating */}
-                    <div className="flex">
-                      {/* Array(5): 길이가 5인 빈 배열 만들기 */}
-                      {/* .map((값, 인덱스) => ...) // _ = 값 (안씀 표시 관례), i = 인덱스: 값은 필요없고 인덱스만 필요 */}
-                      {/* key={i}: 여러개의 map으로 별 개수 만듬(key 필요): 고유 id가 없어서 index i 사용 */}
-                      {[...Array(review.rating)].map((_, i) => (
-                        <img key={i} src="/star-full.png" className="w-4 h-4" />
-                      ))}
-                      {/* 숫자 rating */}
-                      <p>{review.rating}</p>
-                    </div>
+                  {/* 별점 + 숫자 */}
+                  <div className="flex items-center ml-[7vw]">
+                    {[...Array(review.rating)].map((_, i) => (
+                      <img
+                        key={i}
+                        src="/star-full.png"
+                        className="w-[0.8vw] h-[0.8vw]"
+                      />
+                    ))}
+                    <p className="text-[0.6vw] ml-[0.3vw]">
+                      {review.rating.toFixed(1)}
+                    </p>
                   </div>
                 </div>
               ))}
-
-              <button>Read More →</button>
+              {/* TODO: 추후 리뷰 전체 리뷰 목록 모달 or 페이지로 교체 */}
+              <button onClick={() => alert("The feature to view all reviews is scheduled to be developed later.")} className="mr-[20vw] mt-[1vh] text-[1vw] text-teal-600">
+                Read More  <span className="font-black">⟶</span>
+              </button>
             </div>
           </div>
         </div>
