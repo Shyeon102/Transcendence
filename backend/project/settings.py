@@ -11,6 +11,8 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
+    "daphne",
+    "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -120,3 +122,14 @@ CORS_ALLOW_ALL_ORIGINS = True
 AUTHENTICATION_BACKENDS = {
     'django.contrib.auth.backends.ModelBackend',
 }
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            'hosts': [(os.getenv('REDIS_URL', 'redis'), 6379)]
+        },
+    },
+}
+
+ASGI_APPLICATION = 'project.asgi.application'

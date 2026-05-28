@@ -10,6 +10,8 @@ class ChatRoom(models.Model):
                                    on_delete=models.CASCADE,
                                    related_name='created_rooms')
 
+    password = models.CharField(max_length=128, blank=True)
+
     max_members = models.IntegerField(default=4)
 
     is_active = models.BooleanField(default=True)
@@ -19,12 +21,22 @@ class ChatRoom(models.Model):
 
 class ChatRoomMember(models.Model):
     """Discussion room member"""
+
+    ROLE_CHOICES = (
+        ("owner", "Owner"),
+        ("moderator", "Moderator"),
+        ("member", "Member"),
+    )
+    
     room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE,
                              related_name='members')
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE,
                              related_name='chat_memberships')
     joined_at = models.DateTimeField(auto_now_add=True)
+
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, 
+                            default="member")
 
     class Meta:
         unique_together = ('room', 'user')
