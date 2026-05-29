@@ -63,7 +63,7 @@ type RawAuthResponse = {
 type RawUserPayload = RawAuthUser | RawAuthResponse;
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/+$/, '');
-const SHOULD_FALLBACK_TO_MOCK = import.meta.env.VITE_USE_MOCK_AUTH !== 'false';
+const SHOULD_FALLBACK_TO_MOCK = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
 
 const toMessage = (value: unknown): string | undefined => {
   if (typeof value === 'string' && value.trim()) {
@@ -355,7 +355,7 @@ export const authApi = createApi({
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
-        const result = await rawBaseQuery(
+        const result = await baseQuery(
           {
             url: '/users/me',
             method: 'PUT',
@@ -394,13 +394,8 @@ export const authApi = createApi({
           }
         }
 
-        const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
         return {
-          error: {
-            message: toMessage(data) ?? 'Request failed.',
-            fields: toFieldErrors(data),
-          },
+          error: result.error ?? { message: 'Request failed.' },
         };
       },
     }),
