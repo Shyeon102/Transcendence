@@ -1,4 +1,17 @@
 @import "tailwindcss/index.css";
+
 .font-playfair {
   font-family: "Playfair Display", serif;
+}
+
+.font-bebas {
+  font-family: "Bebas Neue", sans-serif;
+}
+
+.font-ibm {
+  font-family: "IBM Plex Serif", serif;
+}
+
+.font-montserrat {
+  font-family: "Montserrat", sans-serif;
 }

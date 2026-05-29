@@ -17,9 +17,9 @@ const Header = () => {
       </div>
       {/* 오른쪽: MEDIA / LIVE CHAT / FORUM / 프로필 아이콘 */}
       <div className="flex gap-[2.99vw]">
-        <button className="text-[0.90vw]">MEDIA</button>
-        <button className="text-[0.90vw]">LIVE CHAT</button>
-        <button className="text-[0.90vw]">FORUM</button>
+        <button className="text-[0.90vw] text-white">MEDIA</button>
+        <button className="text-[0.90vw] text-white">LIVE CHAT</button>
+        <button className="text-[0.90vw] text-white">FORUM</button>
         <button>
           <img
             src="/profile.png"
