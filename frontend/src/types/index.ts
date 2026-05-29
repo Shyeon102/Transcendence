@@ -1,3 +1,9 @@
+export interface OnboardingAnswers {
+  allTimeFavorite: string;
+  recentFavorite: string;
+  friendRecommendation: string;
+}
+
 export interface AuthUser {
   id: number;
   email: string;
@@ -7,6 +13,8 @@ export interface AuthUser {
   avatarUrl?: string;
   bio?: string;
   favoriteGenres?: number[];
+  favoriteTitles?: string[];
+  onboardingAnswers?: OnboardingAnswers;
   favoriteCountries?: string[];
   isStaff?: boolean;
 }
@@ -23,6 +31,7 @@ export interface LoginRequest {
 export interface LoginResponse {
   user: AuthUser;
   token: string;
+  refreshToken?: string;
 }
 
 export interface SignupRequest {
@@ -33,18 +42,28 @@ export interface SignupRequest {
   password: string;
   passwordConfirm: string;
   favoriteGenres?: number[];
+  favoriteTitles?: string[];
+  onboardingAnswers?: OnboardingAnswers;
 }
 
 export interface SignupResponse {
   user: AuthUser;
   token: string;
+  refreshToken?: string;
 }
 
 export interface AuthErrorResponse {
   message: string;
+  fields?: Record<string, string[]>;
 }
 
 export interface AuthSession {
   user: AuthUser;
   token: string;
+  refreshToken?: string;
+}
+
+export interface RefreshTokenResponse {
+  token: string;
+  refreshToken?: string;
 }

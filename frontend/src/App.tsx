@@ -2,8 +2,12 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
+import { OAUTH_42_CALLBACK_PATH } from './lib/oauth';
 import InfoPage from './pages/InfoPage';
 import LoginPage from './pages/LoginPage';
+import MyPagePage from './pages/MyPagePage';
+import OnboardingPage from './pages/OnboardingPage';
+import OAuthCallbackPage from './pages/OAuthCallbackPage';
 import ProfilePage from './pages/ProfilePage';
 import SignupPage from './pages/SignupPage';
 
@@ -16,11 +20,28 @@ export default function App() {
             <Route path="/" element={<InfoPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path={OAUTH_42_CALLBACK_PATH} element={<OAuthCallbackPage />} />
+            <Route
+              path="/onboarding"
+              element={
+                <PrivateRoute>
+                  <OnboardingPage />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="/home"
               element={
                 <PrivateRoute>
                   <ProfilePage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/mypage"
+              element={
+                <PrivateRoute>
+                  <MyPagePage />
                 </PrivateRoute>
               }
             />

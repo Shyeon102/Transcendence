@@ -6,6 +6,7 @@
     "signup": "Sign up",
     "logout": "Log out",
     "profile": "Profile",
+    "mypage": "My Page",
     "info": "Info"
   },
   "infoPage": {
@@ -26,6 +27,8 @@
     "joinedYear": "Joined 2025",
     "editProfile": "Edit Profile",
     "closeEdit": "Close",
+    "uploadAvatar": "Change Photo",
+    "avatarAlt": "Profile avatar",
     "reviews": "Reviews",
     "posts": "Posts",
     "communityPosts": "Community Posts",
@@ -46,6 +49,9 @@
     "newPassword": "New Password",
     "confirmNewPassword": "Confirm New Password",
     "changePassword": "Change Password",
+    "passwordChanging": "Changing...",
+    "passwordChangeSuccess": "Password change form validation passed. Only the API hookup remains.",
+    "passwordSameAsCurrent": "The new password must be different from the current password.",
     "deleteAccount": "Delete Account",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - Currently obsessed with slow cinema and anything A24."
   },
@@ -103,11 +109,90 @@
     "toLogin": "Log in",
     "toLoginCta": "Sign in here"
   },
+  "onboarding": {
+    "eyebrow": "Initial Taste Setup",
+    "titleLine1": "CURATE",
+    "titleLine2": "YOUR TASTE.",
+    "description": "Pick the genres and titles you love, then answer a few short questions so the first recommendation flow starts with your voice.",
+    "genreEyebrow": "STEP 01",
+    "genreTitle": "Choose your genres",
+    "genreCounter": "genres picked",
+    "titleEyebrow": "STEP 02",
+    "titleTitle": "Pick titles you loved",
+    "titleCounter": "titles picked",
+    "questionEyebrow": "STEP 03",
+    "questionTitle": "Answer the prompts",
+    "questionCounter": "answers ready",
+    "questionPlaceholder": "Write the title or your reason here.",
+    "validation": "Select at least {genres} genres and {titles} titles.",
+    "questionValidation": "Please answer all three onboarding prompts.",
+    "saveError": "Saving to the server failed. The backend endpoint still needs to be verified.",
+    "saving": "Saving...",
+    "selected": "selected",
+    "tapToSelect": "tap to select",
+    "summaryEyebrow": "SUMMARY",
+    "summaryTitle": "YOUR TASTE MAP",
+    "selectedGenres": "Selected Genres",
+    "selectedTitles": "Selected Titles",
+    "answerSummary": "Recommendation Answers",
+    "emptyGenres": "No genres selected yet.",
+    "emptyTitles": "No titles selected yet.",
+    "emptyAnswer": "No answer yet.",
+    "complete": "Complete Onboarding",
+    "genreOptions": {
+      "drama": "Drama",
+      "sciFi": "Sci-Fi",
+      "thriller": "Thriller",
+      "animation": "Animation",
+      "indie": "Indie",
+      "documentary": "Documentary"
+    },
+    "titleOptions": {
+      "poorThings": "Poor Things",
+      "duneTwo": "Dune: Part Two",
+      "pastLives": "Past Lives",
+      "theZone": "The Zone of Interest",
+      "perfectDays": "Perfect Days",
+      "anora": "Anora"
+    },
+    "questions": {
+      "allTimeFavorite": "What is your all-time favorite? Movie, anime, or drama.",
+      "recentFavorite": "What media did you enjoy recently? Movie, anime, or drama.",
+      "friendRecommendation": "What would you recommend to a friend? Movie, anime, or drama."
+    }
+  },
+  "mypage": {
+    "eyebrow": "Personal Space",
+    "title": "MY PAGE",
+    "description": "A first-pass personal dashboard for your reviews, saved titles, and recent activity.",
+    "reviewSection": "My Reviews",
+    "watchlistSection": "Watchlist",
+    "recentActivity": "Recent Activity",
+    "empty": "There is no data to show yet."
+  },
+  "review": {
+    "formEyebrow": "Review Draft",
+    "formTitle": "WRITE A QUICK TAKE",
+    "titlePlaceholder": "Title",
+    "typePlaceholder": "movie / anime / drama",
+    "textPlaceholder": "Write a short reaction or recommendation point.",
+    "submit": "Add Review",
+    "validation": "Please enter the title, type, star rating, and review text."
+  },
   "validation": {
     "required": "Please fill in every field.",
     "invalidEmail": "Please enter a valid email address.",
     "passwordTooShort": "Password must be at least 8 characters.",
     "passwordMismatch": "Passwords do not match.",
     "usernameInvalid": "Username must be 3+ chars using letters, numbers, or underscores."
+  },
+  "oauth": {
+    "callbackEyebrow": "42 OAuth",
+    "callbackSuccessTitle": "AUTH FLOW STARTED",
+    "callbackSuccessDescription": "Once 42 authentication finishes, the app will continue to the next step. The backend callback policy will decide whether you return to login or another target page.",
+    "callbackErrorTitle": "AUTH FAILED",
+    "callbackErrorDescription": "There was a problem while handling 42 OAuth. Check the configured callback URL and backend response flow.",
+    "callbackContinue": "Continue",
+    "callbackRetry": "Back to login"
   }
 }

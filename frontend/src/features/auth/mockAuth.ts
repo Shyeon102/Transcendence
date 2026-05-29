@@ -1,6 +1,7 @@
 import type {
   LoginRequest,
   LoginResponse,
+  AuthUser,
   SignupRequest,
   SignupResponse,
   StoredUser,
@@ -59,4 +60,20 @@ export async function mockSignup(req: SignupRequest): Promise<SignupResponse> {
   };
   mockUsers.push(newUser);
   return { user: withoutPassword(newUser), token: makeToken() };
+}
+
+export async function mockUpdateProfile(
+  userId: number,
+  payload: Partial<AuthUser>
+): Promise<AuthUser> {
+  await delay(DELAY_MS);
+
+  const user = mockUsers.find((item) => item.id === userId);
+
+  if (!user) {
+    throw new Error('사용자를 찾을 수 없습니다.');
+  }
+
+  Object.assign(user, payload);
+  return withoutPassword(user);
 }

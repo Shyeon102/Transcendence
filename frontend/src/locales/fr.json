@@ -6,6 +6,7 @@
     "signup": "Inscription",
     "logout": "Se deconnecter",
     "profile": "Profil",
+    "mypage": "Ma page",
     "info": "Info"
   },
   "infoPage": {
@@ -26,6 +27,8 @@
     "joinedYear": "Inscrit en 2025",
     "editProfile": "Modifier le profil",
     "closeEdit": "Fermer",
+    "uploadAvatar": "Changer la photo",
+    "avatarAlt": "Avatar du profil",
     "reviews": "Critiques",
     "posts": "Posts",
     "communityPosts": "Posts de la communaute",
@@ -46,6 +49,9 @@
     "newPassword": "Nouveau mot de passe",
     "confirmNewPassword": "Confirmer le nouveau mot de passe",
     "changePassword": "Changer le mot de passe",
+    "passwordChanging": "Changement...",
+    "passwordChangeSuccess": "La validation du formulaire de mot de passe est terminee. Il reste seulement le branchement API.",
+    "passwordSameAsCurrent": "Le nouveau mot de passe doit etre different du mot de passe actuel.",
     "deleteAccount": "Supprimer le compte",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - En ce moment, je suis absorbe par le slow cinema et tout ce qui touche a A24."
   },
@@ -103,11 +109,90 @@
     "toLogin": "Connexion",
     "toLoginCta": "Se connecter ici"
   },
+  "onboarding": {
+    "eyebrow": "Premiere configuration",
+    "titleLine1": "CURATE",
+    "titleLine2": "YOUR TASTE.",
+    "description": "Choisissez vos genres et titres preferes, puis repondez a quelques questions pour lancer les premieres recommandations avec votre propre sensibilite.",
+    "genreEyebrow": "STEP 01",
+    "genreTitle": "Choisissez vos genres",
+    "genreCounter": "genres choisis",
+    "titleEyebrow": "STEP 02",
+    "titleTitle": "Choisissez les oeuvres aimees",
+    "titleCounter": "titres choisis",
+    "questionEyebrow": "STEP 03",
+    "questionTitle": "Repondez aux questions",
+    "questionCounter": "reponses pretes",
+    "questionPlaceholder": "Ecrivez librement le titre ou votre raison.",
+    "validation": "Selectionnez au moins {genres} genres et {titles} titres.",
+    "questionValidation": "Veuillez repondre aux trois questions de l'onboarding.",
+    "saveError": "L'enregistrement sur le serveur a echoue. Il faut encore verifier l'endpoint backend.",
+    "saving": "Enregistrement...",
+    "selected": "selected",
+    "tapToSelect": "tap to select",
+    "summaryEyebrow": "SUMMARY",
+    "summaryTitle": "YOUR TASTE MAP",
+    "selectedGenres": "Genres selectionnes",
+    "selectedTitles": "Titres selectionnes",
+    "answerSummary": "Reponses de recommandation",
+    "emptyGenres": "Aucun genre selectionne pour le moment.",
+    "emptyTitles": "Aucun titre selectionne pour le moment.",
+    "emptyAnswer": "Pas encore de reponse.",
+    "complete": "Terminer l'onboarding",
+    "genreOptions": {
+      "drama": "Drama",
+      "sciFi": "Sci-Fi",
+      "thriller": "Thriller",
+      "animation": "Animation",
+      "indie": "Indie",
+      "documentary": "Documentary"
+    },
+    "titleOptions": {
+      "poorThings": "Poor Things",
+      "duneTwo": "Dune: Part Two",
+      "pastLives": "Past Lives",
+      "theZone": "The Zone of Interest",
+      "perfectDays": "Perfect Days",
+      "anora": "Anora"
+    },
+    "questions": {
+      "allTimeFavorite": "Quelle est votre oeuvre de vie ? Film, anime ou drama.",
+      "recentFavorite": "Quel media avez-vous aime recemment ? Film, anime ou drama.",
+      "friendRecommendation": "Que recommanderiez-vous a un ami ? Film, anime ou drama."
+    }
+  },
+  "mypage": {
+    "eyebrow": "Espace personnel",
+    "title": "MY PAGE",
+    "description": "Une premiere version du tableau de bord personnel pour vos critiques, vos favoris et votre activite recente.",
+    "reviewSection": "Mes critiques",
+    "watchlistSection": "Liste a voir",
+    "recentActivity": "Activite recente",
+    "empty": "Aucune donnee a afficher pour le moment."
+  },
+  "review": {
+    "formEyebrow": "Brouillon de critique",
+    "formTitle": "WRITE A QUICK TAKE",
+    "titlePlaceholder": "Titre",
+    "typePlaceholder": "movie / anime / drama",
+    "textPlaceholder": "Ecrivez une courte reaction ou un point de recommandation.",
+    "submit": "Ajouter une critique",
+    "validation": "Veuillez saisir le titre, le type, la note et le texte de la critique."
+  },
   "validation": {
     "required": "Veuillez remplir tous les champs.",
     "invalidEmail": "Veuillez saisir une adresse email valide.",
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caracteres.",
     "passwordMismatch": "Les mots de passe ne correspondent pas.",
     "usernameInvalid": "Le nom d'utilisateur doit contenir au moins 3 caracteres et utiliser lettres, chiffres ou tirets bas."
+  },
+  "oauth": {
+    "callbackEyebrow": "42 OAuth",
+    "callbackSuccessTitle": "AUTH FLOW STARTED",
+    "callbackSuccessDescription": "Une fois l'authentification 42 terminee, l'application passera a l'etape suivante. La politique de callback du backend determinera le retour vers la page de connexion ou une autre page cible.",
+    "callbackErrorTitle": "AUTH FAILED",
+    "callbackErrorDescription": "Un probleme est survenu pendant le traitement de 42 OAuth. Verifiez l'URL de callback configuree et le flux de reponse du backend.",
+    "callbackContinue": "Continuer",
+    "callbackRetry": "Retour a la connexion"
   }
 }

@@ -4,6 +4,7 @@ export type {
   AuthUser,
   LoginRequest,
   LoginResponse,
+  RefreshTokenResponse,
   SignupRequest,
   SignupResponse,
   StoredUser,

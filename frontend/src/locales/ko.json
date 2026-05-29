@@ -6,6 +6,7 @@
     "signup": "회원가입",
     "logout": "로그아웃",
     "profile": "프로필",
+    "mypage": "마이페이지",
     "info": "소개"
   },
   "infoPage": {
@@ -26,6 +27,8 @@
     "joinedYear": "2025 가입",
     "editProfile": "프로필 수정",
     "closeEdit": "닫기",
+    "uploadAvatar": "사진 변경",
+    "avatarAlt": "프로필 아바타",
     "reviews": "리뷰",
     "posts": "게시글",
     "communityPosts": "커뮤니티 게시글",
@@ -46,6 +49,9 @@
     "newPassword": "새 비밀번호",
     "confirmNewPassword": "새 비밀번호 확인",
     "changePassword": "비밀번호 변경",
+    "passwordChanging": "변경 중...",
+    "passwordChangeSuccess": "비밀번호 변경 폼 검증이 완료되었습니다. API 연결만 남았습니다.",
+    "passwordSameAsCurrent": "새 비밀번호는 현재 비밀번호와 달라야 합니다.",
     "deleteAccount": "계정 삭제",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - 슬로우 시네마와 A24 작품에 빠져 있습니다."
   },
@@ -104,11 +110,90 @@
     "toLogin": "로그인",
     "toLoginCta": "여기서 로그인"
   },
+  "onboarding": {
+    "eyebrow": "첫 취향 설정",
+    "titleLine1": "CURATE",
+    "titleLine2": "YOUR TASTE.",
+    "description": "좋아하는 장르와 작품, 그리고 당신만의 추천 포인트를 알려주세요. 첫 피드와 추천 흐름의 기준이 됩니다.",
+    "genreEyebrow": "STEP 01",
+    "genreTitle": "장르를 고르세요",
+    "genreCounter": "genres picked",
+    "titleEyebrow": "STEP 02",
+    "titleTitle": "좋아한 작품을 고르세요",
+    "titleCounter": "titles picked",
+    "questionEyebrow": "STEP 03",
+    "questionTitle": "질문에 답하세요",
+    "questionCounter": "answers ready",
+    "questionPlaceholder": "작품 제목이나 이유를 자유롭게 적어주세요.",
+    "validation": "장르 {genres}개 이상, 작품 {titles}개 이상 선택해야 합니다.",
+    "questionValidation": "온보딩 질문 3개에 모두 답변해야 합니다.",
+    "saveError": "서버 저장에는 실패했습니다. 백엔드 endpoint를 확인해야 합니다.",
+    "saving": "저장 중...",
+    "selected": "selected",
+    "tapToSelect": "tap to select",
+    "summaryEyebrow": "SUMMARY",
+    "summaryTitle": "YOUR TASTE MAP",
+    "selectedGenres": "선택한 장르",
+    "selectedTitles": "선택한 작품",
+    "answerSummary": "추천 답변",
+    "emptyGenres": "아직 선택한 장르가 없습니다.",
+    "emptyTitles": "아직 선택한 작품이 없습니다.",
+    "emptyAnswer": "아직 답변이 없습니다.",
+    "complete": "온보딩 완료",
+    "genreOptions": {
+      "drama": "Drama",
+      "sciFi": "Sci-Fi",
+      "thriller": "Thriller",
+      "animation": "Animation",
+      "indie": "Indie",
+      "documentary": "Documentary"
+    },
+    "titleOptions": {
+      "poorThings": "Poor Things",
+      "duneTwo": "Dune: Part Two",
+      "pastLives": "Past Lives",
+      "theZone": "The Zone of Interest",
+      "perfectDays": "Perfect Days",
+      "anora": "Anora"
+    },
+    "questions": {
+      "allTimeFavorite": "인생작은 무엇인가요? 영화/애니/드라마 중에서",
+      "recentFavorite": "최근 재밌게 본 미디어는 무엇인가요? 영화/애니/드라마 중에서",
+      "friendRecommendation": "친구에게 추천한다면 어떤 작품을 추천하나요? 영화/애니/드라마 중에서"
+    }
+  },
+  "mypage": {
+    "eyebrow": "내 공간",
+    "title": "MY PAGE",
+    "description": "내 리뷰, 찜한 작품, 최근 활동을 한 화면에서 정리하는 개인 대시보드 초안입니다.",
+    "reviewSection": "내 리뷰",
+    "watchlistSection": "찜 목록",
+    "recentActivity": "최근 활동",
+    "empty": "아직 표시할 데이터가 없습니다."
+  },
+  "review": {
+    "formEyebrow": "리뷰 작성",
+    "formTitle": "WRITE A QUICK TAKE",
+    "titlePlaceholder": "작품 제목",
+    "typePlaceholder": "movie / anime / drama",
+    "textPlaceholder": "짧은 감상이나 추천 포인트를 적어주세요.",
+    "submit": "리뷰 추가",
+    "validation": "제목, 타입, 별점, 내용을 모두 입력해주세요."
+  },
   "validation": {
     "required": "모든 필드를 입력해주세요.",
     "invalidEmail": "올바른 이메일 형식이 아닙니다.",
     "passwordTooShort": "비밀번호는 8자 이상이어야 합니다.",
     "passwordMismatch": "비밀번호가 일치하지 않습니다.",
     "usernameInvalid": "사용자명은 3자 이상이며 영문자, 숫자, 밑줄만 사용할 수 있습니다."
+  },
+  "oauth": {
+    "callbackEyebrow": "42 OAuth",
+    "callbackSuccessTitle": "AUTH FLOW STARTED",
+    "callbackSuccessDescription": "42 인증이 완료되면 다음 단계로 이동합니다. 백엔드 callback 정책에 따라 로그인 페이지 또는 지정된 화면으로 돌아갑니다.",
+    "callbackErrorTitle": "AUTH FAILED",
+    "callbackErrorDescription": "42 OAuth 처리 중 문제가 발생했습니다. 설정된 callback URL과 백엔드 응답을 확인해야 합니다.",
+    "callbackContinue": "다음으로 이동",
+    "callbackRetry": "로그인으로 돌아가기"
   }
 }
