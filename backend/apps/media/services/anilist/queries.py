@@ -12,6 +12,7 @@ query ($page: Int, $perPage: Int, $season: MediaSeason, $seasonYear:
     media(type: ANIME, season: $season, seasonYear: $seasonYear, sort: $sort) {
       id
       title { romaji english native }
+      description(asHtml: false)
       format
       status
       season
@@ -19,6 +20,8 @@ query ($page: Int, $perPage: Int, $season: MediaSeason, $seasonYear:
       episodes
       duration
       genres
+      countryOfOrigin
+      coverImage { large medium }
       tags { name rank }
       averageScore
       meanScore
