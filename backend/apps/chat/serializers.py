@@ -14,7 +14,7 @@ class SimpleUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "created_by"]
+        fields = ["id", "username"]
 
 
 class ChatRoomSerializer(serializers.ModelSerializer):
@@ -38,7 +38,7 @@ class ChatRoomSerializer(serializers.ModelSerializer):
 class ChatRoomMemberSerializer(serializers.ModelSerializer):
 
     user = SimpleUserSerializer(read_only=True)
-    created_by = SimpleUserSerializer(read_only=True)
+    created_by = ChatRoomSerializer(read_only=True)
 
     class Meta:
         model = ChatRoomMember
@@ -46,6 +46,7 @@ class ChatRoomMemberSerializer(serializers.ModelSerializer):
             "id",
             "user",
             "joined_at",
+            "created_by",
         ]
 
 

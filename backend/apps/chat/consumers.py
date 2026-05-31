@@ -1,5 +1,6 @@
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from django_redis import get_redis_connection
 
 import json
 # from urllib.parse import parse_qs
@@ -13,7 +14,6 @@ import json
 
 from .models import ChatRoom, ChatRoomMember, ChatMessage
 from django.contrib.auth import get_user_model
-from django.core.cache import cache
 
 User = get_user_model()
 
@@ -36,20 +36,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         # Check room permission
-        has_access = await self.can_join_room()
+        has_access = await self.is_room_member()
 
         if not has_access:
             await self.close(code=4003)
             return
 
-        await self.set_online()
+        ok = await self.get_socket_lock()
 
-        await self.accept()
-
-        if await self.is_connected():
-            await self.close(code=4008)
+        if not ok:
+            await self.close(code=4007)
             return
-        await self.register_connection()
+
+        await self.set_online()
 
         if not await self.can_reconnect():
             await self.close(code=4009)
@@ -62,6 +61,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+
+        await self.register_connection()
 
         # Notify room
         await self.channel_layer.group_send(
@@ -76,16 +77,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """
         Called when websocket disconnects.
         """
-
         await self.set_offline()
+        await self.unregister_connection()
+        await self.release_socket_lock()
 
-        if hasattr(self, "room_group_name"):
+        # Only send leave notification if the user was connected to room
+        if hasattr(self, "room_group_name") and await self.is_connected():
 
             await self.channel_layer.group_discard(
                 self.room_group_name,
                 self.channel_name
             )
 
+            # Notify room
             if hasattr(self, "user"):
                 await self.channel_layer.group_send(
                     self.room_group_name,
@@ -158,7 +162,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # -------------------------
 
     @database_sync_to_async
-    def can_join_room(self):
+    def is_room_member(self):
 
         room = ChatRoom.objects.get(id=self.room_id)
 
@@ -181,43 +185,73 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def register_connection(self):
 
+        redis = get_redis_connection("default")
+
         key = f"chat:{self.room_id}:users"
 
-        users = cache.get(key, set())
+        redis.sadd(key, self.user.id)
 
-        users.add(self.user.id)
+    @database_sync_to_async
+    def unregister_connection(self):
 
-        cache.set(key, users, timeout=None)
+        redis = get_redis_connection("default")
+
+        key = f"chat:{self.room_id}:users"
+
+        redis.srem(key, self.user.id)
 
     @database_sync_to_async
     def is_connected(self):
 
+        redis = get_redis_connection("default")
+
         key = f"chat:{self.room_id}:users"
 
-        users = cache.get(key, set())
-
-        return self.user_id in users
+        return redis.sismember(key, self.user.id)
 
     @database_sync_to_async
     def set_online(self):
 
-        cache.set(
-            f"chat:{self.room_id}:online:{self.user.id}",
-            True,
-            timeout=60,
-        )
+        redis = get_redis_connection("default")
+
+        key = f"chat:{self.room_id}:online"
+
+        redis.sadd(key, self.user.id)
 
     @database_sync_to_async
     def set_offline(self):
-        cache.delete(f"chat:{self.room_id}:online:{self.user.id}")
+
+        redis = get_redis_connection("default")
+
+        key = f"chat:{self.room_id}:online"
+
+        redis.srem(key, self.user.id)
 
     @database_sync_to_async
     def can_reconnect(self):
 
+        redis = get_redis_connection("default")
+
         key = f"chat:{self.room_id}:reconnect:{self.user.id}"
 
-        if cache.get(key):
-            return False
+        was_set = redis.set(key, "1", nx=True, ex=3)
 
-        cache.set(key, True, timeout=3)
-        return True
+        return bool(was_set)
+
+    @database_sync_to_async
+    def get_socket_lock(self):
+
+        redis = get_redis_connection("default")
+
+        key = f"chat:{self.room_id}:socket_lock:{self.user.id}"
+
+        return redis.set(key, self.channel_name, nx=True, ex=30)
+
+    @database_sync_to_async
+    def release_socket_lock(self):
+
+        redis = get_redis_connection("default")
+
+        key = f"chat:{self.room_id}:socket_lock:{self.user.id}"
+
+        redis.delete(key)

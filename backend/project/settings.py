@@ -31,6 +31,16 @@ INSTALLED_APPS = [
     "corsheaders",
 ]
 
+CACHES = {
+    "default": {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': f"redis://{os.getenv('REDIS_URL', 'redis')}:6379/1",
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
 # send email, now to console, change later to actual email
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
