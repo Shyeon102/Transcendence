@@ -1,0 +1,7 @@
+openai
+pgvector
+celery
+redis
+
+numpy  # often needed for embeddings / math
+pandas # optional, depends on pipeline

@@ -3,8 +3,10 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import { OAUTH_42_CALLBACK_PATH } from './lib/oauth';
+import HomePage from './pages/HomePage';
 import InfoPage from './pages/InfoPage';
 import LoginPage from './pages/LoginPage';
+import MediaDetailPage from './pages/MediaDetailPage';
 import MyPagePage from './pages/MyPagePage';
 import OnboardingPage from './pages/OnboardingPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
@@ -32,6 +34,12 @@ export default function App() {
             <Route
               path="/home"
               element={
+                <HomePage />
+              }
+            />
+            <Route
+              path="/profile"
+              element={
                 <PrivateRoute>
                   <ProfilePage />
                 </PrivateRoute>
@@ -43,6 +51,12 @@ export default function App() {
                 <PrivateRoute>
                   <MyPagePage />
                 </PrivateRoute>
+              }
+            />
+            <Route
+              path="/media/:id"
+              element={
+                <MediaDetailPage />
               }
             />
           </Route>
