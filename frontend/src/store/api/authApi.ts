@@ -5,7 +5,7 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
-import { mockLogin, mockSignup, mockUpdateProfile } from '../../features/auth/mockAuth';
+import { mockLogin, mockUpdateProfile } from '../../features/auth/mockAuth';
 import { logout, setCredentials, updateTokens } from '../../features/auth/authSlice';
 import type { RootState } from '../index';
 import type {
@@ -37,6 +37,8 @@ type RawAuthUser = {
   favorite_titles?: string[];
   onboardingAnswers?: OnboardingAnswers;
   onboarding_answers?: OnboardingAnswers;
+  onboardingCompleted?: boolean;
+  onboarding_completed?: boolean;
   favoriteCountries?: string[];
   favorite_countries?: string[];
   isStaff?: boolean;
@@ -45,8 +47,10 @@ type RawAuthUser = {
 
 type RawAuthResponse = {
   user?: RawAuthUser;
+  users?: RawAuthUser;
   data?: {
     user?: RawAuthUser;
+    users?: RawAuthUser;
     token?: string;
     access?: string;
     access_token?: string;
@@ -61,9 +65,15 @@ type RawAuthResponse = {
 };
 
 type RawUserPayload = RawAuthUser | RawAuthResponse;
+type RawTokenResponse = {
+  access?: string;
+  refresh?: string;
+};
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/+$/, '');
-const SHOULD_FALLBACK_TO_MOCK = import.meta.env.VITE_USE_MOCK_AUTH === 'true';
+const SHOULD_FALLBACK_TO_MOCK = import.meta.env.VITE_USE_MOCK_AUTH !== 'false';
+const isDemoLogin = (credentials: LoginRequest) =>
+  credentials.username === 'demo' || credentials.username === 'demo@demo.demo';
 
 const toMessage = (value: unknown): string | undefined => {
   if (typeof value === 'string' && value.trim()) {
@@ -133,6 +143,7 @@ const normalizeUser = (user: RawAuthUser): AuthUser => ({
   favoriteGenres: user.favoriteGenres ?? user.favorite_genres,
   favoriteTitles: user.favoriteTitles ?? user.favorite_titles,
   onboardingAnswers: user.onboardingAnswers ?? user.onboarding_answers,
+  onboardingCompleted: user.onboardingCompleted ?? user.onboarding_completed,
   favoriteCountries: user.favoriteCountries ?? user.favorite_countries,
   isStaff: user.isStaff ?? user.is_staff,
 });
@@ -144,7 +155,7 @@ const normalizeUserPayload = (payload: RawUserPayload): AuthUser => {
     }
 
     const responsePayload = payload as RawAuthResponse;
-    return responsePayload.user ?? responsePayload.data?.user;
+    return responsePayload.user ?? responsePayload.users ?? responsePayload.data?.user ?? responsePayload.data?.users;
   })();
 
   if (!candidate) {
@@ -155,7 +166,7 @@ const normalizeUserPayload = (payload: RawUserPayload): AuthUser => {
 };
 
 const normalizeSession = (payload: RawAuthResponse): AuthSession => {
-  const user = payload.user ?? payload.data?.user;
+  const user = payload.user ?? payload.users ?? payload.data?.user ?? payload.data?.users;
   const token = payload.token ?? payload.access ?? payload.access_token ?? payload.data?.token ?? payload.data?.access ?? payload.data?.access_token;
   const refreshToken = payload.refresh ?? payload.refresh_token ?? payload.data?.refresh ?? payload.data?.refresh_token;
 
@@ -188,7 +199,7 @@ const getRequestUrl = (args: string | FetchArgs) => (typeof args === 'string' ? 
 
 const isRefreshEligibleRequest = (args: string | FetchArgs) => {
   const url = getRequestUrl(args);
-  return !['/auth/login', '/auth/register', '/auth/refresh'].includes(url);
+  return !['/auth/token/', '/auth/register/', '/auth/token/refresh/'].includes(url);
 };
 
 const rawBaseQuery = fetchBaseQuery({
@@ -216,10 +227,10 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
       api.dispatch(logout());
     } else {
       const refreshResult = await rawBaseQuery(
-        {
-          url: '/auth/refresh',
-          method: 'POST',
-          body: { refresh: refreshToken },
+          {
+            url: '/auth/token/refresh/',
+            method: 'POST',
+            body: { refresh: refreshToken },
         },
         api,
         extraOptions
@@ -259,9 +270,9 @@ export const authApi = createApi({
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials, api) {
-        const result = await rawBaseQuery(
+        const tokenResult = await rawBaseQuery(
           {
-            url: '/auth/login',
+            url: '/auth/token/',
             method: 'POST',
             body: credentials,
           },
@@ -269,11 +280,39 @@ export const authApi = createApi({
           {}
         );
 
-        if (result.data) {
-          return { data: normalizeSession(result.data as RawAuthResponse) };
+        if (tokenResult.data) {
+          const tokenPayload = tokenResult.data as RawTokenResponse;
+          if (!tokenPayload.access) {
+            return {
+              error: {
+                message: 'Login response is missing an access token.',
+              },
+            };
+          }
+
+          const userResult = await rawBaseQuery(
+            {
+              url: '/users/',
+              headers: {
+                Authorization: `Bearer ${tokenPayload.access}`,
+              },
+            },
+            api,
+            {}
+          );
+
+          if (userResult.data) {
+            return {
+              data: normalizeSession({
+                ...(userResult.data as RawAuthResponse),
+                access: tokenPayload.access,
+                refresh: tokenPayload.refresh,
+              }),
+            };
+          }
         }
 
-        if (SHOULD_FALLBACK_TO_MOCK) {
+        if (SHOULD_FALLBACK_TO_MOCK && isDemoLogin(credentials)) {
           try {
             const data = await mockLogin(credentials);
             return { data };
@@ -286,7 +325,7 @@ export const authApi = createApi({
           }
         }
 
-        const error = result.error as FetchBaseQueryError;
+        const error = (tokenResult.error ?? {}) as FetchBaseQueryError;
         const data = 'data' in error ? error.data : undefined;
         return {
           error: {
@@ -301,16 +340,16 @@ export const authApi = createApi({
       },
     }),
     signup: builder.mutation<SignupResponse, SignupRequest>({
-      async queryFn({ passwordConfirm, firstName, lastName, ...payload }, api) {
+      async queryFn({ passwordConfirm, firstName: _firstName, lastName: _lastName, ...payload }, api) {
+        void _firstName;
+        void _lastName;
         const result = await rawBaseQuery(
           {
-            url: '/auth/register',
+            url: '/auth/register/',
             method: 'POST',
             body: {
               ...payload,
-              first_name: firstName,
-              last_name: lastName,
-              password_confirm: passwordConfirm,
+              passwordConfirm,
             },
           },
           api,
@@ -319,24 +358,6 @@ export const authApi = createApi({
 
         if (result.data) {
           return { data: normalizeSession(result.data as RawAuthResponse) };
-        }
-
-        if (SHOULD_FALLBACK_TO_MOCK) {
-          try {
-            const data = await mockSignup({
-              ...payload,
-              firstName,
-              lastName,
-              passwordConfirm,
-            });
-            return { data };
-          } catch (error) {
-            return {
-              error: {
-                message: error instanceof Error ? error.message : 'Signup failed.',
-              },
-            };
-          }
         }
 
         const error = result.error as FetchBaseQueryError;
@@ -348,25 +369,20 @@ export const authApi = createApi({
           },
         };
       },
-      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        const { data } = await queryFulfilled;
-        dispatch(setCredentials(data));
-      },
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
-        const result = await baseQuery(
+        const isOnboardingUpdate = Boolean(payload.favoriteGenres);
+        const result = await rawBaseQuery(
           {
-            url: '/users/me',
-            method: 'PUT',
+            url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/update/',
+            method: 'PATCH',
             body: {
               username: payload.username,
-              first_name: payload.firstName,
-              last_name: payload.lastName,
+              email: payload.email,
+              avatar_url: payload.avatarUrl,
               bio: payload.bio,
               favorite_genres: payload.favoriteGenres,
-              favorite_titles: payload.favoriteTitles,
-              onboarding_answers: payload.onboardingAnswers,
             },
           },
           api,
@@ -380,8 +396,8 @@ export const authApi = createApi({
         if (SHOULD_FALLBACK_TO_MOCK) {
           try {
             const currentUser = (api.getState() as RootState).auth.user;
-            if (!currentUser) {
-              throw new Error('사용자 세션이 없습니다.');
+            if (!currentUser || currentUser.username !== 'demo') {
+              throw new Error('Profile update failed.');
             }
             const data = await mockUpdateProfile(currentUser.id, payload);
             return { data };
@@ -394,8 +410,13 @@ export const authApi = createApi({
           }
         }
 
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
         return {
-          error: result.error ?? { message: 'Request failed.' },
+          error: {
+            message: toMessage(data) ?? 'Request failed.',
+            fields: toFieldErrors(data),
+          },
         };
       },
     }),

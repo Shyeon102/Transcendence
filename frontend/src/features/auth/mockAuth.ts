@@ -31,7 +31,9 @@ const makeToken = () => Math.random().toString(36).slice(2) + Date.now().toStrin
 export async function mockLogin(req: LoginRequest): Promise<LoginResponse> {
   await delay(DELAY_MS);
   const found = mockUsers.find(
-    (u) => u.email === req.email && u.password === req.password
+    (u) =>
+      (u.username === req.username || u.email === req.username) &&
+      u.password === req.password
   );
   if (!found) {
     throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.');

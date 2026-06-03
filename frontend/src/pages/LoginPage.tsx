@@ -6,10 +6,8 @@ import { beginOAuth42Login } from '../lib/oauth';
 import { useLoginMutation } from '../store/slices/authApi';
 import type { AuthErrorResponse } from '../store';
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -18,12 +16,8 @@ export default function LoginPage() {
   const [login, { isLoading }] = useLoginMutation();
 
   const validateForm = () => {
-    if (!email.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim()) {
       return t('validation.required');
-    }
-
-    if (!EMAIL_REGEX.test(email)) {
-      return t('validation.invalidEmail');
     }
 
     return '';
@@ -39,8 +33,9 @@ export default function LoginPage() {
     }
 
     try {
-      await login({ email, password }).unwrap();
-      navigate('/home');
+      const session = await login({ username, password }).unwrap();
+      const isDemo = session.user.username === 'demo';
+      navigate(isDemo || session.user.onboardingCompleted ? '/home' : '/onboarding');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
       setErrorMsg(apiError.message ?? t('common.error'));
@@ -63,12 +58,12 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="mb-2 block text-[9px] uppercase tracking-[0.18em] text-[#8a8474]">
-            {t('login.email')}
+            {t('home.username')}
           </label>
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[13px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
           />
         </div>
@@ -108,7 +103,11 @@ export default function LoginPage() {
 
         <button
           type="button"
-          onClick={beginOAuth42Login}
+          onClick={() => {
+            if (!beginOAuth42Login()) {
+              setErrorMsg('42 OAuth 백엔드 URL이 아직 설정되지 않았습니다.');
+            }
+          }}
           className="flex w-full items-center justify-center gap-3 border border-[#f0ead0]/25 bg-transparent px-4 py-[13px] text-[11px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#c8c2a8] hover:text-[#f0ead0]"
         >
           <span className="font-['Bebas_Neue'] text-base tracking-[0.05em] text-[#f0ead0]">42</span>

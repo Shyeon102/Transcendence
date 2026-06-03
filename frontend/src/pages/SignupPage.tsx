@@ -32,8 +32,6 @@ export default function SignupPage() {
     if (
       !formData.email.trim() ||
       !formData.username.trim() ||
-      !formData.firstName.trim() ||
-      !formData.lastName.trim() ||
       !formData.password.trim() ||
       !formData.passwordConfirm.trim()
     ) {
@@ -92,7 +90,7 @@ export default function SignupPage() {
 
     try {
       await signup(formData).unwrap();
-      navigate('/onboarding');
+      navigate('/login');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
       setErrorMsg(apiError.message ?? t('common.error'));
@@ -241,7 +239,11 @@ export default function SignupPage() {
 
         <button
           type="button"
-          onClick={beginOAuth42Login}
+          onClick={() => {
+            if (!beginOAuth42Login()) {
+              setErrorMsg('42 OAuth 백엔드 URL이 아직 설정되지 않았습니다.');
+            }
+          }}
           className="flex w-full items-center justify-center gap-3 border border-[#f0ead0]/25 bg-transparent px-4 py-[13px] text-[11px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#c8c2a8] hover:text-[#f0ead0]"
         >
           <span className="font-['Bebas_Neue'] text-base tracking-[0.05em] text-[#f0ead0]">42</span>

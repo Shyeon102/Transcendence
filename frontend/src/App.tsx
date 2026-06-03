@@ -33,9 +33,7 @@ export default function App() {
             />
             <Route
               path="/home"
-              element={
-                <HomePage />
-              }
+              element={<HomePage />}
             />
             <Route
               path="/profile"
@@ -53,12 +51,7 @@ export default function App() {
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/media/:id"
-              element={
-                <MediaDetailPage />
-              }
-            />
+            <Route path="/media/:id" element={<MediaDetailPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

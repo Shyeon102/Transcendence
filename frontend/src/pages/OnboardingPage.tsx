@@ -48,18 +48,20 @@ export default function OnboardingPage() {
 
   const selectedGenreLabels = useMemo(
     () =>
-      selectedGenres.map((index) =>
-        t(`onboarding.genreOptions.${GENRE_IDS[index]}`)
-      ),
+      selectedGenres
+        .map((genrePk) => GENRE_IDS[genrePk - 1])
+        .filter((genreId): genreId is (typeof GENRE_IDS)[number] => Boolean(genreId))
+        .map((genreId) => t(`onboarding.genreOptions.${genreId}`)),
     [selectedGenres, t]
   );
 
   const toggleGenre = (index: number) => {
+    const genrePk = index + 1;
     if (errorMsg) {
       setErrorMsg('');
     }
     setSelectedGenres((prev) =>
-      prev.includes(index) ? prev.filter((value) => value !== index) : [...prev, index]
+      prev.includes(genrePk) ? prev.filter((value) => value !== genrePk) : [...prev, genrePk]
     );
   };
 
@@ -106,7 +108,11 @@ export default function OnboardingPage() {
       navigate('/home');
     } catch (error) {
       const apiError = error as { message?: string };
-      dispatch(updateProfile(payload));
+      if (user?.username === 'demo') {
+        dispatch(updateProfile(payload));
+        navigate('/home');
+        return;
+      }
       setErrorMsg(apiError.message ?? t('onboarding.saveError'));
     }
   };
@@ -152,7 +158,7 @@ export default function OnboardingPage() {
 
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {GENRE_IDS.map((genreId, index) => {
-                  const selected = selectedGenres.includes(index);
+                  const selected = selectedGenres.includes(index + 1);
                   return (
                     <button
                       key={genreId}

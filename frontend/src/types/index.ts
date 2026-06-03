@@ -15,6 +15,7 @@ export interface AuthUser {
   favoriteGenres?: number[];
   favoriteTitles?: string[];
   onboardingAnswers?: OnboardingAnswers;
+  onboardingCompleted?: boolean;
   favoriteCountries?: string[];
   isStaff?: boolean;
 }
@@ -24,7 +25,7 @@ export interface StoredUser extends AuthUser {
 }
 
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -37,8 +38,8 @@ export interface LoginResponse {
 export interface SignupRequest {
   email: string;
   username: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   password: string;
   passwordConfirm: string;
   favoriteGenres?: number[];

@@ -1,15 +1,13 @@
-import { Outlet } from 'react-router-dom'
-//import SiteHeader from './SiteHeader'
+import { Outlet } from 'react-router-dom';
+import Header from './Header';
 
-const Layout = () => {
+export default function Layout() {
   return (
-    <div>
-      {/* <SiteHeader /> */} {/* home/main 테스트 잠시 주석처리 */}
+    <div className="min-h-screen">
+      <Header />
       <main>
         <Outlet />
       </main>
     </div>
-  )
+  );
 }
-
-export default Layout

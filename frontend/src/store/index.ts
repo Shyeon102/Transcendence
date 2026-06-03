@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { apiSlice } from './api/apiSlice';
 import authReducer from './slices/authSlice';
 import uiReducer from './slices/uiSlice';
 import chatReducer from './slices/chatSlice';
@@ -20,10 +21,11 @@ export const store = configureStore({
     auth: authReducer,
     ui: uiReducer,
     chat: chatReducer,
+    [apiSlice.reducerPath]: apiSlice.reducer,
     [authApi.reducerPath]: authApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(authApi.middleware),
+    getDefaultMiddleware().concat(apiSlice.middleware, authApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

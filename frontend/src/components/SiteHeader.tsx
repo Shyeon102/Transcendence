@@ -34,12 +34,16 @@ export default function SiteHeader() {
           <Link to="/" className={navLinkClass('/')}>
             {t('common.info')}
           </Link>
-          <Link to="/login" className={navLinkClass('/login')}>
-            {t('common.login')}
-          </Link>
-          <Link to="/signup" className={navLinkClass('/signup')}>
-            {t('common.signup')}
-          </Link>
+          {!hasSession ? (
+            <Link to="/login" className={navLinkClass('/login')}>
+              {t('common.login')}
+            </Link>
+          ) : null}
+          {!hasSession ? (
+            <Link to="/signup" className={navLinkClass('/signup')}>
+              {t('common.signup')}
+            </Link>
+          ) : null}
           {hasSession ? (
             <Link to="/home" className={navLinkClass('/home')}>
               {t('common.profile')}

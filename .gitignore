@@ -87,4 +87,3 @@ docker-compose.override.yml
 Thumbs.db
 
 .claude/
-.codex/
