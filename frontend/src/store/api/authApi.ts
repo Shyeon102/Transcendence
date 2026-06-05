@@ -483,6 +483,8 @@ export const authApi = createApi({
             body: {
               username: payload.username,
               email: payload.email,
+              first_name: payload.firstName,
+              last_name: payload.lastName,
               avatar_url: payload.avatarUrl,
               bio: payload.bio,
               favorite_genres: payload.favoriteGenres,
