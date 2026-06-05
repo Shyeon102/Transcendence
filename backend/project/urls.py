@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.urls import path, include
+from apps.chat.admin import chat_admin_site
 
 
 def home(request):
@@ -13,4 +14,5 @@ urlpatterns = [
     path("api/chat/", include("apps.chat.urls")),
     path("api/community/", include("apps.community.urls")),
     path("api/media/", include("apps.media.urls")),
+    path("chat_admin/", chat_admin_site.urls),
 ]

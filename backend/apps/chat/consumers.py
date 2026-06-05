@@ -28,19 +28,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_id = self.scope["url_route"]["kwargs"]["room_id"]
         self.room_group_name = f"chat_{self.room_id}"
 
-        # Authenticate user from JWT
+        # Authenticate user from JWT, our authentication system
         self.user = self.scope["user"]
 
         if not self.user.is_authenticated:
             await self.close(code=4001)
             return
 
-        # Check room permission
         has_access = await self.is_room_member()
 
         if not has_access:
-            await self.close(code=4003)
-            return
+            member = await self.add_room_member()
+            if not member:
+                await self.close(code=4003)
+                return
 
         ok = await self.get_socket_lock()
 
@@ -54,7 +55,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close(code=4009)
             return
 
-        # Join Redis group
+        # Join Redis group, redis handle the cache
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -81,7 +82,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.unregister_connection()
         await self.release_socket_lock()
 
-        # Only send leave notification if the user was connected to room
         if hasattr(self, "room_group_name") and await self.is_connected():
 
             await self.channel_layer.group_discard(
@@ -115,10 +115,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if not message:
             return
 
-        # Save to DB
+        # Save to DB, needed to handle later with django admin !!
         saved_message = await self.save_message(message)
 
-        # Broadcast to room
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -170,6 +169,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
             room=room,
             user=self.user
         ).exists()
+
+    @database_sync_to_async
+    def add_room_member(self):
+
+        room = ChatRoom.objects.get(id=self.room_id)
+        current_members = ChatRoomMember.objects.filter(room=room).count()
+
+        if current_members >= room.max_members:
+            return None
+
+        member, created = ChatRoomMember.objects.get_or_create(
+            room=room,
+            user=self.user
+        )
+
+        return member
 
     @database_sync_to_async
     def save_message(self, content):

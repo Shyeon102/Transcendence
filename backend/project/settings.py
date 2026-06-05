@@ -90,6 +90,7 @@ TEMPLATES = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     'apps.core.middleware.CommonErrorResponseMiddleware',
     "django.middleware.common.CommonMiddleware",

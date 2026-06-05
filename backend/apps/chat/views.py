@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import BasePermission
 
 from .models import ChatRoom, ChatMessage, ChatRoomMember
 from .serializers import (
@@ -16,9 +16,15 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
+class IsRoomMember(BasePermission):
+    def has_object_permission(self, request, obj):
+        return ChatRoomMember.objects.filter(room=obj,
+                                             user=request.user).exists()
+
+
 class ChatRoomViewSet(viewsets.ModelViewSet):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsRoomMember]
     queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
 

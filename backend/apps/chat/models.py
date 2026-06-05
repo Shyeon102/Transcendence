@@ -27,7 +27,7 @@ class ChatRoomMember(models.Model):
         ("moderator", "Moderator"),
         ("member", "Member"),
     )
-    
+
     room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE,
                              related_name='members')
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -35,7 +35,7 @@ class ChatRoomMember(models.Model):
                              related_name='chat_memberships')
     joined_at = models.DateTimeField(auto_now_add=True)
 
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, 
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES,
                             default="member")
 
     class Meta:

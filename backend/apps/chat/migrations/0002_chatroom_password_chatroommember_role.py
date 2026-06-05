@@ -18,6 +18,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='chatroommember',
             name='role',
-            field=models.CharField(choices=[('owner', 'Owner'), ('moderator', 'Moderator'), ('member', 'Member')], default='member', max_length=10),
+            field=models.CharField(choices=[('owner', 'Owner'),
+                                            ('moderator', 'Moderator'),
+                                            ('member', 'Member')],
+                                   default='member', max_length=10),
         ),
     ]
