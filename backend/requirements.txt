@@ -9,5 +9,7 @@ channels-redis
 
 psycopg2-binary
 django-redis
+requests
+pandas
 
 celery 
