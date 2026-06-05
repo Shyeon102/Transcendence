@@ -12,8 +12,13 @@ import type {
   AuthErrorResponse,
   AuthSession,
   AuthUser,
+  DashboardReview,
   LoginRequest,
   LoginResponse,
+  MediaReview,
+  MediaReviewRequest,
+  MyPageDashboardData,
+  PasswordChangeRequest,
   OnboardingAnswers,
   RefreshTokenResponse,
   SignupRequest,
@@ -70,7 +75,39 @@ type RawTokenResponse = {
   refresh?: string;
 };
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '/api').replace(/\/+$/, '');
+type RawDashboardReview = {
+  id: number;
+  title: string;
+  note: string;
+  when: string;
+  rating: number;
+};
+
+type RawDashboard = {
+  reviews?: RawDashboardReview[];
+  watchlist?: string[];
+  activities?: string[];
+};
+
+type RawReview = {
+  id: number;
+  user_id?: number;
+  username?: string;
+  media_id?: number;
+  media_title?: string;
+  rating: number;
+  content: string;
+  visibility?: 'public' | 'followers' | 'private';
+  created_at?: string;
+  updated_at?: string;
+};
+
+type RawReviewPayload = RawReview | {
+  review?: RawReview;
+  reviews?: RawReview[];
+};
+
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api').replace(/\/+$/, '');
 const SHOULD_FALLBACK_TO_MOCK = import.meta.env.VITE_USE_MOCK_AUTH !== 'false';
 const isDemoLogin = (credentials: LoginRequest) =>
   credentials.username === 'demo' || credentials.username === 'demo@demo.demo';
@@ -193,6 +230,50 @@ const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse 
     token,
     refreshToken,
   };
+};
+
+const normalizeDashboardReview = (review: RawDashboardReview): DashboardReview => ({
+  id: review.id,
+  title: review.title,
+  note: review.note,
+  when: review.when,
+  rating: review.rating,
+});
+
+const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
+  reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
+  watchlist: payload.watchlist ?? [],
+  activities: payload.activities ?? [],
+});
+
+const normalizeReview = (review: RawReview): MediaReview => ({
+  id: review.id,
+  userId: review.user_id ?? 0,
+  username: review.username ?? '',
+  mediaId: review.media_id ?? 0,
+  mediaTitle: review.media_title ?? '',
+  rating: review.rating,
+  content: review.content,
+  visibility: review.visibility ?? 'public',
+  createdAt: review.created_at ?? '',
+  updatedAt: review.updated_at ?? '',
+});
+
+const normalizeReviewPayload = (payload: RawReviewPayload): MediaReview => {
+  if ('id' in payload) {
+    return normalizeReview(payload);
+  }
+  if (payload.review) {
+    return normalizeReview(payload.review);
+  }
+  throw new Error('Review response is missing required fields.');
+};
+
+const normalizeReviewList = (payload: RawReviewPayload): MediaReview[] => {
+  if ('reviews' in payload && Array.isArray(payload.reviews)) {
+    return payload.reviews.map(normalizeReview);
+  }
+  return [];
 };
 
 const getRequestUrl = (args: string | FetchArgs) => (typeof args === 'string' ? args : args.url);
@@ -340,15 +421,15 @@ export const authApi = createApi({
       },
     }),
     signup: builder.mutation<SignupResponse, SignupRequest>({
-      async queryFn({ passwordConfirm, firstName: _firstName, lastName: _lastName, ...payload }, api) {
-        void _firstName;
-        void _lastName;
+      async queryFn({ passwordConfirm, firstName, lastName, ...payload }, api) {
         const result = await rawBaseQuery(
           {
             url: '/auth/register/',
             method: 'POST',
             body: {
               ...payload,
+              first_name: firstName,
+              last_name: lastName,
               passwordConfirm,
             },
           },
@@ -365,6 +446,28 @@ export const authApi = createApi({
         return {
           error: {
             message: toMessage(data) ?? 'Request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        dispatch(setCredentials(data));
+      },
+    }),
+    getMe: builder.query<AuthUser, void>({
+      async queryFn(_arg, api) {
+        const result = await rawBaseQuery('/users/', api, {});
+
+        if (result.data) {
+          return { data: normalizeUserPayload(result.data as RawUserPayload) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Failed to load user.',
             fields: toFieldErrors(data),
           },
         };
@@ -420,7 +523,149 @@ export const authApi = createApi({
         };
       },
     }),
+    updateAvatar: builder.mutation<AuthUser, string>({
+      async queryFn(avatarUrl, api) {
+        const result = await rawBaseQuery(
+          {
+            url: '/users/me/avatar/',
+            method: 'PUT',
+            body: { avatar_url: avatarUrl },
+          },
+          api,
+          {}
+        );
+
+        if (result.data) {
+          return { data: normalizeUserPayload(result.data as RawUserPayload) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Avatar update failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+    }),
+    changePassword: builder.mutation<{ success: boolean }, PasswordChangeRequest>({
+      query: ({ currentPassword, newPassword }) => ({
+        url: '/users/me/password/',
+        method: 'POST',
+        body: {
+          current_password: currentPassword,
+          new_password: newPassword,
+        },
+      }),
+    }),
+    getMyPageDashboard: builder.query<MyPageDashboardData, void>({
+      async queryFn(_arg, api) {
+        const result = await rawBaseQuery('/users/me/dashboard/', api, {});
+
+        if (result.data) {
+          return { data: normalizeDashboard(result.data as RawDashboard) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Dashboard request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+    }),
+    getMediaReviews: builder.query<MediaReview[], number>({
+      async queryFn(mediaId, api) {
+        const result = await rawBaseQuery(`/media/${mediaId}/reviews/`, api, {});
+
+        if (result.data) {
+          return { data: normalizeReviewList(result.data as RawReviewPayload) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Review request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+    }),
+    createMediaReview: builder.mutation<MediaReview, { mediaId: number; review: MediaReviewRequest }>({
+      async queryFn({ mediaId, review }, api) {
+        const result = await rawBaseQuery(
+          {
+            url: `/media/${mediaId}/reviews/`,
+            method: 'POST',
+            body: review,
+          },
+          api,
+          {}
+        );
+
+        if (result.data) {
+          return { data: normalizeReviewPayload(result.data as RawReviewPayload) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Review save failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+    }),
+    updateMediaReview: builder.mutation<MediaReview, { mediaId: number; reviewId: number; review: MediaReviewRequest }>({
+      async queryFn({ mediaId, reviewId, review }, api) {
+        const result = await rawBaseQuery(
+          {
+            url: `/media/${mediaId}/reviews/${reviewId}/`,
+            method: 'PUT',
+            body: review,
+          },
+          api,
+          {}
+        );
+
+        if (result.data) {
+          return { data: normalizeReviewPayload(result.data as RawReviewPayload) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Review update failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+    }),
+    deleteMediaReview: builder.mutation<void, { mediaId: number; reviewId: number }>({
+      query: ({ mediaId, reviewId }) => ({
+        url: `/media/${mediaId}/reviews/${reviewId}/`,
+        method: 'DELETE',
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation, useSignupMutation, useUpdateMeMutation } = authApi;
+export const {
+  useChangePasswordMutation,
+  useCreateMediaReviewMutation,
+  useDeleteMediaReviewMutation,
+  useGetMeQuery,
+  useGetMediaReviewsQuery,
+  useGetMyPageDashboardQuery,
+  useLoginMutation,
+  useSignupMutation,
+  useUpdateAvatarMutation,
+  useUpdateMeMutation,
+  useUpdateMediaReviewMutation,
+} = authApi;

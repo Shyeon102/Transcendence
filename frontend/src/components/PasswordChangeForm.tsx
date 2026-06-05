@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useI18n } from '../lib/i18n';
+import { useChangePasswordMutation } from '../store/slices/authApi';
 import FieldLabel from './ui/FieldLabel';
 import StatusMessage from './ui/StatusMessage';
 import TextField from './ui/TextField';
@@ -25,7 +26,7 @@ export default function PasswordChangeForm({
   });
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [changePassword, { isLoading: isSubmitting }] = useChangePasswordMutation();
 
   const handleChange = (field: keyof typeof form, value: string) => {
     if (errorMsg) {
@@ -69,15 +70,21 @@ export default function PasswordChangeForm({
       return;
     }
 
-    setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    setSuccessMsg(t('home.passwordChangeSuccess'));
-    setForm({
-      currentPassword: '',
-      newPassword: '',
-      confirmNewPassword: '',
-    });
-    setIsSubmitting(false);
+    try {
+      await changePassword({
+        currentPassword: form.currentPassword,
+        newPassword: form.newPassword,
+      }).unwrap();
+      setSuccessMsg(t('home.passwordChangeSuccess'));
+      setForm({
+        currentPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
+      });
+    } catch (error) {
+      const apiError = error as { message?: string };
+      setErrorMsg(apiError.message ?? t('common.error'));
+    }
   };
 
   return (

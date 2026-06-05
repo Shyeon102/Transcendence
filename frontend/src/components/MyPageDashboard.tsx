@@ -25,23 +25,29 @@ const activityItems = [
 ];
 
 type MyPageDashboardProps = {
+  activities?: string[];
   emptyLabel: string;
   isDemo: boolean;
   recentActivityLabel: string;
+  reviews?: typeof reviewItems;
   reviewSectionLabel: string;
+  watchlist?: string[];
   watchlistLabel: string;
 };
 
 export default function MyPageDashboard({
+  activities: actualActivities,
   emptyLabel,
   isDemo,
   recentActivityLabel,
+  reviews: actualReviews,
   reviewSectionLabel,
+  watchlist: actualWatchlist,
   watchlistLabel,
 }: MyPageDashboardProps) {
-  const reviews = isDemo ? reviewItems : [];
-  const watchlist = isDemo ? watchlistItems : [];
-  const activities = isDemo ? activityItems : [];
+  const reviews = actualReviews?.length ? actualReviews : isDemo ? reviewItems : [];
+  const watchlist = actualWatchlist?.length ? actualWatchlist : isDemo ? watchlistItems : [];
+  const activities = actualActivities?.length ? actualActivities : isDemo ? activityItems : [];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
