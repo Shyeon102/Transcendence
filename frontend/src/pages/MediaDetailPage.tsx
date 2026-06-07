@@ -1,8 +1,9 @@
 import { useState } from "react";
 //import { useParams } from "react-router-dom";
-import Header from "../components/Header";
+import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
 import type { Media, Genre } from "../types/media";
+import type { RootState } from "../store";
 
 // 임시 목업 데이터: 현재 백엔드가 없으므로 목업 데이터 임시 선언
 // TODO) 추후 백엔드 연동후 useParams()로 받은 id로 API 호출, 그 영화 데이터를 받아오기
@@ -72,6 +73,8 @@ const mockMedia: Media = {
 };
 
 const MediaDetailPage = () => {
+  const user = useSelector((state: RootState) => state.auth.user);
+  const isDemo = user?.username === "demo";
   //const navigate = useNavigate(); // 미디어 탭 이동
   //const { id } = useParams(); // React Router에서  URL 파라미터 읽는 훅. URL: /media/:id
   //useParams(); // // TODO: 백엔드 연동 후 useParams()로 id 받아서 API 호출
@@ -86,11 +89,21 @@ const MediaDetailPage = () => {
   });
   const [myRating, setMyRating] = useState(0); // star rating
 
+  if (!isDemo) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#0c0c0b] text-white">
+        <div className="flex flex-1 items-center justify-center px-6 text-center">
+          <p className="text-[1vw] italic tracking-[0.08em] text-white/50">
+            No media detail data yet.
+          </p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white flex flex-col">
-      {/* 헤더 */}
-      <Header />
-
       {/* 레이아웃: 가로로 3등분 */}
       <div className="flex mt-[7vh]">
         {/* 미디어 변환 탭: 제일 왼쪽 */}

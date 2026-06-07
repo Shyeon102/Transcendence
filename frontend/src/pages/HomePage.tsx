@@ -2,8 +2,9 @@ import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
+import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
+import type { RootState } from "../store";
 
 // 목업 데이터
 
@@ -137,6 +138,9 @@ const mockMediaList: Media[] = [
 // 컴포넌트
 
 const HomePage = () => {
+  const user = useSelector((state: RootState) => state.auth.user);
+  const isDemo = user?.username === "demo";
+  const mediaList = isDemo ? mockMediaList : [];
   // 필터 버튼 공통 스타일 (반복 방지용)
   const filterBtnClass =
     "border rounded-full px-[1.1vw] py-[0.4vw] text-[0.7vw] hover:bg-white/10 transition w-[4.7vw] h-[3vh] whitespace-nowrap flex items-center justify-center font-light";
@@ -170,16 +174,13 @@ const HomePage = () => {
 
   // 오른쪽 화살표: 마지막 카드일 때는 이동 안 함
   const handleNext = () => {
-    if (currentIndex < mockMediaList.length - 1)
+    if (currentIndex < mediaList.length - 1)
       setCurrentIndex((prev) => prev + 15);
   };
 
   return (
     // 전체 페이지: 세로 쌓기 (헤더 -> 검색바 -> 필터 -> 카드 -> 화살표 -> 푸터)
     <div className="flex flex-col min-h-screen bg-[#0c0c0b] text-white overflow-x-hidden">
-      {/* 헤더 */}
-      <Header />
-
       {/* 검색바 */}
       <div className="flex justify-center pt-[5vh] pb-[5vh]">
         <div className="flex items-center gap-2 bg-transparent border border-white/30 rounded-full px-[2vw] w-[43vw] h-[4.3vh]">
@@ -244,15 +245,21 @@ const HomePage = () => {
             transition: "transform 0.3s ease",
           }}
         >
-          {mockMediaList.map((media) => (
-            <MediaCard
-              key={media.id}
-              media={media}
-              onSelect={handleSelect}
-              isSelected={selectedMedia?.id === media.id}
-              onDetailClick={(id) => navigate(`/media/${id}`)}
-            />
-          ))}
+          {mediaList.length ? (
+            mediaList.map((media) => (
+              <MediaCard
+                key={media.id}
+                media={media}
+                onSelect={handleSelect}
+                isSelected={selectedMedia?.id === media.id}
+                onDetailClick={(id) => navigate(`/media/${id}`)}
+              />
+            ))
+          ) : (
+            <div className="flex min-h-[42vh] w-full items-center justify-center text-[1vw] italic tracking-[0.08em] text-white/50">
+              No media data yet.
+            </div>
+          )}
         </div>
       </div>
 
@@ -270,7 +277,7 @@ const HomePage = () => {
         {/* 오른쪽 화살표: 마지막이면 흐리게 */}
         <button
           onClick={handleNext}
-          disabled={currentIndex === mockMediaList.length - 1}
+          disabled={!mediaList.length || currentIndex >= mediaList.length - 1}
           className="text-white text-[1.7vw] px-[0.5vw] disabled:opacity-30 transition"
         >
           »

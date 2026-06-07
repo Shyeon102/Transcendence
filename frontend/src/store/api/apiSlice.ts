@@ -49,7 +49,7 @@ const baseQuery = fetchBaseQuery({
       if (refreshResult.data) {
         // 새 토큰 받으면 스토어에 저장
         const { access, refresh } = refreshResult.data as RefreshResponse;
-        api.dispatch(updateTokens({ access, refresh }))
+        api.dispatch(updateTokens({ token: access, refreshToken: refresh }))
         // 원래 요청 재시도
         result = await baseQuery(args, api, extraOptions)
       } else {

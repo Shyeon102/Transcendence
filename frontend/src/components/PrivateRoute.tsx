@@ -1,18 +1,16 @@
-import { Navigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import type { RootState } from '../store/index'
-import type { ReactNode } from 'react'
+import type { ReactNode } from 'react';
+import { Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../store';
 
-const PrivateRoute = ({ children }: { children: ReactNode }) => {
-  const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
-  )
+export default function PrivateRoute({ children }: { children: ReactNode }) {
+  const { isAuthenticated, user, accessToken } = useSelector(
+    (state: RootState) => state.auth
+  );
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+  if (!isAuthenticated || !user || !accessToken) {
+    return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
-
-export default PrivateRoute
