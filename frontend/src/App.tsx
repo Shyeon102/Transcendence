@@ -1,15 +1,19 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Layout from './components/Layout'
-import PrivateRoute from './components/PrivateRoute'
-import ErrorBoundary from './components/ErrorBoundary'
-import InfoPage from './pages/InfoPage'
-import LoginPage from './pages/LoginPage'
-import HomePage from './pages/HomePage'
-import SignupPage from './pages/SignupPage'
-import ProfilePage from './pages/ProfilePage'
-import MediaDetailPage from './pages/MediaDetailPage'
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
+import Layout from './components/Layout';
+import PrivateRoute from './components/PrivateRoute';
+import { OAUTH_42_CALLBACK_PATH } from './lib/oauth';
+import HomePage from './pages/HomePage';
+import InfoPage from './pages/InfoPage';
+import LoginPage from './pages/LoginPage';
+import MediaDetailPage from './pages/MediaDetailPage';
+import MyPagePage from './pages/MyPagePage';
+import OnboardingPage from './pages/OnboardingPage';
+import OAuthCallbackPage from './pages/OAuthCallbackPage';
+import ProfilePage from './pages/ProfilePage';
+import SignupPage from './pages/SignupPage';
 
-const App = () => {
+export default function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
@@ -18,11 +22,18 @@ const App = () => {
             <Route path="/" element={<InfoPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path={OAUTH_42_CALLBACK_PATH} element={<OAuthCallbackPage />} />
+            <Route
+              path="/onboarding"
+              element={
+                <PrivateRoute>
+                  <OnboardingPage />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="/home"
-              element={
-                  <HomePage /> // 개발 확인용:private 임시제거
-              }
+              element={<HomePage />}
             />
             <Route
               path="/profile"
@@ -33,18 +44,17 @@ const App = () => {
               }
             />
             <Route
-              path="/media/:id" // media가 여러개이니까 id(아무숫자) 다 받을 수 있게 설정
+              path="/mypage"
               element={
-                //<PrivateRoute>
-                  <MediaDetailPage />
-                //</PrivateRoute>
+                <PrivateRoute>
+                  <MyPagePage />
+                </PrivateRoute>
               }
             />
+            <Route path="/media/:id" element={<MediaDetailPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>
   );
-};
-
-export default App;
+}

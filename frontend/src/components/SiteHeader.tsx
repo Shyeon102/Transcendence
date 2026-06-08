@@ -10,7 +10,8 @@ export default function SiteHeader() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t } = useI18n();
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const { isAuthenticated, user, accessToken } = useSelector((state: RootState) => state.auth);
+  const hasSession = isAuthenticated && Boolean(user) && Boolean(accessToken);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -25,7 +26,7 @@ export default function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-[#f0ead0]/10 bg-[#0c0c0b]/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-4 px-6 py-4 text-[#f0ead0]">
-        <Link to={isAuthenticated ? '/home' : '/'} className="mr-auto font-['Bebas_Neue'] text-2xl uppercase tracking-[0.18em]">
+        <Link to={hasSession ? '/home' : '/'} className="mr-auto font-['Bebas_Neue'] text-2xl uppercase tracking-[0.18em]">
           Transcendence
         </Link>
 
@@ -33,22 +34,31 @@ export default function SiteHeader() {
           <Link to="/" className={navLinkClass('/')}>
             {t('common.info')}
           </Link>
-          <Link to="/login" className={navLinkClass('/login')}>
-            {t('common.login')}
-          </Link>
-          <Link to="/signup" className={navLinkClass('/signup')}>
-            {t('common.signup')}
-          </Link>
-          {isAuthenticated ? (
+          {!hasSession ? (
+            <Link to="/login" className={navLinkClass('/login')}>
+              {t('common.login')}
+            </Link>
+          ) : null}
+          {!hasSession ? (
+            <Link to="/signup" className={navLinkClass('/signup')}>
+              {t('common.signup')}
+            </Link>
+          ) : null}
+          {hasSession ? (
             <Link to="/home" className={navLinkClass('/home')}>
               {t('common.profile')}
+            </Link>
+          ) : null}
+          {hasSession ? (
+            <Link to="/mypage" className={navLinkClass('/mypage')}>
+              {t('common.mypage')}
             </Link>
           ) : null}
         </nav>
 
         <div className="ml-auto flex items-center gap-3 sm:ml-0">
           <LanguageSwitcher />
-          {isAuthenticated ? (
+          {hasSession ? (
             <button
               type="button"
               onClick={handleLogout}
