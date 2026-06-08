@@ -204,6 +204,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         key = f"chat:{self.room_id}:users"
 
+        if not hasattr(self, "user") or not getattr(self.user, "id", None):
+            return
+
         redis.sadd(key, self.user.id)
 
     @database_sync_to_async
@@ -212,6 +215,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         redis = get_redis_connection("default")
 
         key = f"chat:{self.room_id}:users"
+
+        if not hasattr(self, "user") or not getattr(self.user, "id", None):
+            return
 
         redis.srem(key, self.user.id)
 
@@ -222,6 +228,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         key = f"chat:{self.room_id}:users"
 
+        if not hasattr(self, "user") or not getattr(self.user, "id", None):
+            return False
+
         return redis.sismember(key, self.user.id)
 
     @database_sync_to_async
@@ -231,6 +240,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         key = f"chat:{self.room_id}:online"
 
+        if not hasattr(self, "user") or not getattr(self.user, "id", None):
+            return
+
         redis.sadd(key, self.user.id)
 
     @database_sync_to_async
@@ -239,6 +251,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         redis = get_redis_connection("default")
 
         key = f"chat:{self.room_id}:online"
+
+        if not hasattr(self, "user") or not getattr(self.user, "id", None):
+            return
 
         redis.srem(key, self.user.id)
 

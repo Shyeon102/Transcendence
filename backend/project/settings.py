@@ -31,10 +31,33 @@ INSTALLED_APPS = [
     "corsheaders",
 ]
 
+# Normalize REDIS_URL environment variable. Accept formats like:
+# - redis (host)
+# - host:port/db
+# - redis://host:port/db
+# and produce a proper redis URL for other settings below.
+# need to check further if really needed, but it was useful
+# for development and testing with docker compose,
+# where we can just set REDIS_URL to "redis" and it will work
+# without needing to specify the full URL with port and db index
+_redis_env = os.getenv('REDIS_URL', 'redis')
+if _redis_env.startswith('redis://'):
+    _redis_url = _redis_env
+elif ':' in _redis_env or '/' in _redis_env:
+    _redis_url = f"redis://{_redis_env}"
+else:
+    _redis_url = f"redis://{_redis_env}:6379/0"
+
+# Ensure a DB index for the cache (use DB 1 by default)
+if '/' in _redis_url.split('://', 1)[1]:
+    _cache_location = _redis_url
+else:
+    _cache_location = _redis_url.rstrip('/') + '/1'
+
 CACHES = {
     "default": {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f"redis://{os.getenv('REDIS_URL', 'redis')}:6379/1",
+        'LOCATION': _cache_location,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
@@ -138,7 +161,9 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            'hosts': [(os.getenv('REDIS_URL', 'redis'), 6379)]
+            # channels_redis accepts full redis URL strings in the hosts list.
+            # Reuse normalized URL from above.
+            'hosts': [_redis_url],
         },
     },
 }
