@@ -8,6 +8,8 @@ import HomePage from './pages/HomePage'
 import SignupPage from './pages/SignupPage'
 import ProfilePage from './pages/ProfilePage'
 import MediaDetailPage from './pages/MediaDetailPage'
+import ChatRoomListPage from './pages/ChatRoomListPage'
+import ChatRoomPage from './pages/ChatRoomPage'
 
 const App = () => {
   return (
@@ -41,6 +43,8 @@ const App = () => {
               }
             />
           </Route>
+          <Route path="/chat/rooms" element={<ChatRoomListPage />} />
+          <Route path="/chat/rooms/:id" element={<ChatRoomPage />} />
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>
