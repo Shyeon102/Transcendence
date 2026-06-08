@@ -3,7 +3,7 @@
   import { useI18n } from '../lib/i18n';
   import { setCredentials } from '../store/slices/authSlice';
   import { useDispatch } from 'react-redux';
-  import { useLoginMutation } from '../store/api/apiSlice';
+  import { useLoginMutation } from '../store/slices/apiSlice';
   import type { AppDispatch } from '../store';
 
   // const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

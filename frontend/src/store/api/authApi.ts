@@ -1,25 +1,25 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type {
   LoginRequest,
   LoginResponse,
   SignupRequest,
   SignupResponse,
-} from '../index';
-import { setCredentials } from './authSlice';
+} from "../index";
+import { setCredentials } from "../slices/authSlice";
 
 const buildMockSession = (email: string, username?: string) => ({
   user: {
     id: Date.now(),
     email: email.trim(),
-    username: username?.trim() || email.split('@')[0] || 'user',
+    username: username?.trim() || email.split("@")[0] || "user",
   },
-  token: 'mock-token',
+  token: "mock-token",
 });
 
 export const authApi = createApi({
-  reducerPath: 'authApi',
+  reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
+    baseUrl: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api",
   }),
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
@@ -30,7 +30,7 @@ export const authApi = createApi({
         } catch (error) {
           return {
             error: {
-              message: error instanceof Error ? error.message : 'Login failed.',
+              message: error instanceof Error ? error.message : "Login failed.",
             },
           };
         }
@@ -42,8 +42,8 @@ export const authApi = createApi({
     }),
     signup: builder.mutation<SignupResponse, SignupRequest>({
       query: (payload) => ({
-        url: '/auth/register/',
-        method: 'POST',
+        url: "/auth/register/",
+        method: "POST",
         body: payload,
       }),
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
