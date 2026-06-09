@@ -1,4 +1,5 @@
 import MediaCard from "../components/MediaCard";
+import { useGetMediaListQuery } from "../store/slices/authApi";
 import type { Media, Genre } from "../types/media";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -140,7 +141,30 @@ const mockMediaList: Media[] = [
 const HomePage = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const isDemo = user?.username === "demo";
-  const mediaList = isDemo ? mockMediaList : [];
+  const { data: apiMedia } = useGetMediaListQuery();
+  const apiMediaList = apiMedia?.map((item) => ({
+    id: item.id,
+    title: item.title,
+    director: item.director ?? '',
+    genre: item.genres ?? [],
+    releaseDate: item.release_date ?? '',
+    country: item.country ?? '',
+    language: item.language ?? '',
+    cast: Array.isArray(item.cast)
+      ? item.cast
+      : item.cast
+      ? String(item.cast).split(',').map((name) => name.trim())
+      : [],
+    story: item.description ?? '',
+    ageRating: item.age_rating ?? 'NR',
+    starRating: item.avg_rating ? Math.round(item.avg_rating) : 0,
+    runtime: item.runtime ?? '',
+    type: item.media_type ?? '',
+    frontPosterUrl: item.image_url || '/placeholder.jpg',
+    sidePosterUrl: item.image_url || '/placeholder.jpg',
+    reviews: [],
+  })) ?? [];
+  const mediaList = apiMediaList.length ? apiMediaList : isDemo ? mockMediaList : [];
   // 필터 버튼 공통 스타일 (반복 방지용)
   const filterBtnClass =
     "border rounded-full px-[1.1vw] py-[0.4vw] text-[0.7vw] hover:bg-white/10 transition w-[4.7vw] h-[3vh] whitespace-nowrap flex items-center justify-center font-light";
