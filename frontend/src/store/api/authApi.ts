@@ -107,24 +107,6 @@ type RawReviewPayload = RawReview | {
   reviews?: RawReview[];
 };
 
-type RawMedia = {
-  id: number;
-  title: string;
-  media_type?: string;
-  country?: string;
-  description?: string;
-  director?: string;
-  cast?: string | string[];
-  release_date?: string;
-  image_url?: string;
-  avg_rating?: number;
-  rating_count?: number;
-  genres?: { id: number; name: string }[];
-  language?: string;
-  runtime?: string;
-  age_rating?: string;
-};
-
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api').replace(/\/+$/, '');
 const SHOULD_FALLBACK_TO_MOCK = import.meta.env.VITE_USE_MOCK_AUTH !== 'false';
 const isDemoLogin = (credentials: LoginRequest) =>
@@ -599,24 +581,6 @@ export const authApi = createApi({
         };
       },
     }),
-    getMediaList: builder.query<RawMedia[], void>({
-      async queryFn(_arg, api) {
-        const result = await rawBaseQuery('/media/', api, {});
-
-        if (result.data && typeof result.data === 'object' && Array.isArray((result.data as Record<string, unknown>).media)) {
-          return { data: (result.data as { media: RawMedia[] }).media };
-        }
-
-        const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
-        return {
-          error: {
-            message: toMessage(data) ?? 'Media request failed.',
-            fields: toFieldErrors(data),
-          },
-        };
-      },
-    }),
     getMediaReviews: builder.query<MediaReview[], number>({
       async queryFn(mediaId, api) {
         const result = await rawBaseQuery(`/media/${mediaId}/reviews/`, api, {});
@@ -701,7 +665,6 @@ export const {
   useCreateMediaReviewMutation,
   useDeleteMediaReviewMutation,
   useGetMeQuery,
-  useGetMediaListQuery,
   useGetMediaReviewsQuery,
   useGetMyPageDashboardQuery,
   useLoginMutation,
