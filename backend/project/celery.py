@@ -17,4 +17,3 @@ def debug_task(self):
 @app.task(name="project.ping")
 def ping():
     return "pong"
-
