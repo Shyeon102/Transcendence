@@ -42,6 +42,30 @@ services:
       retries: 5
       start_period: 30s
     command: ["daphne", "-b", "0.0.0.0", "-p", "8000", "project.asgi:application"]
+  worker:
+      build: ./backend
+      restart: unless-stopped
+      volumes:
+        - ./backend:/app
+      env_file: .env
+      depends_on:
+        db:
+          condition: service_healthy
+        redis:
+          condition: service_healthy
+      command: celery -A project worker --loglevel=info
+  beat:
+      build: ./backend
+      restart: unless-stopped
+      volumes:
+        - ./backend:/app
+      env_file: .env
+      depends_on:
+        db:
+          condition: service_healthy
+        redis:
+          condition: service_healthy
+      command: celery -A project beat --loglevel=info --schedule=/tmp/celerybeat-schedule
 
   # worker:
   #   build: ./ai
