@@ -13,3 +13,4 @@ requests
 pandas
 
 celery 
+redis
