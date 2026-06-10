@@ -1,33 +1,42 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import ProfileCard from '../components/ProfileCard';
+import ProfileEditForm from '../components/ProfileEditForm';
+import ReviewForm from '../components/ReviewForm';
+import ReviewList from '../components/ReviewList';
+import type { ReviewItem } from '../components/ReviewCard';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
+import { useUpdateMeMutation } from '../store/slices/authApi';
 import { updateProfile } from '../store/slices/authSlice';
 
-const reviews = [
+const initialReviews: ReviewItem[] = [
   {
+    id: 'poor-things',
     title: 'Poor Things',
     type: 'film',
     date: '2025.03.12',
     poster: '🎬',
     text: 'A deliriously chaotic triumph. Lanthimos at full throttle - grotesque, gorgeous, and genuinely funny.',
-    stars: '★★★★☆',
+    rating: 4,
   },
   {
+    id: 'dune-two',
     title: 'Dune: Part Two',
     type: 'film',
     date: '2025.02.28',
     poster: '📺',
     text: "Villeneuve's scale is unmatched. The Harkonnen arena sequence alone is worth the price of admission.",
-    stars: '★★★★★',
+    rating: 5,
   },
   {
+    id: 'past-lives',
     title: 'Past Lives',
     type: 'film',
     date: '2024.12.05',
     poster: '🎞️',
     text: "Celine Song's debut is devastating in its restraint. The final scene will stay with you for weeks.",
-    stars: '★★★★★',
+    rating: 5,
   },
 ];
 
@@ -82,18 +91,23 @@ export default function ProfilePage() {
   const dispatch = useDispatch();
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
-  const displayUsername = user?.username?.trim() || 'demo';
+  const [updateMe] = useUpdateMeMutation();
+  const isDemo = user?.username === 'demo';
+  const displayUsername = user?.username?.trim() || '';
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || displayUsername || 'User';
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
   const [isEditing, setIsEditing] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
+  const [reviews, setReviews] = useState<ReviewItem[]>(isDemo ? initialReviews : []);
+  const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl ?? '');
   const [profileForm, setProfileForm] = useState({
     username: user?.username ?? '',
     firstName: user?.firstName ?? '',
     lastName: user?.lastName ?? '',
     bio: user?.bio ?? t('home.profileBioDefault'),
   });
+  const displayName = [profileForm.firstName, profileForm.lastName].filter(Boolean).join(' ') || displayUsername;
 
   if (!user) {
     return null;
@@ -105,84 +119,105 @@ export default function ProfilePage() {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('') || displayUsername.slice(0, 2).toUpperCase();
+  const userPosts = isDemo ? posts : [];
+  const userWatchlist = isDemo ? watchlist : [];
 
-  const handleProfileSave = () => {
-    dispatch(
-      updateProfile({
-        username: profileForm.username,
-        firstName: profileForm.firstName,
-        lastName: profileForm.lastName,
-        bio: profileForm.bio,
-      })
-    );
-    setIsEditing(false);
+  const handleProfileSave = async () => {
+    const payload = {
+      username: profileForm.username,
+      firstName: profileForm.firstName,
+      lastName: profileForm.lastName,
+      bio: profileForm.bio,
+      avatarUrl: /^https?:\/\//.test(avatarPreview) ? avatarPreview : undefined,
+    };
+
+    try {
+      const updatedUser = await updateMe(payload).unwrap();
+      dispatch(updateProfile(updatedUser));
+    } catch {
+      if (isDemo) {
+        dispatch(updateProfile(payload));
+      }
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
+  const handleProfileFormChange = (
+    field: keyof typeof profileForm,
+    value: string
+  ) => {
+    setProfileForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const profileStats = [
+    { label: t('home.reviews'), value: String(reviews.length) },
+    { label: t('home.posts'), value: String(userPosts.length) },
+    { label: t('home.watchlist'), value: String(userWatchlist.length) },
+    { label: t('home.followers'), value: isDemo ? '31' : '0' },
+  ];
+
+  const settingsToggles = [
+    {
+      label: t('home.twoFactorAuth'),
+      description: t('home.twoFactorAuthDesc'),
+      value: twoFactorEnabled,
+      onToggle: setTwoFactorEnabled,
+    },
+    {
+      label: t('home.emailNotifications'),
+      description: t('home.emailNotificationsDesc'),
+      value: emailNotificationsEnabled,
+      onToggle: setEmailNotificationsEnabled,
+    },
+  ];
+
+  const handleReviewSubmit = (review: ReviewItem) => {
+    setReviews((prev) => [review, ...prev]);
+  };
+
+  const handleAvatarSelect = (file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setAvatarPreview(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
-        <div className="grid gap-10 border-b border-[#f0ead0]/10 pb-10 lg:grid-cols-[110px_1fr_auto]">
-          <div className="relative h-[110px] w-[110px]">
-            <div className="relative flex h-[110px] w-[110px] items-center justify-center overflow-hidden border-2 border-[#f0ead0]/25 bg-[#1c1c19] font-['Bebas_Neue'] text-[44px] tracking-[0.05em] text-[#c8c2a8]">
-              <div className="absolute inset-0 bg-[repeating-linear-gradient(45deg,transparent,transparent_3px,rgba(240,234,210,0.02)_3px,rgba(240,234,210,0.02)_6px)]" />
-              <span className="relative z-10">{initials}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsEditing((prev) => !prev)}
-              className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center border-2 border-[#0c0c0b] bg-[#d63e2a] text-[11px]"
-            >
-              ✎
-            </button>
-          </div>
-
-          <div>
-            <span className="mb-3 inline-block border border-[#d63e2a]/20 bg-[#d63e2a]/15 px-3 py-1 text-[9px] uppercase tracking-[0.18em] text-[#ff4f38]">
-              {t('home.verifiedMember')}
-            </span>
-            <h1 className="mb-2 font-['Bebas_Neue'] text-[46px] leading-none tracking-[0.03em]">
-              {([profileForm.firstName, profileForm.lastName].filter(Boolean).join(' ') || displayUsername).toUpperCase()}
-            </h1>
-            <p className="mb-3 text-xs tracking-[0.08em] text-[#8a8474]">@{displayUsername} · {t('home.joinedYear')}</p>
-            <p className="max-w-[440px] font-['IBM_Plex_Serif'] text-sm font-light italic leading-7 text-[#c8c2a8]">
-              {profileForm.bio}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-start gap-6 lg:flex-col lg:items-end">
-            <button
-              type="button"
-              onClick={() => setIsEditing((prev) => !prev)}
-              className={`border px-5 py-2 text-[10px] uppercase tracking-[0.12em] transition ${
-                isEditing
-                  ? 'border-[#d63e2a] bg-[#d63e2a] text-[#f0ead0]'
-                  : 'border-[#f0ead0]/25 text-[#c8c2a8] hover:border-[#f0ead0] hover:text-[#f0ead0]'
-              }`}
-            >
-              {isEditing ? `✕ ${t('home.closeEdit')}` : t('home.editProfile')}
-            </button>
-
-            {[
-              [t('home.reviews'), '142'],
-              [t('home.posts'), '27'],
-              [t('home.watchlist'), '88'],
-              [t('home.followers'), '31'],
-            ].map(([label, value]) => (
-              <div key={label} className="min-w-[88px] text-left lg:text-right">
-                <div className="font-['Bebas_Neue'] text-4xl leading-none tracking-[0.05em]">{value}</div>
-                <div className="mt-0.5 text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <ProfileCard
+          avatarAlt={t('home.avatarAlt')}
+          avatarUrl={avatarPreview || undefined}
+          bio={profileForm.bio}
+          closeEditLabel={t('home.closeEdit')}
+          displayName={displayName}
+          displayUsername={displayUsername}
+          editProfileLabel={t('home.editProfile')}
+          initials={initials}
+          isEditing={isEditing}
+          joinedYearLabel={t('home.joinedYear')}
+          onAvatarSelect={handleAvatarSelect}
+          onToggleEdit={() => setIsEditing((prev) => !prev)}
+          stats={profileStats}
+          uploadAvatarLabel={t('home.uploadAvatar')}
+          verifiedLabel={t('home.verifiedMember')}
+        />
 
         <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_320px]">
           <div>
             <div className="mb-7 flex border-b border-[#f0ead0]/10">
               {[
-                ['reviews', t('home.reviews'), '142'],
-                ['posts', t('home.communityPosts'), '27'],
-                ['watchlist', t('home.watchlist'), '88'],
+                ['reviews', t('home.reviews'), String(reviews.length)],
+                ['posts', t('home.communityPosts'), String(userPosts.length)],
+                ['watchlist', t('home.watchlist'), String(userWatchlist.length)],
               ].map(([key, label, count]) => (
                 <button
                   key={key}
@@ -198,216 +233,99 @@ export default function ProfilePage() {
             </div>
 
             {activeTab === 'reviews' ? (
-              <div className="space-y-3">
-                {reviews.map((review) => (
-                  <article
-                    key={review.title}
-                    className="grid gap-4 border border-[#f0ead0]/10 bg-[#141412] px-5 py-4 transition hover:border-[#f0ead0]/25 md:grid-cols-[42px_1fr_auto]"
-                  >
-                    <div className="flex h-[60px] w-[42px] items-center justify-center border border-[#f0ead0]/10 bg-[#1c1c19] text-lg">
-                      {review.poster}
-                    </div>
-                    <div>
-                      <h2 className="mb-1 text-xs font-bold uppercase tracking-[0.06em]">{review.title}</h2>
-                      <p className="font-['IBM_Plex_Serif'] text-[13px] font-light italic leading-6 text-[#c8c2a8]">
-                        {review.text}
-                      </p>
-                      <p className="mt-2 flex gap-3 text-[9px] tracking-[0.08em] text-[#8a8474]">
-                        <span>{review.date}</span>
-                        <span>·</span>
-                        <span>{review.type}</span>
-                      </p>
-                    </div>
-                    <div className="text-[11px] text-[#d4a847]">{review.stars}</div>
-                  </article>
-                ))}
-              </div>
+              <>
+                <ReviewForm onSubmit={handleReviewSubmit} />
+                <ReviewList reviews={reviews} />
+              </>
             ) : null}
 
             {activeTab === 'posts' ? (
               <div className="space-y-3">
-                {posts.map((post) => (
-                  <article
-                    key={post.title}
-                    className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/25"
-                  >
-                    <div className="mb-2">
-                      <span
-                        className={`inline-block border px-2.5 py-1 text-[8px] uppercase tracking-[0.14em] ${
-                          post.theme === 'recommend'
-                            ? 'border-[#d4a847]/30 bg-[#d4a847]/10 text-[#d4a847]'
-                            : post.theme === 'info'
-                              ? 'border-[#6bbf72]/30 bg-[#6bbf72]/10 text-[#6bbf72]'
-                              : 'border-[#f0ead0]/10 text-[#8a8474]'
-                        }`}
-                      >
-                        {post.board}
-                      </span>
-                    </div>
-                    <h2 className="mb-2 text-[13px] font-bold leading-6 tracking-[0.04em]">{post.title}</h2>
-                    <p className="mb-3 font-['IBM_Plex_Serif'] text-xs font-light italic leading-6 text-[#8a8474]">
-                      {post.body}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-4 text-[9px] tracking-[0.08em] text-[#8a8474]">
-                      <span>♡ {post.likes}</span>
-                      <span>💬 {post.comments}</span>
-                      <span>👁 {post.views}</span>
-                      <span className="ml-auto">{post.date}</span>
-                    </div>
-                  </article>
-                ))}
+                {userPosts.length ? (
+                  userPosts.map((post) => (
+                    <article
+                      key={post.title}
+                      className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/25"
+                    >
+                      <div className="mb-2">
+                        <span
+                          className={`inline-block border px-2.5 py-1 text-[8px] uppercase tracking-[0.14em] ${
+                            post.theme === 'recommend'
+                              ? 'border-[#d4a847]/30 bg-[#d4a847]/10 text-[#d4a847]'
+                              : post.theme === 'info'
+                                ? 'border-[#6bbf72]/30 bg-[#6bbf72]/10 text-[#6bbf72]'
+                                : 'border-[#f0ead0]/10 text-[#8a8474]'
+                          }`}
+                        >
+                          {post.board}
+                        </span>
+                      </div>
+                      <h2 className="mb-2 text-[13px] font-bold leading-6 tracking-[0.04em]">{post.title}</h2>
+                      <p className="mb-3 font-['IBM_Plex_Serif'] text-xs font-light italic leading-6 text-[#8a8474]">
+                        {post.body}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-4 text-[9px] tracking-[0.08em] text-[#8a8474]">
+                        <span>♡ {post.likes}</span>
+                        <span>💬 {post.comments}</span>
+                        <span>👁 {post.views}</span>
+                        <span className="ml-auto">{post.date}</span>
+                      </div>
+                    </article>
+                  ))
+                ) : (
+                  <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
+                    {t('mypage.empty')}
+                  </p>
+                )}
               </div>
             ) : null}
 
             {activeTab === 'watchlist' ? (
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {watchlist.map(([icon, label]) => (
-                  <div
-                    key={label}
-                    className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] text-[22px] transition hover:border-[#f0ead0]/25"
-                  >
-                    <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_4px,rgba(240,234,210,0.02)_4px,rgba(240,234,210,0.02)_8px)]" />
-                    <span className="relative z-10">{icon}</span>
-                    <span className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-1 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
-                      {label}
-                    </span>
-                  </div>
-                ))}
+                {userWatchlist.length ? (
+                  userWatchlist.map(([icon, label]) => (
+                    <div
+                      key={label}
+                      className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] text-[22px] transition hover:border-[#f0ead0]/25"
+                    >
+                      <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_4px,rgba(240,234,210,0.02)_4px,rgba(240,234,210,0.02)_8px)]" />
+                      <span className="relative z-10">{icon}</span>
+                      <span className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-1 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
+                        {label}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
+                    {t('mypage.empty')}
+                  </p>
+                )}
               </div>
             ) : null}
           </div>
 
-          <aside>
-            {isEditing ? (
-              <div className="mb-7 border border-[#f0ead0]/10 bg-[#141412] p-7">
-                <div className="mb-5 text-[10px] uppercase tracking-[0.18em] text-[#d63e2a]">▶ {t('home.editPanelTitle')}</div>
-
-                <div className="mb-4">
-                  <label className="mb-1.5 block text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">
-                    {t('signup.firstName')}
-                  </label>
-                  <input
-                    type="text"
-                    value={profileForm.firstName}
-                    onChange={(e) => setProfileForm((prev) => ({ ...prev, firstName: e.target.value }))}
-                    className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-3 py-2.5 text-xs text-[#f0ead0] outline-none transition focus:border-[#f0ead0]/25"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="mb-1.5 block text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">
-                    {t('signup.lastName')}
-                  </label>
-                  <input
-                    type="text"
-                    value={profileForm.lastName}
-                    onChange={(e) => setProfileForm((prev) => ({ ...prev, lastName: e.target.value }))}
-                    className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-3 py-2.5 text-xs text-[#f0ead0] outline-none transition focus:border-[#f0ead0]/25"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="mb-1.5 block text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">
-                    {t('home.username')}
-                  </label>
-                  <input
-                    type="text"
-                    value={profileForm.username}
-                    onChange={(e) => setProfileForm((prev) => ({ ...prev, username: e.target.value }))}
-                    className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-3 py-2.5 text-xs text-[#f0ead0] outline-none transition focus:border-[#f0ead0]/25"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="mb-1.5 block text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">{t('home.bio')}</label>
-                  <textarea
-                    value={profileForm.bio}
-                    onChange={(e) => setProfileForm((prev) => ({ ...prev, bio: e.target.value }))}
-                    className="min-h-24 w-full resize-y border border-[#f0ead0]/10 bg-[#1c1c19] px-3 py-2.5 text-xs leading-6 text-[#f0ead0] outline-none transition focus:border-[#f0ead0]/25"
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleProfileSave}
-                  className="w-full border border-[#f0ead0]/25 bg-[#1c1c19] px-4 py-3 text-[10px] uppercase tracking-[0.15em] text-[#f0ead0] transition hover:border-[#d63e2a] hover:bg-[#d63e2a]"
-                >
-                  {t('home.saveChanges')}
-                </button>
-              </div>
-            ) : null}
-
-            <div>
-              <div className="mb-5 flex items-center gap-4">
-                <span className="text-[10px] uppercase tracking-[0.18em] text-[#8a8474]">{t('home.accountSettings')}</span>
-                <div className="h-px flex-1 bg-[#f0ead0]/10" />
-              </div>
-
-              {[
-                [t('home.twoFactorAuth'), t('home.twoFactorAuthDesc'), twoFactorEnabled, setTwoFactorEnabled],
-                [t('home.emailNotifications'), t('home.emailNotificationsDesc'), emailNotificationsEnabled, setEmailNotificationsEnabled],
-              ].map(([label, description, value, setter]) => (
-                <div
-                  key={label as string}
-                  className="flex items-center justify-between gap-3 border-b border-[#f0ead0]/10 py-4"
-                >
-                  <div>
-                    <div className="text-[11px] tracking-[0.08em] text-[#c8c2a8]">{label as string}</div>
-                    <div className="mt-1 text-[9px] tracking-[0.06em] text-[#8a8474]">{description as string}</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => (setter as React.Dispatch<React.SetStateAction<boolean>>)((prev) => !prev)}
-                    className={`relative h-[18px] w-[34px] rounded-full border transition ${
-                      value ? 'border-[#d63e2a] bg-[#d63e2a]' : 'border-[#f0ead0]/25 bg-[#1c1c19]'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 h-3 w-3 rounded-full bg-[#f0ead0] transition ${
-                        value ? 'left-5' : 'left-0.5'
-                      }`}
-                    />
-                  </button>
-                </div>
-              ))}
-
-              <div className="mt-7">
-                <div className="mb-5 flex items-center gap-4">
-                  <span className="text-[10px] uppercase tracking-[0.18em] text-[#8a8474]">{t('home.passwordSection')}</span>
-                  <div className="h-px flex-1 bg-[#f0ead0]/10" />
-                </div>
-
-                <div className="space-y-4">
-                  {[t('home.currentPassword'), t('home.newPassword'), t('home.confirmNewPassword')].map((label) => (
-                    <div key={label}>
-                      <label className="mb-1.5 block text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">{label}</label>
-                      <input
-                        type="password"
-                        placeholder="••••••••"
-                        className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-3 py-2.5 text-xs text-[#f0ead0] outline-none transition focus:border-[#f0ead0]/25"
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  className="mt-4 w-full border border-[#f0ead0]/25 bg-[#1c1c19] px-4 py-3 text-[10px] uppercase tracking-[0.15em] text-[#f0ead0] transition hover:border-[#d63e2a] hover:bg-[#d63e2a]"
-                >
-                  {t('home.changePassword')}
-                </button>
-              </div>
-
-              <div className="mt-7 border-t border-[#f0ead0]/10 pt-7">
-                <button
-                  type="button"
-                  className="w-full border border-[#d63e2a]/30 bg-transparent px-4 py-2.5 text-[9px] uppercase tracking-[0.12em] text-[#d63e2a]/70 transition hover:border-[#d63e2a] hover:text-[#ff4f38]"
-                >
-                  ⚠ {t('home.deleteAccount')}
-                </button>
-              </div>
-            </div>
-          </aside>
+          <ProfileEditForm
+            bioLabel={t('home.bio')}
+            changePasswordLabel={t('home.changePassword')}
+            confirmNewPasswordLabel={t('home.confirmNewPassword')}
+            currentPasswordLabel={t('home.currentPassword')}
+            deleteAccountLabel={t('home.deleteAccount')}
+            firstNameLabel={t('signup.firstName')}
+            form={profileForm}
+            isEditing={isEditing}
+            lastNameLabel={t('signup.lastName')}
+            newPasswordLabel={t('home.newPassword')}
+            onChange={handleProfileFormChange}
+            onSave={handleProfileSave}
+            passwordSectionLabel={t('home.passwordSection')}
+            saveLabel={t('home.saveChanges')}
+            sectionTitle={t('home.editPanelTitle')}
+            settingsTitle={t('home.accountSettings')}
+            toggles={settingsToggles}
+            twoFactorDescription={t('home.twoFactorAuthDesc')}
+            twoFactorLabel={t('home.twoFactorAuth')}
+            usernameLabel={t('home.username')}
+          />
         </div>
       </div>
     </section>
