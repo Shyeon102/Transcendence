@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux';
 import MyPageDashboard from '../components/MyPageDashboard';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
-import { useGetMyPageDashboardQuery } from '../store/slices/authApi';
+import { useGetMyPageDashboardQuery } from '../store/api/authApi';
 
 export default function MyPagePage() {
   const { t } = useI18n();

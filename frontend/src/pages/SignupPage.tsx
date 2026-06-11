@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import AuthShell from '../components/AuthShell';
 import { useI18n } from '../lib/i18n';
 import { beginOAuth42Login } from '../lib/oauth';
-import { useSignupMutation } from '../store/slices/authApi';
+import { useSignupMutation } from '../store/api/authApi';
 import type { AuthErrorResponse } from '../store';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
