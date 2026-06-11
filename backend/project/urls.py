@@ -16,6 +16,6 @@ urlpatterns = [
     path("api/community/", include("apps.community.urls")),
     path("api/media/", include("apps.media.urls")),
     path("chat_admin/", chat_admin_site.urls),
-    path("health/live", live),
+    path("health/live/", live),
     path("health/", health),
 ]

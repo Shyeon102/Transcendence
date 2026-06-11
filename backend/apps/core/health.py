@@ -46,7 +46,7 @@ def health(request):
     checks = {
         "database": _check_database(),
         "redis": _check_redis(),
-        "health": _check_celery(),
+        "celery": _check_celery(),
     }
 
     ok = all(check["ok"] for check in checks.values())
