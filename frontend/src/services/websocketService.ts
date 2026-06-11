@@ -14,7 +14,7 @@ export const connect = (roomId: number, token: string) => {
 
   // 등록만. 실행 X
   // 연결 성공 직후
-  ws.onopen = (event) => {
+  ws.onopen = () => {
     console.log("WebSocket connected");
   };
   // 서버에서 메시지 도착 (서버가 우리한테 던질때마다)
@@ -39,7 +39,7 @@ export const connect = (roomId: number, token: string) => {
     console.error("WebSocket error:", error);
   };
   // 연결끊김
-  ws.onclose = (event) => {
+  ws.onclose = () => {
     console.log("WebSocket closed");
   };
 };
