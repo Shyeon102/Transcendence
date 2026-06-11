@@ -1,10 +1,13 @@
 import Header from "../components/Header";
 import { useGetChatRoomsQuery } from "../store/api/chatApi";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import NewRoomModal from "../components/NewRoomModal";
 
 const ChatRoomListPage = () => {
   const { data, isLoading, error } = useGetChatRoomsQuery(); // const {RTK Query에서 제공}
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white">
@@ -14,9 +17,8 @@ const ChatRoomListPage = () => {
         {/* 페이지 내부 헤더 */}
         <div className="flex justify-between ">
           <h1 className="font-bold">Chat Rooms</h1>
-          <button>+ New Room</button>
+          <button onClick={() => setIsModalOpen(true)}>+ New Room</button>
         </div>
-
         {/* 토론방 목록*/}
         <div>
           {/* 상태에 따라 브라우저 로딩 및 에러처리 */}
@@ -38,6 +40,10 @@ const ChatRoomListPage = () => {
             </div>
           ))}
         </div>
+        <NewRoomModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
       </div>
     </div>
   );
