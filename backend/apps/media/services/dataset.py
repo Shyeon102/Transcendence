@@ -23,6 +23,7 @@ def get_media_dataframe() -> pd.DataFrame:
             "cast": media.cast,
             "release_date": media.release_date,
             "image_url": media.image_url,
+            "age_rating": media.age_rating,
             "avg_rating": media.avg_rating,
             "rating_count": media.rating_count,
             "created_at": media.created_at,

@@ -32,6 +32,7 @@ def parse_anime(raw: dict) -> dict:
             start_date.get("day"),
         ),
         "image_url": cover.get("large") or cover.get("medium") or "",
+        "age_rating": "18+" if raw.get("isAdult") else "",
         "avg_rating": normalize_rating(raw.get("averageScore"), scale=20),
         "rating_count": int(raw.get("popularity") or 0),
     }

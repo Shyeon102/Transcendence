@@ -39,6 +39,7 @@ def parse_movie(raw: dict) -> dict:
         ),
         "release_date": parse_iso_date(raw.get("release_date", "")),
         "image_url": f"{POSTER_BASE_URL}{poster_path}" if poster_path else "",
+        "age_rating": _parse_movie_age_rating(raw),
         "avg_rating": normalize_rating(raw.get("vote_average"), scale=2),
         "rating_count": int(raw.get("vote_count") or 0),
     }
@@ -71,6 +72,36 @@ def parse_tv_drama(raw: dict) -> dict:
         ),
         "release_date": parse_iso_date(raw.get("first_air_date", "")),
         "image_url": f"{POSTER_BASE_URL}{poster_path}" if poster_path else "",
+        "age_rating": _parse_tv_age_rating(raw),
         "avg_rating": normalize_rating(raw.get("vote_average"), scale=2),
         "rating_count": int(raw.get("vote_count") or 0),
     }
+
+
+def _pick_country_result(results, preferred_countries=("US", "KR", "FR")):
+    for country in preferred_countries:
+        match = next(
+            (item for item in results if item.get("iso_3166_1") == country),
+            None,
+        )
+        if match:
+            return match
+    return results[0] if results else {}
+
+
+def _parse_movie_age_rating(raw: dict) -> str:
+    release_dates = raw.get("release_dates", {}).get("results", [])
+    country_result = _pick_country_result(release_dates)
+
+    for item in country_result.get("release_dates", []):
+        certification = item.get("certification")
+        if certification:
+            return certification
+
+    return ""
+
+
+def _parse_tv_age_rating(raw: dict) -> str:
+    content_ratings = raw.get("content_ratings", {}).get("results", [])
+    country_result = _pick_country_result(content_ratings)
+    return country_result.get("rating") or ""

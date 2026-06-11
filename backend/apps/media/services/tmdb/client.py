@@ -54,13 +54,13 @@ class TMDBClient:
     def movie_details(self, movie_id: int) -> dict:
         return self._get(
             f"/movie/{movie_id}",
-            {"append_to_response": "credits"},
+            {"append_to_response": "credits,release_dates"},
         )
 
     def tv_details(self, tv_id: int) -> dict:
         return self._get(
             f"/tv/{tv_id}",
-            {"append_to_response": "credits"},
+            {"append_to_response": "credits,content_ratings"},
         )
 
     def _fetch_items(self, limit: int, discover, details) -> list[dict]:
