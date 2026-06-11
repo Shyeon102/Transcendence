@@ -121,6 +121,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.room_group_name,
             {
+                "user_id": self.user.id,
                 "type": "chat_message",
                 "message": saved_message.content,
                 "username": self.user.username,
@@ -135,6 +136,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """
 
         await self.send(text_data=json.dumps({
+            "user_id": self.user.id,
             "type": "chat_message",
             "message": event["message"],
             "username": event["username"],
@@ -145,6 +147,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def user_joined(self, event):
 
         await self.send(text_data=json.dumps({
+            "user_id": self.user.id,
             "type": "user_joined",
             "username": event["username"],
         }))
@@ -152,6 +155,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def user_left(self, event):
 
         await self.send(text_data=json.dumps({
+            "user_id": self.user.id,
             "type": "user_left",
             "username": event["username"],
         }))
