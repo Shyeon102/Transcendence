@@ -32,6 +32,7 @@ query ($page: Int, $perPage: Int, $season: MediaSeason, $seasonYear:
       source
       startDate { year month day }
       endDate { year month day }
+      isAdult
     }
   }
 }
