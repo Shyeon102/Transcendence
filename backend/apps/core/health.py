@@ -60,3 +60,7 @@ def health(request):
         },
         status=status_code,
     )
+
+
+def live(request):
+    return JsonResponse({"ok": True})
