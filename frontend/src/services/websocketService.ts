@@ -25,9 +25,10 @@ export const connect = (roomId: number, token: string) => {
       store.dispatch(
         messageReceived({
           id: data.message_id,
+          userId: 0, //임시
           username: data.username,
           content: data.message,
-          type: "chat_message",
+          messageType: 'message',
           createdAt: data.created_at,
         }),
       );
