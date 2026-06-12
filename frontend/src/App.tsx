@@ -1,17 +1,19 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import ErrorBoundary from './components/ErrorBoundary';
-import Layout from './components/Layout';
-import PrivateRoute from './components/PrivateRoute';
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Layout from './components/Layout'
+import PrivateRoute from './components/PrivateRoute'
+import ErrorBoundary from './components/ErrorBoundary'
+import InfoPage from './pages/InfoPage'
+import LoginPage from './pages/LoginPage'
+import HomePage from './pages/HomePage'
+import SignupPage from './pages/SignupPage'
+import ProfilePage from './pages/ProfilePage'
+import MediaDetailPage from './pages/MediaDetailPage'
+import ChatRoomListPage from './pages/ChatRoomListPage'
+import ChatRoomPage from './pages/ChatRoomPage'
 import { OAUTH_42_CALLBACK_PATH } from './lib/oauth';
-import HomePage from './pages/HomePage';
-import InfoPage from './pages/InfoPage';
-import LoginPage from './pages/LoginPage';
-import MediaDetailPage from './pages/MediaDetailPage';
 import MyPagePage from './pages/MyPagePage';
 import OnboardingPage from './pages/OnboardingPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
-import ProfilePage from './pages/ProfilePage';
-import SignupPage from './pages/SignupPage';
 
 export default function App() {
   return (
@@ -53,6 +55,8 @@ export default function App() {
             />
             <Route path="/media/:id" element={<MediaDetailPage />} />
           </Route>
+          <Route path="/chat/rooms" element={<ChatRoomListPage />} />
+          <Route path="/chat/rooms/:id" element={<ChatRoomPage />} />
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>

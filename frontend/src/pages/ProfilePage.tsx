@@ -7,7 +7,7 @@ import ReviewList from '../components/ReviewList';
 import type { ReviewItem } from '../components/ReviewCard';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
-import { useUpdateMeMutation } from '../store/slices/authApi';
+import { useUpdateMeMutation } from '../store/api/authApi';
 import { updateProfile } from '../store/slices/authSlice';
 
 const initialReviews: ReviewItem[] = [
