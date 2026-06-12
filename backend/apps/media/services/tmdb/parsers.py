@@ -6,6 +6,7 @@ from apps.media.services.normalizer import (
 
 
 POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500"
+BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w780"
 
 
 def parse_movie(raw: dict) -> dict:
@@ -19,6 +20,7 @@ def parse_movie(raw: dict) -> dict:
     )
 
     poster_path = raw.get("poster_path") or ""
+    backdrop_path = raw.get("backdrop_path") or ""
     countries = raw.get("production_countries") or []
     country = countries[0].get("iso_3166_1", "") if countries else ""
 
@@ -39,7 +41,12 @@ def parse_movie(raw: dict) -> dict:
         ),
         "release_date": parse_iso_date(raw.get("release_date", "")),
         "image_url": f"{POSTER_BASE_URL}{poster_path}" if poster_path else "",
+        "side_poster_url": (
+            f"{BACKDROP_BASE_URL}{backdrop_path}" if backdrop_path else ""
+        ),
         "age_rating": _parse_movie_age_rating(raw),
+        "language": raw.get("original_language") or "",
+        "runtime": raw.get("runtime"),
         "avg_rating": normalize_rating(raw.get("vote_average"), scale=2),
         "rating_count": int(raw.get("vote_count") or 0),
     }
@@ -50,7 +57,9 @@ def parse_tv_drama(raw: dict) -> dict:
     cast = credits.get("cast") or []
     creators = raw.get("created_by") or []
     poster_path = raw.get("poster_path") or ""
+    backdrop_path = raw.get("backdrop_path") or ""
     origin_countries = raw.get("origin_country") or []
+    episode_run_times = raw.get("episode_run_time") or []
 
     return {
         "external_source": "tmdb",
@@ -72,7 +81,12 @@ def parse_tv_drama(raw: dict) -> dict:
         ),
         "release_date": parse_iso_date(raw.get("first_air_date", "")),
         "image_url": f"{POSTER_BASE_URL}{poster_path}" if poster_path else "",
+        "side_poster_url": (
+            f"{BACKDROP_BASE_URL}{backdrop_path}" if backdrop_path else ""
+        ),
         "age_rating": _parse_tv_age_rating(raw),
+        "language": raw.get("original_language") or "",
+        "runtime": episode_run_times[0] if episode_run_times else None,
         "avg_rating": normalize_rating(raw.get("vote_average"), scale=2),
         "rating_count": int(raw.get("vote_count") or 0),
     }

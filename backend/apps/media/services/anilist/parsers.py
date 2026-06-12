@@ -10,6 +10,7 @@ def parse_anime(raw: dict) -> dict:
     start_date = raw.get("startDate") or {}
     studios = raw.get("studios", {}).get("nodes", [])
     cover = raw.get("coverImage") or {}
+    country = raw.get("countryOfOrigin") or "JP"
 
     return {
         "external_source": "anilist",
@@ -22,7 +23,7 @@ def parse_anime(raw: dict) -> dict:
         ),
         "media_type": "anime",
         "genres": normalize_genre_names(raw.get("genres", [])),
-        "country": raw.get("countryOfOrigin") or "JP",
+        "country": country,
         "description": raw.get("description") or "",
         "director": studios[0].get("name", "") if studios else "",
         "cast": "",
@@ -32,7 +33,10 @@ def parse_anime(raw: dict) -> dict:
             start_date.get("day"),
         ),
         "image_url": cover.get("large") or cover.get("medium") or "",
+        "side_poster_url": raw.get("bannerImage") or "",
         "age_rating": "18+" if raw.get("isAdult") else "",
+        "language": "jp" if country == "JP" else "",
+        "runtime": raw.get("duration"),
         "avg_rating": normalize_rating(raw.get("averageScore"), scale=20),
         "rating_count": int(raw.get("popularity") or 0),
     }
