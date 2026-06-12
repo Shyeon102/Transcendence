@@ -64,6 +64,20 @@ CACHES = {
     }
 }
 
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", _redis_url)
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", _redis_url)
+
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Europe/Paris"
+CELERY_ENABLE_UTC = True
+
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+CELERY_BEAT_SCHEDULE = {}
+
 # send email, now to console, change later to actual email
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
