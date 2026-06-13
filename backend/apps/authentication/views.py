@@ -29,12 +29,19 @@ class LogoutView(APIView):
 
 
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         user = login_user(
             request.data.get("username"),
             request.data.get("password")
         )
-        return Response({"success": bool(user)})
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh)
+        })
 
 
 class RegisterView(APIView):

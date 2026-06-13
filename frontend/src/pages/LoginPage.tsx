@@ -5,7 +5,7 @@ import Button from '../components/ui/Button';
 import StatusMessage from '../components/ui/StatusMessage';
 import { useI18n } from '../lib/i18n';
 import { beginOAuth42Login } from '../lib/oauth';
-import { useLoginMutation } from '../store/slices/authApi';
+import { useLoginMutation } from '../store/api/authApi';
 import type { AuthErrorResponse } from '../store';
 
 export default function LoginPage() {

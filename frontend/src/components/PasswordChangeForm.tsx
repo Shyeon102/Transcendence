@@ -1,6 +1,6 @@
 import { useState } from 'react';
+import { useChangePasswordMutation } from '../store/api/authApi';
 import { useI18n } from '../lib/i18n';
-import { useChangePasswordMutation } from '../store/slices/authApi';
 import Button from './ui/Button';
 import FieldLabel from './ui/FieldLabel';
 import StatusMessage from './ui/StatusMessage';
