@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useI18n } from '../lib/i18n';
 import StarRating from './StarRating';
 import type { ReviewItem } from './ReviewCard';
+import Button from './ui/Button';
 import SectionCard from './ui/SectionCard';
 import StatusMessage from './ui/StatusMessage';
 import TextAreaField from './ui/TextAreaField';
@@ -18,10 +19,11 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
     type: '',
     text: '',
     rating: 0,
+    spoiler: false,
   });
   const [errorMsg, setErrorMsg] = useState('');
 
-  const handleChange = (field: keyof typeof form, value: string | number) => {
+  const handleChange = (field: keyof typeof form, value: boolean | string | number) => {
     if (errorMsg) {
       setErrorMsg('');
     }
@@ -45,6 +47,8 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
       text: form.text,
       rating: form.rating,
       poster: '🎬',
+      spoiler: form.spoiler,
+      isOwn: true,
       date: new Date().toISOString().slice(0, 10).replace(/-/g, '.'),
     });
 
@@ -53,6 +57,7 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
       type: '',
       text: '',
       rating: 0,
+      spoiler: false,
     });
   };
 
@@ -94,17 +99,23 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
         className="mt-4 min-h-28 px-4 py-3 font-['IBM_Plex_Serif'] text-[13px] italic leading-6"
       />
 
+      <label className="mt-4 flex cursor-pointer items-center gap-3 text-[10px] uppercase tracking-[0.12em] text-[#8a8474]">
+        <input
+          type="checkbox"
+          checked={form.spoiler}
+          onChange={(e) => handleChange('spoiler', e.target.checked)}
+          className="h-4 w-4 accent-[#d63e2a]"
+        />
+        {t('review.markSpoiler')}
+      </label>
+
       {errorMsg ? (
         <StatusMessage className="mt-4">{errorMsg}</StatusMessage>
       ) : null}
 
-      <button
-        type="button"
-        onClick={handleSubmit}
-        className="mt-4 bg-[#d63e2a] px-4 py-3 text-[10px] uppercase tracking-[0.15em] text-[#f0ead0] transition hover:bg-[#ff4f38]"
-      >
+      <Button onClick={handleSubmit} variant="primary" className="mt-4">
         {t('review.submit')}
-      </button>
+      </Button>
     </SectionCard>
   );
 }

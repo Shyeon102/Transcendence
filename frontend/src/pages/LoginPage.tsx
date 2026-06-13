@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthShell from '../components/AuthShell';
+import Button from '../components/ui/Button';
+import StatusMessage from '../components/ui/StatusMessage';
 import { useI18n } from '../lib/i18n';
 import { beginOAuth42Login } from '../lib/oauth';
 import { useLoginMutation } from '../store/slices/authApi';
@@ -79,21 +81,22 @@ export default function LoginPage() {
             className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[13px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
           />
           <p className="mt-1.5 text-[9px] tracking-[0.08em] text-[#8a8474]">
-            <button type="button" className="border-b border-[#f0ead0]/10 text-[#8a8474]">
+            <Button size="sm" variant="ghost" className="border-b border-[#f0ead0]/10 px-0 py-0 normal-case tracking-[0.08em]">
               {t('login.forgotPassword')}
-            </button>
+            </Button>
           </p>
         </div>
 
-        {errorMsg ? <p className="text-[11px] tracking-[0.06em] text-[#ff4f38]">{errorMsg}</p> : null}
+        {errorMsg ? <StatusMessage>{errorMsg}</StatusMessage> : null}
 
-        <button
+        <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-[#d63e2a] px-4 py-[15px] text-[11px] uppercase tracking-[0.15em] text-[#f0ead0] transition hover:bg-[#ff4f38] disabled:cursor-not-allowed disabled:opacity-60"
+          variant="primary"
+          className="w-full py-[15px] text-[11px]"
         >
           {isLoading ? t('login.loading') : t('login.submitDisplay')}
-        </button>
+        </Button>
 
         <div className="flex items-center gap-3 py-1">
           <div className="h-px flex-1 bg-[#f0ead0]/10" />
@@ -101,18 +104,18 @@ export default function LoginPage() {
           <div className="h-px flex-1 bg-[#f0ead0]/10" />
         </div>
 
-        <button
-          type="button"
+        <Button
           onClick={() => {
             if (!beginOAuth42Login()) {
-              setErrorMsg('42 OAuth 백엔드 URL이 아직 설정되지 않았습니다.');
+              setErrorMsg(t('oauth.startUrlMissing'));
             }
           }}
-          className="flex w-full items-center justify-center gap-3 border border-[#f0ead0]/25 bg-transparent px-4 py-[13px] text-[11px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#c8c2a8] hover:text-[#f0ead0]"
+          variant="secondary"
+          className="w-full py-[13px] text-[11px]"
         >
           <span className="font-['Bebas_Neue'] text-base tracking-[0.05em] text-[#f0ead0]">42</span>
           {t('login.oauth42')}
-        </button>
+        </Button>
       </form>
 
       <p className="mt-7 text-center text-[11px] tracking-[0.05em] text-[#8a8474]">

@@ -38,13 +38,9 @@ export default function OnboardingPage() {
     }
   );
   const [errorMsg, setErrorMsg] = useState('');
-  const areAnswersValid = QUESTION_IDS.every(
-    (questionId) => answers[questionId].trim().length > 0
-  );
   const isSelectionValid =
     selectedGenres.length >= MIN_GENRES &&
-    selectedTitles.length >= MIN_TITLES &&
-    areAnswersValid;
+    selectedTitles.length >= MIN_TITLES;
 
   const selectedGenreLabels = useMemo(
     () =>
@@ -86,12 +82,8 @@ export default function OnboardingPage() {
 
   const handleSubmit = async () => {
     if (!isSelectionValid) {
-      const hasMinimumSelections =
-        selectedGenres.length >= MIN_GENRES && selectedTitles.length >= MIN_TITLES;
       setErrorMsg(
-        hasMinimumSelections
-          ? t('onboarding.questionValidation')
-          : t('onboarding.validation').replace('{genres}', String(MIN_GENRES)).replace('{titles}', String(MIN_TITLES))
+        t('onboarding.validation').replace('{genres}', String(MIN_GENRES)).replace('{titles}', String(MIN_TITLES))
       );
       return;
     }
@@ -115,6 +107,18 @@ export default function OnboardingPage() {
       }
       setErrorMsg(apiError.message ?? t('onboarding.saveError'));
     }
+  };
+
+  const handleSkipAnswers = () => {
+    if (errorMsg) {
+      setErrorMsg('');
+    }
+
+    setAnswers({
+      allTimeFavorite: '',
+      recentFavorite: '',
+      friendRecommendation: '',
+    });
   };
 
   return (
@@ -238,6 +242,9 @@ export default function OnboardingPage() {
                   <h2 className="mt-2 font-['Bebas_Neue'] text-4xl tracking-[0.04em]">
                     {t('onboarding.questionTitle')}
                   </h2>
+                  <p className="mt-2 text-[10px] uppercase tracking-[0.12em] text-[#8a8474]">
+                    {t('onboarding.questionOptional')}
+                  </p>
                 </div>
                 <div className="text-right">
                   <div className="font-['Bebas_Neue'] text-4xl leading-none text-[#6bbf72]">
@@ -264,6 +271,14 @@ export default function OnboardingPage() {
                   </div>
                 ))}
               </div>
+
+              <button
+                type="button"
+                onClick={handleSkipAnswers}
+                className="mt-4 border border-[#f0ead0]/10 bg-transparent px-4 py-2.5 text-[9px] uppercase tracking-[0.14em] text-[#8a8474] transition hover:border-[#f0ead0]/25 hover:text-[#f0ead0]"
+              >
+                {t('onboarding.skipQuestions')}
+              </button>
             </section>
           </div>
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useI18n } from '../lib/i18n';
 import { useChangePasswordMutation } from '../store/slices/authApi';
+import Button from './ui/Button';
 import FieldLabel from './ui/FieldLabel';
 import StatusMessage from './ui/StatusMessage';
 import TextField from './ui/TextField';
@@ -129,14 +130,9 @@ export default function PasswordChangeForm({
         <StatusMessage tone="success" className="mt-4">{successMsg}</StatusMessage>
       ) : null}
 
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={isSubmitting}
-        className="mt-4 w-full border border-[#f0ead0]/25 bg-[#1c1c19] px-4 py-3 text-[10px] uppercase tracking-[0.15em] text-[#f0ead0] transition hover:border-[#d63e2a] hover:bg-[#d63e2a] disabled:cursor-not-allowed disabled:opacity-60"
-      >
+      <Button onClick={handleSubmit} disabled={isSubmitting} className="mt-4 w-full">
         {isSubmitting ? t('home.passwordChanging') : changePasswordLabel}
-      </button>
+      </Button>
     </div>
   );
 }

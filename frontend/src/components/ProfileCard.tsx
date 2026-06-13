@@ -1,3 +1,5 @@
+import Button from './ui/Button';
+
 type ProfileStat = {
   label: string;
   value: string;
@@ -85,17 +87,14 @@ export default function ProfileCard({
       </div>
 
       <div className="flex flex-wrap items-start gap-6 lg:flex-col lg:items-end">
-        <button
-          type="button"
+        <Button
           onClick={onToggleEdit}
-          className={`border px-5 py-2 text-[10px] uppercase tracking-[0.12em] transition ${
-            isEditing
-              ? 'border-[#d63e2a] bg-[#d63e2a] text-[#f0ead0]'
-              : 'border-[#f0ead0]/25 text-[#c8c2a8] hover:border-[#f0ead0] hover:text-[#f0ead0]'
-          }`}
+          size="sm"
+          variant={isEditing ? 'primary' : 'secondary'}
+          className="px-5"
         >
           {isEditing ? `✕ ${closeEditLabel}` : editProfileLabel}
-        </button>
+        </Button>
 
         {stats.map((stat) => (
           <div key={stat.label} className="min-w-[88px] text-left lg:text-right">

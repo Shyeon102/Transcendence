@@ -4,6 +4,7 @@ import ProfileCard from '../components/ProfileCard';
 import ProfileEditForm from '../components/ProfileEditForm';
 import ReviewForm from '../components/ReviewForm';
 import ReviewList from '../components/ReviewList';
+import EmptyState from '../components/ui/EmptyState';
 import type { ReviewItem } from '../components/ReviewCard';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
@@ -19,6 +20,7 @@ const initialReviews: ReviewItem[] = [
     poster: '🎬',
     text: 'A deliriously chaotic triumph. Lanthimos at full throttle - grotesque, gorgeous, and genuinely funny.',
     rating: 4,
+    isOwn: true,
   },
   {
     id: 'dune-two',
@@ -28,6 +30,8 @@ const initialReviews: ReviewItem[] = [
     poster: '📺',
     text: "Villeneuve's scale is unmatched. The Harkonnen arena sequence alone is worth the price of admission.",
     rating: 5,
+    spoiler: true,
+    isOwn: true,
   },
   {
     id: 'past-lives',
@@ -37,6 +41,7 @@ const initialReviews: ReviewItem[] = [
     poster: '🎞️',
     text: "Celine Song's debut is devastating in its restraint. The final scene will stay with you for weeks.",
     rating: 5,
+    isOwn: true,
   },
 ];
 
@@ -94,7 +99,7 @@ export default function ProfilePage() {
   const [updateMe] = useUpdateMeMutation();
   const isDemo = user?.username === 'demo';
   const displayUsername = user?.username?.trim() || '';
-  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || displayUsername || 'User';
+  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || displayUsername || t('home.defaultDisplayName');
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
   const [isEditing, setIsEditing] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -176,6 +181,20 @@ export default function ProfilePage() {
     setReviews((prev) => [review, ...prev]);
   };
 
+  const handleReviewDelete = (reviewId: string) => {
+    setReviews((prev) => prev.filter((review) => review.id !== reviewId));
+  };
+
+  const handleReviewEdit = (review: ReviewItem) => {
+    setReviews((prev) =>
+      prev.map((item) =>
+        item.id === review.id
+          ? { ...item, text: `${item.text} ${t('review.editDraftSuffix')}` }
+          : item
+      )
+    );
+  };
+
   const handleAvatarSelect = (file: File | null) => {
     if (!file) {
       return;
@@ -235,7 +254,11 @@ export default function ProfilePage() {
             {activeTab === 'reviews' ? (
               <>
                 <ReviewForm onSubmit={handleReviewSubmit} />
-                <ReviewList reviews={reviews} />
+                <ReviewList
+                  onDelete={handleReviewDelete}
+                  onEdit={handleReviewEdit}
+                  reviews={reviews}
+                />
               </>
             ) : null}
 
@@ -273,9 +296,7 @@ export default function ProfilePage() {
                     </article>
                   ))
                 ) : (
-                  <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
-                    {t('mypage.empty')}
-                  </p>
+                  <EmptyState title={t('mypage.empty')} />
                 )}
               </div>
             ) : null}
@@ -296,9 +317,7 @@ export default function ProfilePage() {
                     </div>
                   ))
                 ) : (
-                  <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
-                    {t('mypage.empty')}
-                  </p>
+                  <EmptyState title={t('mypage.empty')} />
                 )}
               </div>
             ) : null}
