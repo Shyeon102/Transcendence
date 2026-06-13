@@ -59,6 +59,7 @@
     "deleteAccountCancel": "Annuler",
     "deleteAccountConfirm": "Confirmer",
     "deleteAccountPending": "Le flux de confirmation est pret ; l'API de suppression reste a brancher.",
+    "publicProfilePlaceholder": "Quand l'API de profil public sera branchee, cette zone affichera les critiques et les informations de profil de l'utilisateur.",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - En ce moment, je suis absorbe par le slow cinema et tout ce qui touche a A24."
   },
   "login": {

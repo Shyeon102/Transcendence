@@ -59,6 +59,7 @@
     "deleteAccountCancel": "취소",
     "deleteAccountConfirm": "삭제 확인",
     "deleteAccountPending": "계정 삭제 API 연결 전 확인 흐름만 준비되어 있습니다.",
+    "publicProfilePlaceholder": "공개 프로필 조회 API가 연결되면 이 영역에 유저별 리뷰와 프로필 정보가 표시됩니다.",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - 슬로우 시네마와 A24 작품에 빠져 있습니다."
   },
   "login": {

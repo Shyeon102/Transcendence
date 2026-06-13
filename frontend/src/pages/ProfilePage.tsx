@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import ProfileCard from '../components/ProfileCard';
 import ProfileEditForm from '../components/ProfileEditForm';
 import ReviewForm from '../components/ReviewForm';
@@ -95,6 +96,7 @@ type TabKey = 'reviews' | 'posts' | 'watchlist';
 export default function ProfilePage() {
   const dispatch = useDispatch();
   const { t } = useI18n();
+  const { id: profileId } = useParams();
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateMe] = useUpdateMeMutation();
   const isDemo = user?.username === 'demo';
@@ -117,6 +119,8 @@ export default function ProfilePage() {
   if (!user) {
     return null;
   }
+
+  const isOwnProfile = !profileId || profileId === String(user.id);
 
   const initials = fullName
     .split(' ')
@@ -216,6 +220,7 @@ export default function ProfilePage() {
           avatarAlt={t('home.avatarAlt')}
           avatarUrl={avatarPreview || undefined}
           bio={profileForm.bio}
+          canEdit={isOwnProfile}
           closeEditLabel={t('home.closeEdit')}
           displayName={displayName}
           displayUsername={displayUsername}
@@ -253,10 +258,10 @@ export default function ProfilePage() {
 
             {activeTab === 'reviews' ? (
               <>
-                <ReviewForm onSubmit={handleReviewSubmit} />
+                {isOwnProfile ? <ReviewForm onSubmit={handleReviewSubmit} /> : null}
                 <ReviewList
-                  onDelete={handleReviewDelete}
-                  onEdit={handleReviewEdit}
+                  onDelete={isOwnProfile ? handleReviewDelete : undefined}
+                  onEdit={isOwnProfile ? handleReviewEdit : undefined}
                   reviews={reviews}
                 />
               </>
@@ -323,28 +328,34 @@ export default function ProfilePage() {
             ) : null}
           </div>
 
-          <ProfileEditForm
-            bioLabel={t('home.bio')}
-            changePasswordLabel={t('home.changePassword')}
-            confirmNewPasswordLabel={t('home.confirmNewPassword')}
-            currentPasswordLabel={t('home.currentPassword')}
-            deleteAccountLabel={t('home.deleteAccount')}
-            firstNameLabel={t('signup.firstName')}
-            form={profileForm}
-            isEditing={isEditing}
-            lastNameLabel={t('signup.lastName')}
-            newPasswordLabel={t('home.newPassword')}
-            onChange={handleProfileFormChange}
-            onSave={handleProfileSave}
-            passwordSectionLabel={t('home.passwordSection')}
-            saveLabel={t('home.saveChanges')}
-            sectionTitle={t('home.editPanelTitle')}
-            settingsTitle={t('home.accountSettings')}
-            toggles={settingsToggles}
-            twoFactorDescription={t('home.twoFactorAuthDesc')}
-            twoFactorLabel={t('home.twoFactorAuth')}
-            usernameLabel={t('home.username')}
-          />
+          {isOwnProfile ? (
+            <ProfileEditForm
+              bioLabel={t('home.bio')}
+              changePasswordLabel={t('home.changePassword')}
+              confirmNewPasswordLabel={t('home.confirmNewPassword')}
+              currentPasswordLabel={t('home.currentPassword')}
+              deleteAccountLabel={t('home.deleteAccount')}
+              firstNameLabel={t('signup.firstName')}
+              form={profileForm}
+              isEditing={isEditing}
+              lastNameLabel={t('signup.lastName')}
+              newPasswordLabel={t('home.newPassword')}
+              onChange={handleProfileFormChange}
+              onSave={handleProfileSave}
+              passwordSectionLabel={t('home.passwordSection')}
+              saveLabel={t('home.saveChanges')}
+              sectionTitle={t('home.editPanelTitle')}
+              settingsTitle={t('home.accountSettings')}
+              toggles={settingsToggles}
+              twoFactorDescription={t('home.twoFactorAuthDesc')}
+              twoFactorLabel={t('home.twoFactorAuth')}
+              usernameLabel={t('home.username')}
+            />
+          ) : (
+            <aside className="border border-[#f0ead0]/10 bg-[#141412] p-6 text-sm leading-6 text-[#8a8474]">
+              {t('home.publicProfilePlaceholder')}
+            </aside>
+          )}
         </div>
       </div>
     </section>

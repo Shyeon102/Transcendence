@@ -59,6 +59,7 @@
     "deleteAccountCancel": "Cancel",
     "deleteAccountConfirm": "Confirm delete",
     "deleteAccountPending": "The confirmation flow is ready; the account deletion API is still pending.",
+    "publicProfilePlaceholder": "Once the public profile API is connected, this area will show user-specific reviews and profile details.",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - Currently obsessed with slow cinema and anything A24."
   },
   "login": {

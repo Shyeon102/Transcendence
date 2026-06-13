@@ -12,6 +12,11 @@ type ReviewListProps = {
 
 type SortKey = 'latest' | 'rating';
 
+const getReviewTimestamp = (review: ReviewItem) => {
+  const timestamp = Date.parse(review.date.replace(/\./g, '-'));
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+
 export default function ReviewList({ onDelete, onEdit, reviews }: ReviewListProps) {
   const { t } = useI18n();
   const [sortKey, setSortKey] = useState<SortKey>('latest');
@@ -23,7 +28,7 @@ export default function ReviewList({ onDelete, onEdit, reviews }: ReviewListProp
       return nextReviews.sort((left, right) => right.rating - left.rating);
     }
 
-    return nextReviews.sort((left, right) => right.id.localeCompare(left.id));
+    return nextReviews.sort((left, right) => getReviewTimestamp(right) - getReviewTimestamp(left));
   }, [reviews, sortKey]);
 
   if (!reviews.length) {
