@@ -21,6 +21,10 @@ MEDIA_SEED = [
         "description": "A bold, genre-defying drama about rebirth and "
         "rebellion.",
         "image_url": "https://example.com/poor_things.jpg",
+        "age_rating": "R",
+        "language": "English",
+        "runtime": 135,
+        "side_poster_url": "https://example.com/poor_things_side.jpg",
     },
     {
         "title": "Dune: Part Two",
@@ -29,6 +33,10 @@ MEDIA_SEED = [
         "country": "US",
         "description": "The next chapter in the epic sci-fi saga.",
         "image_url": "https://example.com/dune_two.jpg",
+        "age_rating": "PG-13",
+        "language": "English",
+        "runtime": 155,
+        "side_poster_url": "https://example.com/dune_two_side.jpg",
     },
     {
         "title": "Past Lives",
@@ -38,6 +46,10 @@ MEDIA_SEED = [
         "description": "A tender drama that traces love across time and "
         "distance.",
         "image_url": "https://example.com/past_lives.jpg",
+        "age_rating": "R",
+        "language": "English",
+        "runtime": 135,
+        "side_poster_url": "https://example.com/poor_things_side.jpg",
     },
     {
         "title": "The Zone of Interest",
@@ -47,6 +59,10 @@ MEDIA_SEED = [
         "description": "A powerful film about history, memory, and "
         "accountability.",
         "image_url": "https://example.com/the_zone_of_interest.jpg",
+        "age_rating": "R",
+        "language": "English",
+        "runtime": 135,
+        "side_poster_url": "https://example.com/poor_things_side.jpg",
     },
     {
         "title": "Perfect Days",
@@ -55,6 +71,10 @@ MEDIA_SEED = [
         "country": "JP",
         "description": "A quiet, contemplative portrait of ordinary life.",
         "image_url": "https://example.com/perfect_days.jpg",
+        "age_rating": "R",
+        "language": "English",
+        "runtime": 135,
+        "side_poster_url": "https://example.com/poor_things_side.jpg",
     },
     {
         "title": "Anora",
@@ -64,6 +84,10 @@ MEDIA_SEED = [
         "description": "A stylish thriller centered on a high-stakes revenge "
         "plot.",
         "image_url": "https://example.com/anora.jpg",
+        "age_rating": "R",
+        "language": "English",
+        "runtime": 135,
+        "side_poster_url": "https://example.com/poor_things_side.jpg",
     },
 ]
 
@@ -94,6 +118,10 @@ class Command(BaseCommand):
                     "director": "",
                     "cast": "",
                     "image_url": item.get("image_url", ""),
+                    "age_rating": item.get("age_rating", ""),
+                    "language": item.get("language", ""),
+                    "runtime": item.get("runtime"),
+                    "side_poster_url": item.get("side_poster_url", ""),
                 },
             )
 
