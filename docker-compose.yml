@@ -67,19 +67,6 @@ services:
           condition: service_healthy
       command: celery -A project beat --loglevel=info --schedule=/tmp/celerybeat-schedule
 
-  worker:
-    build: ./backend
-    restart: unless-stopped
-    volumes:
-      - ./backend:/app
-    env_file: .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    command: celery -A project.celery worker --loglevel=info
-
   frontend:
     build: ./frontend
     restart: unless-stopped
