@@ -1,10 +1,13 @@
 import pandas as pd
-from content_based import build_tfidf_matrix, get_cb_scores
+from content_based import get_cb_scores
 from collaborative import build_matrix_factorization_scores
 from utils import calculate_sigmoid_weights, normalize_scores
-from ai.embedding.mediaEmbedding import embeddings_to_dataframe_batch
-from ai.embedding.userRatingEmbedding import build_user_embedding
-from ai.embedding.content_based_embedding import get_cb_scores as get_cb_scores_db
+# from ai.embedding.mediaEmbedding import embeddings_to_dataframe_batch
+# from ai.embedding.userRatingEmbedding import build_user_embedding
+from ai.recommendation.content_based_embedding import (
+    get_cb_scores as get_cb_scores_db
+)
+
 
 def get_hybrid_recommendations(user_id: int) -> pd.Series:
 
