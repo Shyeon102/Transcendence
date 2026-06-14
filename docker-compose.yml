@@ -43,17 +43,17 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
 
   worker:
-    build: ./ai
+    build: ./backend
     restart: unless-stopped
     volumes:
-      - ./ai:/app
+      - ./backend:/app
     env_file: .env
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: celery -A project worker --loglevel=info
+    command: celery -A project.celery worker --loglevel=info
 
   frontend:
     build: ./frontend

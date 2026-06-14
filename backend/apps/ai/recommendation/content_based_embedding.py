@@ -1,11 +1,14 @@
 from pgvector.django import CosineDistance
 import pandas as pd
+from embedding.models import MediaEmbedding, UserEmbedding
+
 
 def get_user_profile(user_id: int):
     try:
         return UserEmbedding.objects.get(user_id=user_id).embedding
     except UserEmbedding.DoesNotExist:
         return None
+
 
 def get_cb_scores(user_id: int):
     user_profile = get_user_profile(user_id)

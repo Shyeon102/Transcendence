@@ -4,9 +4,10 @@ from collaborative import build_matrix_factorization_scores
 from utils import calculate_sigmoid_weights, normalize_scores
 # from ai.embedding.mediaEmbedding import embeddings_to_dataframe_batch
 # from ai.embedding.userRatingEmbedding import build_user_embedding
-from ai.recommendation.content_based_embedding import (
+from apps.ai.recommendation.content_based_embedding import (
     get_cb_scores as get_cb_scores_db
 )
+from apps.media.models import Review, MediaInteraction
 
 
 def get_hybrid_recommendations(user_id: int) -> pd.Series:
@@ -45,7 +46,6 @@ def get_hybrid_recommendations(user_id: int) -> pd.Series:
     hybrid_scores = (cb_weight * cb_scores_norm) + (cf_weight * cf_scores_norm)
 
     return hybrid_scores.sort_values(ascending=False)
-
 
 
 # old version without embedding

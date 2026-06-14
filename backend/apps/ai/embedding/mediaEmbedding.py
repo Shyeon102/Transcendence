@@ -1,11 +1,11 @@
 import pandas as pd
 from openai import OpenAI
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from backend.apps.media.services.dataset import get_media_dataframe
+from apps.media.services.dataset import get_media_dataframe
+from .models import MediaEmbedding
+from django.db import transaction
 
 client = OpenAI()
+
 
 def build_source_text(row):
     return f"""
@@ -20,6 +20,7 @@ Rating: {row['avg_rating']} ({row['rating_count']} votes)
 Description:
 {row['description']}
 """
+
 
 def get_embedding(text: str):
     response = client.embeddings.create(
@@ -43,6 +44,7 @@ def get_embeddings_batch(texts):
     )
     return [item.embedding for item in response.data]
 
+
 def embeddings_to_dataframe_batch(batch_size=100):
     df = get_media_dataframe()
     df["source_text"] = df.apply(build_source_text, axis=1)
@@ -55,11 +57,7 @@ def embeddings_to_dataframe_batch(batch_size=100):
     return df
 
 # embedding to db
-"""
-this part need to be checked by backend team
-"""
-from .models import MediaEmbedding
-from django.db import transaction
+
 
 def save_embeddings_to_db(df: pd.DataFrame):
     with transaction.atomic():
