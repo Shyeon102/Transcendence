@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import AuthShell from '../components/AuthShell';
 import { useI18n } from '../lib/i18n';
 import { beginOAuth42Login } from '../lib/oauth';
-import { useSignupMutation } from '../store/slices/authApi';
+import { useSignupMutation } from '../store/api/authApi';
 import type { AuthErrorResponse } from '../store';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -18,7 +18,7 @@ export default function SignupPage() {
     password: '',
     passwordConfirm: '',
   });
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState("");
 
   const navigate = useNavigate();
   const { t } = useI18n();
@@ -39,7 +39,7 @@ export default function SignupPage() {
     }
 
     if (!EMAIL_REGEX.test(formData.email)) {
-      return t('validation.invalidEmail');
+      return t("validation.invalidEmail");
     }
 
     if (formData.username.length < 3 || !USERNAME_REGEX.test(formData.username)) {
@@ -47,14 +47,14 @@ export default function SignupPage() {
     }
 
     if (formData.password.length < 8) {
-      return t('validation.passwordTooShort');
+      return t("validation.passwordTooShort");
     }
 
     if (formData.password !== formData.passwordConfirm) {
-      return t('validation.passwordMismatch');
+      return t("validation.passwordMismatch");
     }
 
-    return '';
+    return "";
   };
 
   const getNicknameHint = () => {

@@ -26,6 +26,11 @@ class Media(models.Model):
     cast = models.TextField(blank=True)
     release_date = models.DateField(blank=True, null=True)
     image_url = models.URLField()
+    side_poster_url = models.URLField(blank=True, default="")
+
+    age_rating = models.CharField(max_length=20, blank=True, default="")
+    language = models.CharField(max_length=20, blank=True, default="")
+    runtime = models.PositiveIntegerField(blank=True, null=True)
 
     avg_rating = models.FloatField(default=0)
     rating_count = models.IntegerField(default=0)

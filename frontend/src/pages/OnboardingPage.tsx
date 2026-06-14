@@ -1,21 +1,35 @@
-import { useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { useI18n } from '../lib/i18n';
-import type { RootState } from '../store';
-import { updateProfile } from '../store/slices/authSlice';
-import { useUpdateMeMutation } from '../store/slices/authApi';
-import type { OnboardingAnswers } from '../types';
+import { useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useI18n } from "../lib/i18n";
+import type { RootState } from "../store";
+import { updateProfile } from "../store/slices/authSlice";
+import { useUpdateMeMutation } from "../store/api/authApi";
+import type { OnboardingAnswers } from "../types";
 
-const GENRE_IDS = ['drama', 'sciFi', 'thriller', 'animation', 'indie', 'documentary'] as const;
-const TITLE_IDS = ['poorThings', 'duneTwo', 'pastLives', 'theZone', 'perfectDays', 'anora'] as const;
+const GENRE_IDS = [
+  "drama",
+  "sciFi",
+  "thriller",
+  "animation",
+  "indie",
+  "documentary",
+] as const;
+const TITLE_IDS = [
+  "poorThings",
+  "duneTwo",
+  "pastLives",
+  "theZone",
+  "perfectDays",
+  "anora",
+] as const;
 const MIN_GENRES = 2;
 const MIN_TITLES = 3;
 
 const QUESTION_IDS = [
-  'allTimeFavorite',
-  'recentFavorite',
-  'friendRecommendation',
+  "allTimeFavorite",
+  "recentFavorite",
+  "friendRecommendation",
 ] as const satisfies readonly (keyof OnboardingAnswers)[];
 
 export default function OnboardingPage() {
@@ -25,21 +39,21 @@ export default function OnboardingPage() {
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateMe, { isLoading: isSaving }] = useUpdateMeMutation();
   const [selectedGenres, setSelectedGenres] = useState<number[]>(
-    user?.favoriteGenres ?? []
+    user?.favoriteGenres ?? [],
   );
   const [selectedTitles, setSelectedTitles] = useState<string[]>(
-    user?.favoriteTitles ?? []
+    user?.favoriteTitles ?? [],
   );
   const [answers, setAnswers] = useState<OnboardingAnswers>(
     user?.onboardingAnswers ?? {
-      allTimeFavorite: '',
-      recentFavorite: '',
-      friendRecommendation: '',
-    }
+      allTimeFavorite: "",
+      recentFavorite: "",
+      friendRecommendation: "",
+    },
   );
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState("");
   const areAnswersValid = QUESTION_IDS.every(
-    (questionId) => answers[questionId].trim().length > 0
+    (questionId) => answers[questionId].trim().length > 0,
   );
   const isSelectionValid =
     selectedGenres.length >= MIN_GENRES &&
@@ -50,33 +64,42 @@ export default function OnboardingPage() {
     () =>
       selectedGenres
         .map((genrePk) => GENRE_IDS[genrePk - 1])
-        .filter((genreId): genreId is (typeof GENRE_IDS)[number] => Boolean(genreId))
+        .filter((genreId): genreId is (typeof GENRE_IDS)[number] =>
+          Boolean(genreId),
+        )
         .map((genreId) => t(`onboarding.genreOptions.${genreId}`)),
-    [selectedGenres, t]
+    [selectedGenres, t],
   );
 
   const toggleGenre = (index: number) => {
     const genrePk = index + 1;
     if (errorMsg) {
-      setErrorMsg('');
+      setErrorMsg("");
     }
     setSelectedGenres((prev) =>
-      prev.includes(genrePk) ? prev.filter((value) => value !== genrePk) : [...prev, genrePk]
+      prev.includes(genrePk)
+        ? prev.filter((value) => value !== genrePk)
+        : [...prev, genrePk],
     );
   };
 
   const toggleTitle = (title: string) => {
     if (errorMsg) {
-      setErrorMsg('');
+      setErrorMsg("");
     }
     setSelectedTitles((prev) =>
-      prev.includes(title) ? prev.filter((value) => value !== title) : [...prev, title]
+      prev.includes(title)
+        ? prev.filter((value) => value !== title)
+        : [...prev, title],
     );
   };
 
-  const handleAnswerChange = (questionId: keyof OnboardingAnswers, value: string) => {
+  const handleAnswerChange = (
+    questionId: keyof OnboardingAnswers,
+    value: string,
+  ) => {
     if (errorMsg) {
-      setErrorMsg('');
+      setErrorMsg("");
     }
     setAnswers((prev) => ({
       ...prev,
@@ -87,11 +110,14 @@ export default function OnboardingPage() {
   const handleSubmit = async () => {
     if (!isSelectionValid) {
       const hasMinimumSelections =
-        selectedGenres.length >= MIN_GENRES && selectedTitles.length >= MIN_TITLES;
+        selectedGenres.length >= MIN_GENRES &&
+        selectedTitles.length >= MIN_TITLES;
       setErrorMsg(
         hasMinimumSelections
-          ? t('onboarding.questionValidation')
-          : t('onboarding.validation').replace('{genres}', String(MIN_GENRES)).replace('{titles}', String(MIN_TITLES))
+          ? t("onboarding.questionValidation")
+          : t("onboarding.validation")
+              .replace("{genres}", String(MIN_GENRES))
+              .replace("{titles}", String(MIN_TITLES)),
       );
       return;
     }
@@ -105,15 +131,15 @@ export default function OnboardingPage() {
     try {
       const updatedUser = await updateMe(payload).unwrap();
       dispatch(updateProfile(updatedUser));
-      navigate('/home');
+      navigate("/home");
     } catch (error) {
       const apiError = error as { message?: string };
-      if (user?.username === 'demo') {
+      if (user?.username === "demo") {
         dispatch(updateProfile(payload));
-        navigate('/home');
+        navigate("/home");
         return;
       }
-      setErrorMsg(apiError.message ?? t('onboarding.saveError'));
+      setErrorMsg(apiError.message ?? t("onboarding.saveError"));
     }
   };
 
@@ -122,15 +148,15 @@ export default function OnboardingPage() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 max-w-3xl">
           <p className="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#d63e2a]">
-            {t('onboarding.eyebrow')}
+            {t("onboarding.eyebrow")}
           </p>
           <h1 className="font-['Bebas_Neue'] text-[clamp(56px,11vw,110px)] leading-[0.9] tracking-[0.03em]">
-            {t('onboarding.titleLine1')}
+            {t("onboarding.titleLine1")}
             <br />
-            {t('onboarding.titleLine2')}
+            {t("onboarding.titleLine2")}
           </h1>
           <p className="mt-4 max-w-2xl font-['IBM_Plex_Serif'] text-sm italic leading-7 text-[#8a8474]">
-            {t('onboarding.description')}
+            {t("onboarding.description")}
           </p>
         </div>
 
@@ -140,10 +166,10 @@ export default function OnboardingPage() {
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.18em] text-[#8a8474]">
-                    {t('onboarding.genreEyebrow')}
+                    {t("onboarding.genreEyebrow")}
                   </p>
                   <h2 className="mt-2 font-['Bebas_Neue'] text-4xl tracking-[0.04em]">
-                    {t('onboarding.genreTitle')}
+                    {t("onboarding.genreTitle")}
                   </h2>
                 </div>
                 <div className="text-right">
@@ -151,7 +177,7 @@ export default function OnboardingPage() {
                     {selectedGenres.length}
                   </div>
                   <div className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">
-                    {t('onboarding.genreCounter')}
+                    {t("onboarding.genreCounter")}
                   </div>
                 </div>
               </div>
@@ -166,12 +192,14 @@ export default function OnboardingPage() {
                       onClick={() => toggleGenre(index)}
                       className={`border px-4 py-5 text-left transition ${
                         selected
-                          ? 'border-[#d63e2a] bg-[#d63e2a]/10'
-                          : 'border-[#f0ead0]/10 bg-[#1c1c19] hover:border-[#f0ead0]/25'
+                          ? "border-[#d63e2a] bg-[#d63e2a]/10"
+                          : "border-[#f0ead0]/10 bg-[#1c1c19] hover:border-[#f0ead0]/25"
                       }`}
                     >
                       <div className="mb-3 text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">
-                        {selected ? t('onboarding.selected') : t('onboarding.tapToSelect')}
+                        {selected
+                          ? t("onboarding.selected")
+                          : t("onboarding.tapToSelect")}
                       </div>
                       <div className="font-['Bebas_Neue'] text-3xl leading-none tracking-[0.04em]">
                         {t(`onboarding.genreOptions.${genreId}`)}
@@ -186,10 +214,10 @@ export default function OnboardingPage() {
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.18em] text-[#8a8474]">
-                    {t('onboarding.titleEyebrow')}
+                    {t("onboarding.titleEyebrow")}
                   </p>
                   <h2 className="mt-2 font-['Bebas_Neue'] text-4xl tracking-[0.04em]">
-                    {t('onboarding.titleTitle')}
+                    {t("onboarding.titleTitle")}
                   </h2>
                 </div>
                 <div className="text-right">
@@ -197,7 +225,7 @@ export default function OnboardingPage() {
                     {selectedTitles.length}
                   </div>
                   <div className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">
-                    {t('onboarding.titleCounter')}
+                    {t("onboarding.titleCounter")}
                   </div>
                 </div>
               </div>
@@ -213,12 +241,12 @@ export default function OnboardingPage() {
                       onClick={() => toggleTitle(titleLabel)}
                       className={`relative overflow-hidden border px-4 py-5 text-left transition ${
                         selected
-                          ? 'border-[#d4a847] bg-[#d4a847]/10'
-                          : 'border-[#f0ead0]/10 bg-[#1c1c19] hover:border-[#f0ead0]/25'
+                          ? "border-[#d4a847] bg-[#d4a847]/10"
+                          : "border-[#f0ead0]/10 bg-[#1c1c19] hover:border-[#f0ead0]/25"
                       }`}
                     >
                       <div className="mb-12 text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">
-                        #{String(index + 1).padStart(2, '0')}
+                        #{String(index + 1).padStart(2, "0")}
                       </div>
                       <div className="font-['IBM_Plex_Serif'] text-base italic leading-6 text-[#f0ead0]">
                         {titleLabel}
@@ -233,32 +261,41 @@ export default function OnboardingPage() {
               <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.18em] text-[#8a8474]">
-                    {t('onboarding.questionEyebrow')}
+                    {t("onboarding.questionEyebrow")}
                   </p>
                   <h2 className="mt-2 font-['Bebas_Neue'] text-4xl tracking-[0.04em]">
-                    {t('onboarding.questionTitle')}
+                    {t("onboarding.questionTitle")}
                   </h2>
                 </div>
                 <div className="text-right">
                   <div className="font-['Bebas_Neue'] text-4xl leading-none text-[#6bbf72]">
-                    {QUESTION_IDS.filter((questionId) => answers[questionId].trim()).length}
+                    {
+                      QUESTION_IDS.filter((questionId) =>
+                        answers[questionId].trim(),
+                      ).length
+                    }
                   </div>
                   <div className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">
-                    {t('onboarding.questionCounter')}
+                    {t("onboarding.questionCounter")}
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
                 {QUESTION_IDS.map((questionId) => (
-                  <div key={questionId} className="border border-[#f0ead0]/10 bg-[#1c1c19] p-4">
+                  <div
+                    key={questionId}
+                    className="border border-[#f0ead0]/10 bg-[#1c1c19] p-4"
+                  >
                     <label className="mb-2 block text-[10px] uppercase tracking-[0.12em] text-[#c8c2a8]">
                       {t(`onboarding.questions.${questionId}`)}
                     </label>
                     <textarea
                       value={answers[questionId]}
-                      onChange={(e) => handleAnswerChange(questionId, e.target.value)}
-                      placeholder={t('onboarding.questionPlaceholder')}
+                      onChange={(e) =>
+                        handleAnswerChange(questionId, e.target.value)
+                      }
+                      placeholder={t("onboarding.questionPlaceholder")}
                       className="min-h-24 w-full resize-y border border-[#f0ead0]/10 bg-[#141412] px-3 py-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
                     />
                   </div>
@@ -269,16 +306,18 @@ export default function OnboardingPage() {
 
           <aside className="h-fit border border-[#f0ead0]/10 bg-[#141412] p-6">
             <p className="mb-3 text-[10px] uppercase tracking-[0.18em] text-[#8a8474]">
-              {t('onboarding.summaryEyebrow')}
+              {t("onboarding.summaryEyebrow")}
             </p>
             <h2 className="font-['Bebas_Neue'] text-4xl tracking-[0.04em]">
-              {user?.firstName ? `${user.firstName.toUpperCase()}'S TASTE` : t('onboarding.summaryTitle')}
+              {user?.firstName
+                ? `${user.firstName.toUpperCase()}'S TASTE`
+                : t("onboarding.summaryTitle")}
             </h2>
 
             <div className="mt-7 space-y-6">
               <div>
                 <div className="mb-2 text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">
-                  {t('onboarding.selectedGenres')}
+                  {t("onboarding.selectedGenres")}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {selectedGenreLabels.length ? (
@@ -292,7 +331,7 @@ export default function OnboardingPage() {
                     ))
                   ) : (
                     <span className="text-xs italic text-[#8a8474]">
-                      {t('onboarding.emptyGenres')}
+                      {t("onboarding.emptyGenres")}
                     </span>
                   )}
                 </div>
@@ -300,18 +339,21 @@ export default function OnboardingPage() {
 
               <div>
                 <div className="mb-2 text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">
-                  {t('onboarding.selectedTitles')}
+                  {t("onboarding.selectedTitles")}
                 </div>
                 <div className="space-y-2">
                   {selectedTitles.length ? (
                     selectedTitles.map((title) => (
-                      <div key={title} className="border-l border-[#d4a847] pl-3 text-sm text-[#c8c2a8]">
+                      <div
+                        key={title}
+                        className="border-l border-[#d4a847] pl-3 text-sm text-[#c8c2a8]"
+                      >
                         {title}
                       </div>
                     ))
                   ) : (
                     <span className="text-xs italic text-[#8a8474]">
-                      {t('onboarding.emptyTitles')}
+                      {t("onboarding.emptyTitles")}
                     </span>
                   )}
                 </div>
@@ -319,16 +361,20 @@ export default function OnboardingPage() {
 
               <div>
                 <div className="mb-2 text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">
-                  {t('onboarding.answerSummary')}
+                  {t("onboarding.answerSummary")}
                 </div>
                 <div className="space-y-3">
                   {QUESTION_IDS.map((questionId) => (
-                    <div key={questionId} className="border-l border-[#6bbf72] pl-3">
+                    <div
+                      key={questionId}
+                      className="border-l border-[#6bbf72] pl-3"
+                    >
                       <div className="text-[9px] uppercase tracking-[0.12em] text-[#8a8474]">
                         {t(`onboarding.questions.${questionId}`)}
                       </div>
                       <div className="mt-1 text-sm text-[#c8c2a8]">
-                        {answers[questionId].trim() || t('onboarding.emptyAnswer')}
+                        {answers[questionId].trim() ||
+                          t("onboarding.emptyAnswer")}
                       </div>
                     </div>
                   ))}
@@ -337,7 +383,9 @@ export default function OnboardingPage() {
             </div>
 
             {errorMsg ? (
-              <p className="mt-6 text-[11px] tracking-[0.06em] text-[#ff4f38]">{errorMsg}</p>
+              <p className="mt-6 text-[11px] tracking-[0.06em] text-[#ff4f38]">
+                {errorMsg}
+              </p>
             ) : null}
 
             <button
@@ -346,7 +394,7 @@ export default function OnboardingPage() {
               disabled={!isSelectionValid || isSaving}
               className="mt-8 w-full bg-[#d63e2a] px-4 py-4 text-[11px] uppercase tracking-[0.15em] text-[#f0ead0] transition hover:bg-[#ff4f38] disabled:cursor-not-allowed disabled:bg-[#6c281f] disabled:text-[#c39a92]"
             >
-              {isSaving ? t('onboarding.saving') : t('onboarding.complete')}
+              {isSaving ? t("onboarding.saving") : t("onboarding.complete")}
             </button>
           </aside>
         </div>

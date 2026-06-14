@@ -7,7 +7,9 @@ pgvector
 redis
 numpy
 
-channels
+whitenoise
+daphne
+channels-redis
 
 psycopg2-binary
 django-redis
@@ -15,3 +17,4 @@ requests
 pandas
 
 celery 
+redis
