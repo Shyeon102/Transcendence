@@ -48,6 +48,9 @@ class ReviewCreateView(APIView):
         return Response({'reviews': serializer.data},
                         status=status.HTTP_200_OK)
 
+    def put(self, request, media_id, review_id):
+        return self.patch(request, media_id, review_id)
+
     def post(self, request, media_id):
         media = get_object_or_404(Media, pk=media_id)
         serializer = ReviewSerializer(data=request.data)
@@ -94,7 +97,7 @@ class MediaInteractionView(APIView):
         data = [
             {
                 'media_id': interaction.media.id,
-                'interaction_type': interaction.interaction_type,
+                'action': interaction.action,
                 'media_title': interaction.media.title,
             }
             for interaction in interactions
@@ -102,15 +105,15 @@ class MediaInteractionView(APIView):
         return Response({'interactions': data}, status=status.HTTP_200_OK)
 
     def delete(self, request, media_id):
-        interaction_type = request.data.get('interaction_type')
-        if not interaction_type:
+        action = request.data.get('action')
+        if not action:
             return Response(
-                {'error': 'interaction_type is required.'},
+                {'error': 'action is required.'},
                 status=status.HTTP_400_BAD_REQUEST)
 
         user = request.user
         interaction = user.interactions.filter(
-            media_id=media_id, interaction_type=interaction_type).first()
+            media_id=media_id, action=action).first()
         if interaction:
             interaction.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
