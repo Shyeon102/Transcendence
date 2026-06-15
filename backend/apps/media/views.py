@@ -2,8 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from django.db import IntegrityError
 
-from apps.media.models import Media
+from apps.media.models import Media, MediaInteraction
 from apps.media.serializers import (
     MediaInteractionSerializer, MediaSerializer, ReviewSerializer
 )
@@ -48,15 +49,35 @@ class ReviewCreateView(APIView):
         return Response({'reviews': serializer.data},
                         status=status.HTTP_200_OK)
 
+    def put(self, request, media_id, review_id):
+        return self.patch(request, media_id, review_id)
+
     def post(self, request, media_id):
         media = get_object_or_404(Media, pk=media_id)
+
+        if media.reviews.filter(user=request.user).exists():
+            return Response(
+                {"error": "Review already exists for this media."},
+                status=status.HTTP_409_CONFLICT,
+            )
+
         serializer = ReviewSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user, media=media)
-            return Response({'review': serializer.data},
-                            status=status.HTTP_201_CREATED)
-        return Response({'errors': serializer.errors},
-                        status=status.HTTP_400_BAD_REQUEST)
+            try:
+                serializer.save(user=request.user, media=media)
+            except IntegrityError:
+                return Response(
+                    {'error': 'Review already exists for this media.'},
+                    status=status.HTTP_409_CONFLICT,
+                )
+            return Response(
+                {'review': serializer.data},
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(
+            {'errors': serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     def patch(self, request, media_id, review_id):
         media = get_object_or_404(Media, pk=media_id)
@@ -81,12 +102,34 @@ class ReviewCreateView(APIView):
 class MediaInteractionView(APIView):
     def post(self, request, media_id):
         serializer = MediaInteractionSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user, media_id=media_id)
-            return Response({'interaction': serializer.data},
-                            status=status.HTTP_200_OK)
-        return Response({'errors': serializer.errors},
-                        status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response({'errors': serializer.errors},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        media = get_object_or_404(Media, pk=media_id)
+        action = serializer.validated_data['action']
+
+        interaction, created = MediaInteraction.objects.get_or_create(
+            user=request.user,
+            media=media,
+            action=action,
+        )
+        response_status = (
+            status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
+
+        return Response(
+            {
+                'interaction': {
+                    'id': interaction.id,
+                    'media': interaction.media_id,
+                    'action': interaction.action,
+                    'created_at': interaction.created_at,
+                },
+                'created': created,
+            },
+            status=response_status,
+        )
 
     def get(self, request):
         user = request.user
@@ -94,7 +137,7 @@ class MediaInteractionView(APIView):
         data = [
             {
                 'media_id': interaction.media.id,
-                'interaction_type': interaction.interaction_type,
+                'action': interaction.action,
                 'media_title': interaction.media.title,
             }
             for interaction in interactions
@@ -102,15 +145,15 @@ class MediaInteractionView(APIView):
         return Response({'interactions': data}, status=status.HTTP_200_OK)
 
     def delete(self, request, media_id):
-        interaction_type = request.data.get('interaction_type')
-        if not interaction_type:
+        action = request.data.get('action')
+        if not action:
             return Response(
-                {'error': 'interaction_type is required.'},
+                {'error': 'action is required.'},
                 status=status.HTTP_400_BAD_REQUEST)
 
         user = request.user
         interaction = user.interactions.filter(
-            media_id=media_id, interaction_type=interaction_type).first()
+            media_id=media_id, action=action).first()
         if interaction:
             interaction.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
