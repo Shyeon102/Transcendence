@@ -36,8 +36,6 @@ type ProfileEditFormProps = {
   saveLabel: string;
   sectionTitle: string;
   settingsTitle: string;
-  twoFactorLabel: string;
-  twoFactorDescription: string;
   usernameLabel: string;
   bioLabel: string;
   passwordSectionLabel: string;

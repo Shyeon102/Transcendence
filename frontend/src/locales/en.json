@@ -9,6 +9,71 @@
     "mypage": "My Page",
     "info": "Info"
   },
+  "admin": {
+    "eyebrow": "Admin Mode",
+    "title": "ADMIN DASHBOARD",
+    "forbiddenTitle": "Admin permission required.",
+    "forbiddenDescription": "Only staff users can access this page.",
+    "tabs": {
+      "reports": "Reports",
+      "users": "Users"
+    },
+    "stats": {
+      "pending": "Pending Reports",
+      "approved": "Approved Reports",
+      "activeUsers": "Active Users",
+      "bannedUsers": "Banned Users"
+    },
+    "reportStatus": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "reportTypes": {
+      "spam": "Spam",
+      "abuse": "Abuse",
+      "nsfw": "Inappropriate",
+      "copyright": "Copyright"
+    },
+    "targets": {
+      "post": "Post",
+      "comment": "Comment"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "ban": "Ban",
+      "cancel": "Cancel",
+      "confirmBan": "Confirm Ban"
+    },
+    "reports": {
+      "title": "Report List",
+      "error": "Failed to load reports.",
+      "empty": "No reports to show.",
+      "emptyDescription": "There are no reports for the selected status.",
+      "untitledTarget": "Untitled target",
+      "noReason": "No report reason was provided.",
+      "reporter": "Reporter",
+      "processed": "Processed",
+      "processedBy": "Processed by"
+    },
+    "users": {
+      "title": "User List",
+      "error": "Failed to load users.",
+      "empty": "No users to show.",
+      "emptyDescription": "There is no user data to manage.",
+      "username": "Username",
+      "email": "Email",
+      "status": "Status",
+      "joined": "Joined",
+      "actions": "Actions",
+      "active": "Active",
+      "banned": "Banned",
+      "banTitle": "Ban this user?",
+      "banDescription": "Target user:"
+    }
+  },
   "infoPage": {
     "eyebrow": "ft_transcendence",
     "title": "Curated auth and profile MVP for the Transcendence frontend.",
@@ -190,10 +255,12 @@
     "textPlaceholder": "Write a short reaction or recommendation point.",
     "submit": "Add Review",
     "validation": "Please enter the title, type, star rating, and review text.",
-    "markSpoiler": "Contains spoiler",
-    "spoiler": "Spoiler",
-    "spoilerHidden": "This review contains spoilers.",
-    "showSpoiler": "Show spoiler",
+    "visibilityLabel": "Visibility",
+    "visibility": {
+      "public": "Public",
+      "followers": "Followers",
+      "private": "Private"
+    },
     "edit": "Edit",
     "delete": "Delete",
     "sortLabel": "Sort",

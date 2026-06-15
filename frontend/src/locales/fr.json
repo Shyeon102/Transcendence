@@ -9,6 +9,71 @@
     "mypage": "Ma page",
     "info": "Info"
   },
+  "admin": {
+    "eyebrow": "Mode admin",
+    "title": "ADMIN DASHBOARD",
+    "forbiddenTitle": "Permission admin requise.",
+    "forbiddenDescription": "Seuls les utilisateurs staff peuvent acceder a cette page.",
+    "tabs": {
+      "reports": "Signalements",
+      "users": "Utilisateurs"
+    },
+    "stats": {
+      "pending": "Signalements en attente",
+      "approved": "Signalements approuves",
+      "activeUsers": "Utilisateurs actifs",
+      "bannedUsers": "Utilisateurs bannis"
+    },
+    "reportStatus": {
+      "all": "Tous",
+      "pending": "En attente",
+      "approved": "Approuve",
+      "rejected": "Rejete"
+    },
+    "reportTypes": {
+      "spam": "Spam",
+      "abuse": "Abus",
+      "nsfw": "Inapproprie",
+      "copyright": "Copyright"
+    },
+    "targets": {
+      "post": "Post",
+      "comment": "Commentaire"
+    },
+    "actions": {
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "ban": "Bannir",
+      "cancel": "Annuler",
+      "confirmBan": "Confirmer"
+    },
+    "reports": {
+      "title": "Liste des signalements",
+      "error": "Impossible de charger les signalements.",
+      "empty": "Aucun signalement a afficher.",
+      "emptyDescription": "Aucun signalement ne correspond au statut choisi.",
+      "untitledTarget": "Cible sans titre",
+      "noReason": "Aucune raison fournie.",
+      "reporter": "Auteur",
+      "processed": "Traite",
+      "processedBy": "Traite par"
+    },
+    "users": {
+      "title": "Liste des utilisateurs",
+      "error": "Impossible de charger les utilisateurs.",
+      "empty": "Aucun utilisateur a afficher.",
+      "emptyDescription": "Aucune donnee utilisateur a gerer.",
+      "username": "Pseudo",
+      "email": "Email",
+      "status": "Statut",
+      "joined": "Inscrit",
+      "actions": "Actions",
+      "active": "Actif",
+      "banned": "Banni",
+      "banTitle": "Bannir cet utilisateur ?",
+      "banDescription": "Utilisateur cible :"
+    }
+  },
   "infoPage": {
     "eyebrow": "ft_transcendence",
     "title": "MVP auth et profil pour le frontend Transcendence.",
@@ -190,10 +255,12 @@
     "textPlaceholder": "Ecrivez une courte reaction ou un point de recommandation.",
     "submit": "Ajouter une critique",
     "validation": "Veuillez saisir le titre, le type, la note et le texte de la critique.",
-    "markSpoiler": "Contient un spoiler",
-    "spoiler": "Spoiler",
-    "spoilerHidden": "Cette critique contient des spoilers.",
-    "showSpoiler": "Afficher le spoiler",
+    "visibilityLabel": "Visibilite",
+    "visibility": {
+      "public": "Public",
+      "followers": "Abonnes",
+      "private": "Prive"
+    },
     "edit": "Modifier",
     "delete": "Supprimer",
     "sortLabel": "Tri",
