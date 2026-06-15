@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from django.db import IntegrityError # for protect sametime request race 
+from django.db import IntegrityError
 
 from apps.media.models import Media, MediaInteraction
 from apps.media.serializers import (
@@ -65,11 +65,15 @@ class ReviewCreateView(APIView):
         if serializer.is_valid():
             try:
                 serializer.save(user=request.user, media=media)
-            except:
+            except IntegrityError:
                 return Response(
-                    {'review': serializer.data},
-                    status=status.HTTP_201_CREATED
+                    {'error': 'Review already exists for this media.'},
+                    status=status.HTTP_409_CONFLICT,
                 )
+            return Response(
+                {'review': serializer.data},
+                status=status.HTTP_201_CREATED,
+            )
         return Response(
             {'errors': serializer.errors},
             status=status.HTTP_400_BAD_REQUEST
@@ -104,6 +108,20 @@ class MediaInteractionView(APIView):
 
         media = get_object_or_404(Media, pk=media_id)
         action = serializer.validated_data['action']
+
+        if action == "like":
+            MediaInteraction.objects.filter(
+                user=request.user,
+                media=media,
+                action="dislike"
+            ).delete()
+
+        if action == "dislike":
+            MediaInteraction.objects.filter(
+                user=request.user,
+                media=media,
+                action="like"
+            ).delete()
 
         interaction, created = MediaInteraction.objects.get_or_create(
             user=request.user,
@@ -140,19 +158,19 @@ class MediaInteractionView(APIView):
         ]
         return Response({'interactions': data}, status=status.HTTP_200_OK)
 
-    def delete(self, request, media_id):
-        action = request.data.get('action')
-        if not action:
-            return Response(
-                {'error': 'action is required.'},
-                status=status.HTTP_400_BAD_REQUEST)
-
+    def delete(self, request, media_id, action):
         user = request.user
+
         interaction = user.interactions.filter(
-            media_id=media_id, action=action).first()
+            media_id=media_id,
+            action=action
+        ).first()
+
         if interaction:
             interaction.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=204)
+
         return Response(
-            {'error': 'Interaction not found.'}, status=status.
-            HTTP_404_NOT_FOUND)
+            {"error": "Interaction not found"},
+            status=404
+        )
