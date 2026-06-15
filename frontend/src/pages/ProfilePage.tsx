@@ -21,6 +21,7 @@ const initialReviews: ReviewItem[] = [
     poster: '🎬',
     text: 'A deliriously chaotic triumph. Lanthimos at full throttle - grotesque, gorgeous, and genuinely funny.',
     rating: 4,
+    visibility: 'public',
     isOwn: true,
   },
   {
@@ -31,7 +32,7 @@ const initialReviews: ReviewItem[] = [
     poster: '📺',
     text: "Villeneuve's scale is unmatched. The Harkonnen arena sequence alone is worth the price of admission.",
     rating: 5,
-    spoiler: true,
+    visibility: 'followers',
     isOwn: true,
   },
   {
@@ -42,40 +43,8 @@ const initialReviews: ReviewItem[] = [
     poster: '🎞️',
     text: "Celine Song's debut is devastating in its restraint. The final scene will stay with you for weeks.",
     rating: 5,
+    visibility: 'private',
     isOwn: true,
-  },
-];
-
-const posts = [
-  {
-    board: '추천게시판',
-    theme: 'recommend',
-    title: 'A24 영화 입문하려는 분들께 꼭 봐야 할 순서 추천합니다',
-    body: '처음 A24를 접하는 분들이 많이 물어보셔서 제가 생각하는 최적의 감상 순서를 정리해봤습니다.',
-    likes: 84,
-    comments: 31,
-    views: '1.2k',
-    date: '2025.04.02',
-  },
-  {
-    board: '자유게시판',
-    theme: 'free',
-    title: 'Dune Part Two IMAX로 봤는데 진짜 압도적이었습니다',
-    body: 'CGV 용산 IMAX로 봤는데 음향이 진짜 강했습니다. 이건 무조건 극장에서 봐야 하는 영화입니다.',
-    likes: 52,
-    comments: 18,
-    views: '876',
-    date: '2025.03.20',
-  },
-  {
-    board: '정보게시판',
-    theme: 'info',
-    title: '빌뇌브 감독 필모그래피 완전 정복 - 데뷔작부터 Dune까지',
-    body: '드니 빌뇌브가 어떻게 할리우드 최정상 SF 감독이 됐는지 초기작부터 최근작까지 정리했습니다.',
-    likes: 117,
-    comments: 44,
-    views: '2.4k',
-    date: '2025.02.11',
   },
 ];
 
@@ -91,7 +60,7 @@ const watchlist = [
   ['🎥', '+80 more'],
 ] as const;
 
-type TabKey = 'reviews' | 'posts' | 'watchlist';
+type TabKey = 'reviews' | 'watchlist';
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
@@ -104,7 +73,6 @@ export default function ProfilePage() {
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || displayUsername || t('home.defaultDisplayName');
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
   const [isEditing, setIsEditing] = useState(false);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
   const [reviews, setReviews] = useState<ReviewItem[]>(isDemo ? initialReviews : []);
   const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl ?? '');
@@ -120,7 +88,11 @@ export default function ProfilePage() {
     return null;
   }
 
-  const isOwnProfile = !profileId || profileId === String(user.id);
+  const isOwnProfile =
+    !profileId ||
+    profileId === 'me' ||
+    profileId === String(user.id) ||
+    profileId === user.username;
 
   const initials = fullName
     .split(' ')
@@ -128,7 +100,6 @@ export default function ProfilePage() {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('') || displayUsername.slice(0, 2).toUpperCase();
-  const userPosts = isDemo ? posts : [];
   const userWatchlist = isDemo ? watchlist : [];
 
   const handleProfileSave = async () => {
@@ -161,18 +132,11 @@ export default function ProfilePage() {
 
   const profileStats = [
     { label: t('home.reviews'), value: String(reviews.length) },
-    { label: t('home.posts'), value: String(userPosts.length) },
     { label: t('home.watchlist'), value: String(userWatchlist.length) },
     { label: t('home.followers'), value: isDemo ? '31' : '0' },
   ];
 
   const settingsToggles = [
-    {
-      label: t('home.twoFactorAuth'),
-      description: t('home.twoFactorAuthDesc'),
-      value: twoFactorEnabled,
-      onToggle: setTwoFactorEnabled,
-    },
     {
       label: t('home.emailNotifications'),
       description: t('home.emailNotificationsDesc'),
@@ -240,7 +204,6 @@ export default function ProfilePage() {
             <div className="mb-7 flex border-b border-[#f0ead0]/10">
               {[
                 ['reviews', t('home.reviews'), String(reviews.length)],
-                ['posts', t('home.communityPosts'), String(userPosts.length)],
                 ['watchlist', t('home.watchlist'), String(userWatchlist.length)],
               ].map(([key, label, count]) => (
                 <button
@@ -265,45 +228,6 @@ export default function ProfilePage() {
                   reviews={reviews}
                 />
               </>
-            ) : null}
-
-            {activeTab === 'posts' ? (
-              <div className="space-y-3">
-                {userPosts.length ? (
-                  userPosts.map((post) => (
-                    <article
-                      key={post.title}
-                      className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/25"
-                    >
-                      <div className="mb-2">
-                        <span
-                          className={`inline-block border px-2.5 py-1 text-[8px] uppercase tracking-[0.14em] ${
-                            post.theme === 'recommend'
-                              ? 'border-[#d4a847]/30 bg-[#d4a847]/10 text-[#d4a847]'
-                              : post.theme === 'info'
-                                ? 'border-[#6bbf72]/30 bg-[#6bbf72]/10 text-[#6bbf72]'
-                                : 'border-[#f0ead0]/10 text-[#8a8474]'
-                          }`}
-                        >
-                          {post.board}
-                        </span>
-                      </div>
-                      <h2 className="mb-2 text-[13px] font-bold leading-6 tracking-[0.04em]">{post.title}</h2>
-                      <p className="mb-3 font-['IBM_Plex_Serif'] text-xs font-light italic leading-6 text-[#8a8474]">
-                        {post.body}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-4 text-[9px] tracking-[0.08em] text-[#8a8474]">
-                        <span>♡ {post.likes}</span>
-                        <span>💬 {post.comments}</span>
-                        <span>👁 {post.views}</span>
-                        <span className="ml-auto">{post.date}</span>
-                      </div>
-                    </article>
-                  ))
-                ) : (
-                  <EmptyState title={t('mypage.empty')} />
-                )}
-              </div>
             ) : null}
 
             {activeTab === 'watchlist' ? (
@@ -347,8 +271,6 @@ export default function ProfilePage() {
               sectionTitle={t('home.editPanelTitle')}
               settingsTitle={t('home.accountSettings')}
               toggles={settingsToggles}
-              twoFactorDescription={t('home.twoFactorAuthDesc')}
-              twoFactorLabel={t('home.twoFactorAuth')}
               usernameLabel={t('home.username')}
             />
           ) : (

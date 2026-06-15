@@ -11,6 +11,7 @@ import ProfilePage from './pages/ProfilePage'
 import MediaDetailPage from './pages/MediaDetailPage'
 import ChatRoomListPage from './pages/ChatRoomListPage'
 import ChatRoomPage from './pages/ChatRoomPage'
+import AdminPage from './pages/AdminPage';
 import { OAUTH_42_CALLBACK_PATH } from './lib/oauth';
 import MyPagePage from './pages/MyPagePage';
 import OnboardingPage from './pages/OnboardingPage';
@@ -19,7 +20,8 @@ import type { RootState } from './store';
 
 function ProfileRedirect() {
   const user = useSelector((state: RootState) => state.auth.user);
-  return <Navigate to={`/profile/${user?.id ?? 0}`} replace />;
+  const profileKey = user?.id ? String(user.id) : user?.username ?? 'me';
+  return <Navigate to={`/profile/${profileKey}`} replace />;
 }
 
 export default function App() {
@@ -65,6 +67,14 @@ export default function App() {
               element={
                 <PrivateRoute>
                   <MyPagePage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <PrivateRoute>
+                  <AdminPage />
                 </PrivateRoute>
               }
             />

@@ -284,6 +284,13 @@ export default function OnboardingPage() {
                   <div className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">
                     {t("onboarding.questionCounter")}
                   </div>
+                  <button
+                    type="button"
+                    onClick={handleSkipAnswers}
+                    className="mt-3 border border-[#f0ead0]/10 bg-transparent px-3 py-2 text-[9px] uppercase tracking-[0.14em] text-[#8a8474] transition hover:border-[#f0ead0]/25 hover:text-[#f0ead0]"
+                  >
+                    {t('onboarding.skipQuestions')}
+                  </button>
                 </div>
               </div>
 
