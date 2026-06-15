@@ -47,9 +47,10 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class MediaInteractionSerializer(serializers.ModelSerializer):
-    action = serializers.ChoiceField(
+    action = serializers.ChoiceField (
         choices = ["like", "dislike", "watchlist", "watched"]
     )
+
     class Meta:
         model = MediaInteraction
         fields = ("id", "media", "action", "created_at")
