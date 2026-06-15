@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from django.db import IntegrityError # for protect sametime request race 
+from django.db import IntegrityError
 
 from apps.media.models import Media, MediaInteraction
 from apps.media.serializers import (
@@ -65,11 +65,15 @@ class ReviewCreateView(APIView):
         if serializer.is_valid():
             try:
                 serializer.save(user=request.user, media=media)
-            except:
+            except IntegrityError:
                 return Response(
-                    {'review': serializer.data},
-                    status=status.HTTP_201_CREATED
+                    {'error': 'Review already exists for this media.'},
+                    status=status.HTTP_409_CONFLICT,
                 )
+            return Response(
+                {'review': serializer.data},
+                status=status.HTTP_201_CREATED,
+            )
         return Response(
             {'errors': serializer.errors},
             status=status.HTTP_400_BAD_REQUEST
