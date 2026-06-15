@@ -4,7 +4,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError # for protect sametime request race 
 
-from apps.media.models import Media
+from apps.media.models import Media, MediaInteraction
 from apps.media.serializers import (
     MediaInteractionSerializer, MediaSerializer, ReviewSerializer
 )
@@ -98,12 +98,34 @@ class ReviewCreateView(APIView):
 class MediaInteractionView(APIView):
     def post(self, request, media_id):
         serializer = MediaInteractionSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user, media_id=media_id)
-            return Response({'interaction': serializer.data},
-                            status=status.HTTP_200_OK)
-        return Response({'errors': serializer.errors},
-                        status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            return Response({'errors': serializer.errors},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        media = get_object_or_404(Media, pk=media_id)
+        action = serializer.validated_data['action']
+
+        interaction, created = MediaInteraction.objects.get_or_create(
+            user=request.user,
+            media=media,
+            action=action,
+        )
+        response_status = (
+            status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
+
+        return Response(
+            {
+                'interaction': {
+                    'id': interaction.id,
+                    'media': interaction.media_id,
+                    'action': interaction.action,
+                    'created_at': interaction.created_at,
+                },
+                'created': created,
+            },
+            status=response_status,
+        )
 
     def get(self, request):
         user = request.user
