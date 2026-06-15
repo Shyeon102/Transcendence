@@ -89,7 +89,6 @@ class MediaInteraction(models.Model):
         ('like', 'Likes'),
         ('dislike', 'Dislike'),
         ('watchlist', 'Watchlist'),
-        ('watched', 'Watched'),
     )
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -102,7 +101,7 @@ class MediaInteraction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'media', 'action')
+        unique_together = ('user', 'media')
         indexes = [
             models.Index(fields=['user', 'action']),
             models.Index(fields=['media', 'action']),

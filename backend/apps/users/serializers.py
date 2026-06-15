@@ -31,12 +31,6 @@ class UserSerializer(serializers.ModelSerializer):
             "onboarding_answers",
         ]
 
-
-class SimpleUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("id", "username")
-
     def update(self, instance, validated_data):
         # Remove frontend-only fields before delegating to super()
         validated_data.pop("favorite_titles", None)
