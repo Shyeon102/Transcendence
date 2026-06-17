@@ -122,12 +122,6 @@ class MediaInteractionView(APIView):
                 action="like"
             )
 
-            MediaInteraction.objects.get_or_create(
-                user=request.user,
-                media=media,
-                action="watched"
-            )
-
         if action == "dislike":
             MediaInteraction.objects.filter(
                 user=request.user,
@@ -139,12 +133,6 @@ class MediaInteractionView(APIView):
                 user=request.user,
                 media=media,
                 action="dislike"
-            )
-
-            MediaInteraction.objects.get_or_create(
-                user=request.user,
-                media=media,
-                action="watched"
             )
 
         interaction, created = MediaInteraction.objects.get_or_create(
