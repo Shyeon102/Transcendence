@@ -1,10 +1,10 @@
 import numpy as np
 from django.db import transaction
 from apps.users.models import User
-from ai.models import UserEmbedding, MediaEmbedding
-from media.models import Review, MediaInteraction
+from apps.ai.models import UserEmbedding, MediaEmbedding
+from apps.media.models import Review, MediaInteraction
 
-from ai import RATING_WEIGHT, ACTION_WEIGHT
+from apps.ai.client import RATING_WEIGHT, ACTION_WEIGHT
 
 
 def _gather_weighted_signals(user: User) -> list[tuple[int, float]]:

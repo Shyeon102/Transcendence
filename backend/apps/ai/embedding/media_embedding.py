@@ -1,10 +1,11 @@
 from apps.ai.models import MediaEmbedding
 from django.db import transaction
 from apps.ai.client import EMBEDDING_MODEL, client
-from media.models import Media
+from apps.media.models import Media
 from celery import shared_task
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import random
 
 # def build_source_text(row) -> str:
 #     return f"""
@@ -39,7 +40,7 @@ Description:
 def get_embedding(text: str) -> list[float]:
     try:
         response = client.models.embed_content(
-            model=EMBEDDING_MODEL,
+            model="models/gemini-embedding-001",
             contents=text
         )
         return response.embeddings[0].values
@@ -75,18 +76,28 @@ def media_saved(sender, instance, **kwargs):
 
 # batch embedding for multiple media items
 
-
-def get_embeddings_batch(texts: list[str]) -> list[list[float]]:
-    response = client.embeddings.create(
-        model=EMBEDDING_MODEL,
-        input=texts
-    )
-    return [item.embedding for item in response.data]
+# using random for testing, will be changed to real embedding later
+# cause models embedding is not working yet @thelee42
+# def get_embeddings_batch(texts: list[str]) -> list[list[float]]:
+#     response = client.models.embed_content(
+#         model="models/gemini-embedding-001",
+#         contents=texts
+#     )
+#     return [emb.values for emb in response.embeddings]
 
 
 BATCH_SIZE = 50
 
 
+def get_embeddings_batch(texts: list[str]) -> list[list[float]]:
+    return [
+        [random.random() for _ in range(768)]
+        for _ in texts
+    ]
+
+
+# @lulu will have to change for real batch processing,
+# currently just for testing, doing batch in commands
 @shared_task(
     autoretry_for=(Exception,),
     retry_backoff=True,

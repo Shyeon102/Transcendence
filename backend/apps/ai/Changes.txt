@@ -1,0 +1,38 @@
+Petit recap des changements
+
+Endpoint :
+Le endpoint fonctionnait deja au precedent commit de tout a l'heure mais jai simplifie la view en en gardant une
+qui fait un melange des deux que j'avais, jai laisse en commentaire celle qui n'est plus utilise
+
+J'ai deplace le contenu du _init_.py dans un nouveau fichier client.py
+ _init_.py ne peux pas recuperer les import parce qu'ils ne sont pas encore installe (il est lance avant)
+
+
+Probleme de models en testant :
+On ne pourra pas utiliser gemini, il ne possede pas models d'embedding avec une sortie (output)
+inferieur a 3072 ce qui ne peut pas etre supporte par notre setup
+j'ai commente get_embeddings_batch qui utilise gemini ou autre AI model pour utiliser une fonction random
+qui permet au moins de tester l'embedding
+
+Je te donnerai la cle OpenAi pour utiliser un de leur modele en 1536 plus tard quand je l'aurais configure
+
+
+Je te disais pas que j'avais pas reussi a faire le endpoint par message
+Contrairement a toutes les autres applications (excepte chat), ai utilise tres peu l'endpoint
+Ca correspont a rien pour, le probleme que j'avais c'est qu'aucune fonction en appele une autre
+et je comprenais pas assez la logique pour implementer ca en plein milieu du reste de notre projet
+
+Embedding marche parfaitement (il fonctionnera pour prod une fois que je t'aurais donne la cle Openai)
+J'implementerai les taches Celery demain ou Samedi sans doute et il sera donc entierement fonctionnel
+une fois que jaurais le model OpenAi
+
+
+Si tu veux vraiment apprendre a utiliser django-python, je te laisse faire le endpoint et finir le RAG
+Rag lui fonctionne majoritairement sur endpoint, embedding et tres simple mais tu peux regarder comment 
+l'endpoint est fait
+
+Je t'envois sur discord les valeurs du .env pour le faire tourner (je peux pas les push)
+
+Tu peux ensuite faire "Make up"
+et  "docker exec -it transcendence-backend-1 python manage.py embedding_test" (pour docker)
+ou  "docker exec -it transcendence_backend_1 python manage.py embedding_test" (pour podman)
