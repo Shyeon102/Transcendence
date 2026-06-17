@@ -40,11 +40,11 @@ Description:
 
 def get_embedding(text: str) -> list[float]:
     try:
-        response = client.embeddings.create(
+        response = client.embed_content(
             model=EMBEDDING_MODEL,
-            input=text
+            contents=text
         )
-        return response.data[0].embedding
+        return response.embeddings[0].values
     except Exception as e:
         raise e
 
