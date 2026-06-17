@@ -11,9 +11,9 @@ def get_cbf_scores(
     if user_emb is None:
         return pd.Series(dtype=float)
 
-    qs = MediaEmbedding.objects
-        .annotate(score=1 - CosineDistance("embedding", user_emb.embedding))
-        .values_list("media_id", "score")
+    qs = MediaEmbedding.objects.annotate(
+        score=1 - CosineDistance("embedding", user_emb.
+                                 embedding)).values_list("media_id", "score")
 
     if exclude_media_ids:
         qs = qs.exclude(media_id__in=exclude_media_ids)

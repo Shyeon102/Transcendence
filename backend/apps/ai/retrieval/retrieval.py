@@ -1,10 +1,7 @@
-
-from django.db import transaction
-from openai import OpenAI
 from pgvector.django import CosineDistance
-
 from media.models import Media, MediaEmbedding
 from ai import EMBED_MODEL, client
+
 
 def embed_query(text: str) -> list[float]:
     response = client.embeddings.create(
@@ -34,7 +31,7 @@ def retrieve_media(
         similarity = round(1.0 - float(emb.distance), 4)
         results.append((emb.media, similarity))
         # results.append({
-        #     "media_id": item['media_id'],
+        #     "media_id": emb['media_id'],
         #     "similarity": similarity
         # })
 
@@ -47,4 +44,4 @@ def rag_recommendations(
     top_k: int = 10
 ) -> list[tuple[Media, float]]:
     query_embedding = embed_query(query)
-    return retrieve_media(query_embedding, media_type)
+    return retrieve_media(query_embedding, media_type).head(top_k)

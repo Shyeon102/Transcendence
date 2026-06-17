@@ -5,6 +5,7 @@ from media.models import Media
 from celery import shared_task
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from apps.media.serializers import MediaSerializer
 
 
 # def build_source_text(row) -> str:
@@ -71,8 +72,7 @@ def create_media_embedding_task(media_id):
 
 @receiver(post_save, sender=Media)
 def media_saved(sender, instance, **kwargs):
-    if created:
-        create_media_embedding_task.delay(instance.id)
+    create_media_embedding_task.delay(instance.id)
 
 
 # batch embedding for multiple media items
@@ -88,12 +88,12 @@ def get_embeddings_batch(texts: list[str]) -> list[list[float]]:
 
 BATCH_SIZE = 50
 
+
 @shared_task(
     autoretry_for=(Exception,),
     retry_backoff=True,
     retry_kwargs={'max_retries': 3}
 )
-
 def create_media_embeddings_batch(media_ids: list[int]):
     medias = (
         Media.objects
@@ -117,7 +117,7 @@ def create_media_embeddings_batch(media_ids: list[int]):
                     "source_text": text,
                 }
             )
-
+# will be changed to redis.cache, need to look @lulu
 from django.core.cache import cache
 
 MEDIA_EMBEDDING_QUEUE_KEY = "media_embedding_queue"
