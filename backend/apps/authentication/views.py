@@ -5,6 +5,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .services import login_user
 from .serializer import RegisterSerializer
 from apps.users.serializers import UserSerializer
+from apps.users.models import User
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from django.conf import settings
 
 
 class LogoutView(APIView):
@@ -26,6 +30,8 @@ class LogoutView(APIView):
                 "success": False,
                 "error": str(e)
             }, status=400)
+
+# not used by frontend, it uses /token/
 
 
 class LoginView(APIView):
@@ -58,6 +64,43 @@ class RegisterView(APIView):
                 "refresh": str(refresh)
             })
         return Response(serializer.errors, status=400)
+
+
+class GoogleLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        credential = request.data.get("credential")
+        if not credential:
+            return Response({"error": "Could not obtain credentials."},
+                            status=400)
+
+        try:
+            data = id_token.verify_oauth2_token(
+                credential,
+                requests.Request(),
+                settings.GOOGLE_CLIENT_ID
+            )
+        except ValueError:
+            return Response({"error": "Invalid Google token"},
+                            status=400)
+
+        email = data["email"]
+
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={
+                "username": data.get("name", email.split("@")[0]),
+            }
+        )
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+                "user": UserSerializer(user).data,
+                "access": str(refresh.access_token),
+                "refresh": str(refresh)
+        })
 
 
 class ChangePasswordView(APIView):

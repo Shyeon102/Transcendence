@@ -23,8 +23,6 @@ INSTALLED_APPS = [
 
     "rest_framework",
 
-    'social_django',
-
     "apps.authentication",
     "apps.users",
     "apps.chat",
@@ -172,9 +170,10 @@ STATIC_URL = "/static/"
 CORS_ALLOW_ALL_ORIGINS = True
 
 AUTHENTICATION_BACKENDS = {
-    'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 }
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 CHANNEL_LAYERS = {
     "default": {

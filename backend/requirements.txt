@@ -2,7 +2,6 @@ Django>=4.2,<5.0
 djangorestframework
 django-cors-headers
 djangorestframework-simplejwt
-openai
 pgvector
 redis
 numpy
@@ -13,9 +12,10 @@ channels-redis
 
 psycopg2-binary
 django-redis
-social-auth-app-django
 requests
 pandas
+google-auth
+google-genai
 
 celery 
 redis
