@@ -1,4 +1,4 @@
-from ai.models import CFModel
+from apps.ai.models import CFModel
 import pandas as pd
 
 

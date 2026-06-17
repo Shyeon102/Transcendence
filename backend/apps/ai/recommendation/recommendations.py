@@ -1,8 +1,8 @@
 import pandas as pd
-from ai.models import CFModel
-from cbf.cbf import get_cbf_scores
-from cf.cf import get_cf_scores
-from cf.utils import calculate_sigmoid_weights
+from apps.ai.models import CFModel
+from apps.ai.recommendation.cbf.cbf import get_cbf_scores
+from apps.ai.recommendation.cf.cf import get_cf_scores
+from apps.ai.recommendation.cf.utils import calculate_sigmoid_weights
 
 
 def min_max_scale(series: pd.Series) -> pd.Series:

@@ -1,5 +1,4 @@
 import numpy as np
-
 from django.db import transaction
 from apps.users.models import User
 from ai.models import UserEmbedding, MediaEmbedding
@@ -11,11 +10,15 @@ from ai import RATING_WEIGHT, ACTION_WEIGHT
 def _gather_weighted_signals(user: User) -> list[tuple[int, float]]:
     signals: dict[int, list[float]] = {}
 
-    for review in Review.objects.filter(user=user).values('media_id', 'rating'):
+    for review in (
+        Review.objects.filter(user=user).values('media_id', 'rating')
+    ):
         w = RATING_WEIGHT.get(review['rating'], 0.0)
         signals.setdefault(review['media_id'], []).append(w)
 
-    for interaction in MediaInteraction.objects.filter(user=user).values('media_id', 'action'):
+    for interaction in (
+        MediaInteraction.objects.filter(user=user).values('media_id', 'action')
+    ):
         w = ACTION_WEIGHT.get(interaction['action'], 0.0)
         signals.setdefault(interaction['media_id'], []).append(w)
 

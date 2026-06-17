@@ -5,7 +5,7 @@ from .serializers import UserSerializer
 
 
 class UserView(APIView):
-    Permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         serializer = UserSerializer(request.user)

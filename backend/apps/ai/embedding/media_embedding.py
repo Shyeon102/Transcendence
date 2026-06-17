@@ -1,12 +1,10 @@
-from ai.models import MediaEmbedding
+from apps.ai.models import MediaEmbedding
 from django.db import transaction
-from ai import EMBEDDING_MODEL, client
+from apps.ai.client import EMBEDDING_MODEL, client
 from media.models import Media
 from celery import shared_task
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from apps.media.serializers import MediaSerializer
-
 
 # def build_source_text(row) -> str:
 #     return f"""
@@ -40,7 +38,7 @@ Description:
 
 def get_embedding(text: str) -> list[float]:
     try:
-        response = client.embed_content(
+        response = client.models.embed_content(
             model=EMBEDDING_MODEL,
             contents=text
         )
@@ -118,22 +116,24 @@ def create_media_embeddings_batch(media_ids: list[int]):
                 }
             )
 # will be changed to redis.cache, need to look @lulu
-from django.core.cache import cache
+# from django.core.cache import cache
 
-MEDIA_EMBEDDING_QUEUE_KEY = "media_embedding_queue"
+# MEDIA_EMBEDDING_QUEUE_KEY = "media_embedding_queue"
 
-@receiver(post_save, sender=Media)
-def media_saved(sender, instance, created, **kwargs):
-    if not created:
-        return
-    queue = cache.get(MEDIA_EMBEDDING_QUEUE_KEY, [])
-    queue.append(instance.id)
-    cache.set(MEDIA_EMBEDDING_QUEUE_KEY, queue, timeout=3600)
 
-@shared_task
-def flush_media_embedding_queue():
-    queue = cache.get(MEDIA_EMBEDDING_QUEUE_KEY, [])
-    if not queue:
-        return
-    cache.set(MEDIA_EMBEDDING_QUEUE_KEY, [], timeout=3600)
-    create_media_embeddings_batch(queue)
+# @receiver(post_save, sender=Media)
+# def media_saved(sender, instance, created, **kwargs):
+#     if not created:
+#         return
+#     queue = cache.get(MEDIA_EMBEDDING_QUEUE_KEY, [])
+#     queue.append(instance.id)
+#     cache.set(MEDIA_EMBEDDING_QUEUE_KEY, queue, timeout=3600)
+
+
+# @shared_task
+# def flush_media_embedding_queue():
+#     queue = cache.get(MEDIA_EMBEDDING_QUEUE_KEY, [])
+#     if not queue:
+#         return
+#     cache.set(MEDIA_EMBEDDING_QUEUE_KEY, [], timeout=3600)
+#     create_media_embeddings_batch(queue)

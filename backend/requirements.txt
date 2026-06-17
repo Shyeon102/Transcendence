@@ -6,7 +6,8 @@ openai
 pgvector
 redis
 numpy
-hnswlib
+hnswlib>=0.7.0,<0.8.0
+google-genai
 
 whitenoise
 daphne

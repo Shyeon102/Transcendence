@@ -98,8 +98,6 @@ class MediaInteraction(models.Model):
     media = models.ForeignKey(Media, on_delete=models.CASCADE,
                               related_name='interactions')
 
-    media_recomm_score = models.ForeignKey(UserMediaScore, on_delete=models.CASCADE, default=0.0)
-
     action = models.CharField(max_length=20, choices=ACTIONS)
 
     created_at = models.DateTimeField(auto_now_add=True)

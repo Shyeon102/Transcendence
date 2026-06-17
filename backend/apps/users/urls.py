@@ -8,5 +8,4 @@ urlpatterns = [
     path("profile/", UserView.as_view()),
     path("profile/update/", UserView.as_view()),
     path("profile/avatar/", UserView.as_view()),
-
 ]

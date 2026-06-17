@@ -1,6 +1,6 @@
 from pgvector.django import CosineDistance
 import pandas as pd
-from embedding.models import MediaEmbedding, UserEmbedding
+from apps.ai.models import MediaEmbedding, UserEmbedding
 
 
 def get_cbf_scores(

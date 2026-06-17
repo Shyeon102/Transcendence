@@ -1,9 +1,8 @@
 from surprise import SVD, Dataset, Reader
 from surprise.dump import dump, load
 import pandas as pd
-from ai.models import CFModel
-from ai import RATING_WEIGHT, ACTION_WEIGHT
-
+from apps.ai.models import CFModel
+from apps.ai.client import RATING_WEIGHT, ACTION_WEIGHT
 
 
 def build_ratings_df() -> pd.DataFrame:

@@ -13,7 +13,8 @@ class UserEmbedding(models.Model):
 
 
 class MediaEmbedding(models.Model):
-    media = models.OneToOneField(Media, on_delete=models.CASCADE, related_name='embedding')
+    media = models.OneToOneField(Media, on_delete=models.CASCADE,
+                                 related_name='embedding')
     embedding = VectorField(dimensions=768)
     source_text = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
@@ -47,7 +48,8 @@ class CFModel(models.Model):
         return pickle.loads(bytes(self.model_data))
 
     @classmethod
-    def save_model(cls, svd_model, version: str, user_count: int, item_count: int, latent_dim: int) -> 'CFModel':
+    def save_model(cls, svd_model, version: str, user_count: int,
+                   item_count: int, latent_dim: int) -> 'CFModel':
         return cls.objects.create(
             version=version,
             model_data=pickle.dumps(svd_model),
