@@ -23,6 +23,8 @@ INSTALLED_APPS = [
 
     "rest_framework",
 
+    'social_django',
+
     "apps.authentication",
     "apps.users",
     "apps.chat",
@@ -92,6 +94,8 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication"
     ],
 }
+
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
 RET_AUTH = {
     "USE_JWT": True,
@@ -168,6 +172,7 @@ STATIC_URL = "/static/"
 CORS_ALLOW_ALL_ORIGINS = True
 
 AUTHENTICATION_BACKENDS = {
+    'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 }
 

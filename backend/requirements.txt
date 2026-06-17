@@ -13,6 +13,7 @@ channels-redis
 
 psycopg2-binary
 django-redis
+social-auth-app-django
 requests
 pandas
 
