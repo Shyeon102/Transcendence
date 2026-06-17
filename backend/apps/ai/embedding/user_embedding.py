@@ -1,16 +1,11 @@
 import numpy as np
 
-from django.contrib.auth import get_user_model
 from django.db import transaction
-
+from apps.users.models import User
 from ai.models import UserEmbedding, MediaEmbedding
 from media.models import Review, MediaInteraction
 
 from ai import RATING_WEIGHT, ACTION_WEIGHT
-
-
-# ??
-User = get_user_model()
 
 
 def _gather_weighted_signals(user: User) -> list[tuple[int, float]]:
@@ -34,7 +29,7 @@ def build_user_embedding(user: User) -> UserEmbedding:
         raise ValueError(f"User {user.pk} has no ratings or interactions yet.")
 
     media_ids = [mid for mid, _ in weighted_signals]
-    weights   = {mid: w for mid, w in weighted_signals}
+    weights = {mid: w for mid, w in weighted_signals}
 
     # MediaEmbedding이 존재하는 항목만 필터
     embeddings_qs = (
@@ -53,7 +48,8 @@ def build_user_embedding(user: User) -> UserEmbedding:
             used_media.append(media_id)
 
     if not used_media:
-        raise ValueError(f"User {user.pk}: all interactions have weight 0 or no MediaEmbedding found.")
+        raise ValueError(f"User {user.pk}: all interactions have weight 0 or"
+                         "no MediaEmbedding found.")
 
     # L2 정규화 (코사인 유사도를 위해)
     norm = np.linalg.norm(profile_vec)

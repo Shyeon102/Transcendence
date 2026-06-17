@@ -6,6 +6,7 @@ openai
 pgvector
 redis
 numpy
+hnswlib
 
 whitenoise
 daphne

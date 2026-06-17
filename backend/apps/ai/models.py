@@ -1,6 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import User
-from pgvector.django import VectorField
+from apps.users.models import User
+from pgvector.django import VectorField, HnswIndex
+from apps.media.models import Media
+import pickle
 
 
 class UserEmbedding(models.Model):
@@ -9,11 +11,13 @@ class UserEmbedding(models.Model):
     source_media_count = models.IntegerField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 class MediaEmbedding(models.Model):
     media = models.OneToOneField(Media, on_delete=models.CASCADE, related_name='embedding')
     embedding = VectorField(dimensions=768)
     source_text = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         indexes = [
             # pgvector HNSW index (cosine similarity)
@@ -28,8 +32,8 @@ class MediaEmbedding(models.Model):
 
 
 class CFModel(models.Model):
-    version = models.CharField(max_length=40, unique=True)           # e.g. git sha or timestamp
-    model_data = models.BinaryField()                                 # pickle.dumps(svd_model)
+    version = models.CharField(max_length=40, unique=True)
+    model_data = models.BinaryField()
     user_count = models.IntegerField()
     item_count = models.IntegerField()
     latent_dim = models.IntegerField()
@@ -53,7 +57,11 @@ class CFModel(models.Model):
         )
 
     def __str__(self):
-        return f"CFModel(v={self.version}, users={self.user_count}, items={self.item_count})"
+        return (
+            f"CFModel(v={self.version}, "
+            f"users={self.user_count}, "
+            f"items={self.item_count})"
+        )
 
 
 class UserMediaScore(models.Model):

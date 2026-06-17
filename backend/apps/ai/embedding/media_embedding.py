@@ -2,6 +2,10 @@ from ai.models import MediaEmbedding
 from django.db import transaction
 from ai import EMBEDDING_MODEL, client
 from media.models import Media
+from celery import shared_task
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 # def build_source_text(row) -> str:
 #     return f"""
@@ -20,7 +24,6 @@ from media.models import Media
 
 def build_source_text(media: Media) -> str:
     genres_text = ", ".join([genre.name for genre in media.genres.all()])
-    release_date_str = media.release_date.strftime('%Y-%m-%d') if media.release_date else "Unknown"
     return f"""
 Title: {media.title}
 Type: {media.media_type}
@@ -28,11 +31,11 @@ Genres: {genres_text}
 Director: {media.director or 'Unknown'}
 Cast: {media.cast or 'Unknown'}
 Country: {media.country}
-Release Date: {release_date_str}
 Rating: {media.avg_rating} ({media.rating_count} votes)
 Description:
 {media.description}
 """.strip()
+
 
 def get_embedding(text: str) -> list[float]:
     try:
@@ -44,8 +47,6 @@ def get_embedding(text: str) -> list[float]:
     except Exception as e:
         raise e
 
-
-from celery import shared_task
 
 @shared_task(
     autoretry_for=(Exception,),
@@ -67,8 +68,6 @@ def create_media_embedding_task(media_id):
         }
     )
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 @receiver(post_save, sender=Media)
 def media_saved(sender, instance, **kwargs):
@@ -86,8 +85,6 @@ def get_embeddings_batch(texts: list[str]) -> list[list[float]]:
     )
     return [item.embedding for item in response.data]
 
-from celery import shared_task
-from django.db import transaction
 
 BATCH_SIZE = 50
 

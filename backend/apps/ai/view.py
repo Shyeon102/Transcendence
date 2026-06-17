@@ -8,14 +8,8 @@ from .utils import get_user_exclude_ids  # 유저가 이미 본 미디어 ID 추
 @require_GET
 # @login_required  # 만약 세션 로그인 기반 보안이 필요하다면 주석 해제
 def user_recommendation_api(request, user_id: int):
-    """
-    유저 ID만 입력받아 하이브리드 추천 점수를 계산하고 
-    최종 순위가 높은 미디어 리스트를 JSON으로 반환합니다.
-    """
     try:
-        # 1. (선택 사항) 이미 본 영화 제외 리스트 가져오기
-        # 앞서 구현한 리뷰/인터랙션 리스트가 있다면 여기서 확보해서 넘겨줍니다.
-        exclude_ids = []  # 예시: get_user_exclude_ids(user_id)
+        exclude_ids = get_user_exclude_ids(user_id)
         
         # 2. 하이브리드 함수 호출 
         # 가중치나 모델 등은 지정하지 않으면 함수 정의에 있는 기본값(Default)이 알아서 적용됩니다.
@@ -83,12 +77,3 @@ def get_user_recommendations_view(request, user_id: int):
         
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-from django.urls import path
-from .views import user_recommendation_api  # 혹은 DRF 뷰 함수명
-
-urlpatterns = [
-    # 예: /api/recommend/42/ 형태로 호출하면 42번 유저의 추천 JSON이 튀어나옵니다.
-    path('api/recommend/<int/>user_id>/', user_recommendation_api, name='user_recommend_api'),
-]
