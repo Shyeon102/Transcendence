@@ -40,3 +40,5 @@ Je t'envois sur discord les valeurs du .env pour le faire tourner (je peux pas l
 Tu peux ensuite faire "Make up"
 et  "docker exec -it transcendence-backend-1 python manage.py embedding_test" (pour docker)
 ou  "docker exec -it transcendence_backend_1 python manage.py embedding_test" (pour podman)
+
+Bon courage pour la suite demain ! Bonne nuit 😴
