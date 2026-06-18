@@ -19,8 +19,12 @@ Je te donnerai la cle OpenAi pour utiliser un de leur modele en 1536 plus tard q
 
 Je te disais pas que j'avais pas reussi a faire le endpoint par message
 Contrairement a toutes les autres applications (excepte chat), ai utilise tres peu l'endpoint
-Ca correspont a rien pour, le probleme que j'avais c'est qu'aucune fonction en appele une autre
+Ca correspond a rien, le probleme que j'avais c'est qu'aucune fonction en appele une autre
 et je comprenais pas assez la logique pour implementer ca en plein milieu du reste de notre projet
+
+Je comprends ce que tu as fais maintenant, je m'occuperai de l'implementer dans notre architecture
+Tu peux tester ton embedding (avec random value) en attendant, ca te permettra pas de faire de vrais tests
+mais au moins tu pourras lancer tes fonctions et les tester elles
 
 Embedding marche parfaitement (il fonctionnera pour prod une fois que je t'aurais donne la cle Openai)
 J'implementerai les taches Celery demain ou Samedi sans doute et il sera donc entierement fonctionnel
