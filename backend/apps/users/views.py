@@ -73,7 +73,7 @@ class UserActivityView(APIView):
             "current_chat_room": (
                 {
                     "id": activity.current_chat_room.id,
-                    "name": activity.current_chat_room.name,
+                    "title": activity.current_chat_room.title,
                 }
                 if activity and activity.current_chat_room
                 else None
@@ -102,7 +102,9 @@ class PublicUserActivityView(APIView):
     def get(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
 
+        reviews = user.reviews.select_related("media")
+
         return Response({
             "user": UserSerializer(user).data,
-            "reviews": ReviewSerializer(user.reviews.select_related("media"))
+            "reviews": ReviewSerializer(reviews, many=True).data
         })
