@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
+from django.db.models import Count
+
 
 from apps.media.models import Media, MediaInteraction
 from apps.media.serializers import (
@@ -160,3 +162,22 @@ class MediaInteractionView(APIView):
         return Response(
             {'error': 'Interaction not found.'}, status=status.
             HTTP_404_NOT_FOUND)
+
+
+class RandomMediaView(APIView):
+    def get(self, request):
+        queryset = Media.objects.order_by("?")[:20]
+        serializer = MediaSerializer(queryset, many=True)
+        return Response({"media": serializer.data}, status=status.HTTP_200_OK)
+
+
+class TrendingMediaView(APIView):
+    def get(self, request):
+        queryset = (
+            Media.objects
+            .annotate(interaction_count=Count("interactions"))
+            .order_by("-interaction_count")[:20]
+        )
+
+        serializer = MediaSerializer(queryset, many=True)
+        return Response({"media": serializer.data}, status=status.HTTP_200_OK)
