@@ -3,11 +3,12 @@ from apps.users.models import User
 from pgvector.django import VectorField, HnswIndex
 from apps.media.models import Media
 import pickle
+from apps.ai.constants import EMB_DIM
 
 
 class UserEmbedding(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    embedding = VectorField(768)
+    embedding = VectorField(EMB_DIM)
     source_media_count = models.IntegerField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -15,7 +16,7 @@ class UserEmbedding(models.Model):
 class MediaEmbedding(models.Model):
     media = models.OneToOneField(Media, on_delete=models.CASCADE,
                                  related_name='embedding')
-    embedding = VectorField(dimensions=768)
+    embedding = VectorField(dimensions=EMB_DIM)
     source_text = models.TextField()
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -46,6 +47,10 @@ class CFModel(models.Model):
 
     def get_model(self):
         return pickle.loads(bytes(self.model_data))
+
+    def get_item_count(self):
+        svd_model = self.get_model()
+        return svd_model.n_items
 
     @classmethod
     def save_model(cls, svd_model, version: str, user_count: int,

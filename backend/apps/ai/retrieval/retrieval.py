@@ -1,6 +1,6 @@
 from pgvector.django import CosineDistance
 from media.models import Media, MediaEmbedding
-from ai import EMBED_MODEL, client
+from ai.constants import EMBED_MODEL, client
 
 
 def embed_query(text: str) -> list[float]:
@@ -15,7 +15,7 @@ def retrieve_media(
     query_embedding: list[float],
     media_type: str | None = None,     # 'movie' | 'tv' | None
     top_k: int = 10
-) -> list[tuple[Media, float]]:
+) -> list[int]:
     qs = (
         MediaEmbedding.objects
         .select_related('media')
@@ -26,22 +26,15 @@ def retrieve_media(
     if media_type:
         qs = qs.filter(media__media_type=media_type)
 
-    results = []
-    for emb in qs[:top_k]:
-        similarity = round(1.0 - float(emb.distance), 4)
-        results.append((emb.media, similarity))
-        # results.append({
-        #     "media_id": emb['media_id'],
-        #     "similarity": similarity
-        # })
+    media_ids = qs.values_list('media_id', flat=True)[:top_k]
 
-    return results
+    return list(media_ids)
 
 
 def rag_recommendations(
     query: str,
     media_type: str | None = None,
     top_k: int = 10
-) -> list[tuple[Media, float]]:
+) -> list[int]:
     query_embedding = embed_query(query)
-    return retrieve_media(query_embedding, media_type).head(top_k)
+    return retrieve_media(query_embedding, media_type, top_k)

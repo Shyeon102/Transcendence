@@ -1,37 +1,25 @@
 from apps.ai.models import MediaEmbedding
 from django.db import transaction
-from apps.ai.client import EMBEDDING_MODEL, client
+from apps.ai.constants import EMBEDDING_MODEL, client
 from apps.media.models import Media
 from celery import shared_task
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 import random
 
-# def build_source_text(row) -> str:
-#     return f"""
-# Title: {row['title']}
-# Type: {row['media_type']}
-# Genres: {row['genres_text']}
-# Director: {row['director']}
-# Cast: {row['cast']}
-# Country: {row['country']}
-# Release Date: {row['release_date']}
-# Rating: {row['avg_rating']} ({row['rating_count']} votes)
-# Description:
-# {row['description']}
-# """
-
 
 def build_source_text(media: Media) -> str:
-    genres_text = ", ".join([genre.name for genre in media.genres.all()])
+    genres_text = ", ".join(
+        genre.name for genre in media.genres.all()
+    )
     return f"""
 Title: {media.title}
 Type: {media.media_type}
 Genres: {genres_text}
-Director: {media.director or 'Unknown'}
-Cast: {media.cast or 'Unknown'}
+Director: {media.director}
+Cast: {media.cast}
 Country: {media.country}
-Rating: {media.avg_rating} ({media.rating_count} votes)
+Release Date: {media.release_date}
 Description:
 {media.description}
 """.strip()
@@ -40,13 +28,15 @@ Description:
 def get_embedding(text: str) -> list[float]:
     try:
         response = client.models.embed_content(
-            model="models/gemini-embedding-001",
+            model=EMBEDDING_MODEL,
             contents=text
         )
         return response.embeddings[0].values
     except Exception as e:
         raise e
 
+
+def get_embedding_batch(texts: list[str]) -> list[list[float]]:
 
 @shared_task(
     autoretry_for=(Exception,),

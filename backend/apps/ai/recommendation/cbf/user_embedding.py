@@ -3,11 +3,10 @@ from django.db import transaction
 from apps.users.models import User
 from apps.ai.models import UserEmbedding, MediaEmbedding
 from apps.media.models import Review, MediaInteraction
+from apps.ai.constants import EMB_DIM, RATING_WEIGHT, ACTION_WEIGHT
 
-from apps.ai.client import RATING_WEIGHT, ACTION_WEIGHT
 
-
-def _gather_weighted_signals(user: User) -> list[tuple[int, float]]:
+def gather_weighted_signals(user: User) -> list[tuple[int, float]]:
     signals: dict[int, list[float]] = {}
 
     for review in (
@@ -27,7 +26,7 @@ def _gather_weighted_signals(user: User) -> list[tuple[int, float]]:
 
 def build_user_embedding(user: User) -> UserEmbedding:
 
-    weighted_signals = _gather_weighted_signals(user)
+    weighted_signals = gather_weighted_signals(user)
     if not weighted_signals:
         raise ValueError(f"User {user.pk} has no ratings or interactions yet.")
 
@@ -41,7 +40,7 @@ def build_user_embedding(user: User) -> UserEmbedding:
         .values_list('media_id', 'embedding')
     )
 
-    profile_vec = np.zeros(1536, dtype=np.float32)
+    profile_vec = np.zeros(EMB_DIM, dtype=np.float32)
     used_media: list[int] = []
 
     for media_id, emb in embeddings_qs:
@@ -59,12 +58,11 @@ def build_user_embedding(user: User) -> UserEmbedding:
     if norm > 0:
         profile_vec /= norm
 
-    with transaction.atomic():
-        obj, _ = UserEmbedding.objects.update_or_create(
-            user=user,
-            defaults={
-                'embedding': profile_vec.tolist(),
-                'source_media_count': len(used_media),
-            },
-        )
+    obj, _ = UserEmbedding.objects.update_or_create(
+        user=user,
+        defaults={
+            'embedding': profile_vec.tolist(),
+            'source_media_count': len(used_media),
+        },
+    )
     return obj

@@ -18,6 +18,4 @@ def get_cbf_scores(
     if exclude_media_ids:
         qs = qs.exclude(media_id__in=exclude_media_ids)
 
-    scores_dict = dict(qs)
-
-    return pd.Series(scores_dict, name="cbf_score")
+    return pd.Series(qs, name="cbf_score")
