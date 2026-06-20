@@ -41,7 +41,7 @@ stop:
 
 fclean:
 	$(COMPOSE) down -v --remove-orphans
-	docker system prune -af --volumes
+	podman system prune -af --volumes
 
 logs:
 	$(COMPOSE) logs -f
