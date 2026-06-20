@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-COMPOSE := docker compose
+COMPOSE := podman compose
 
 .PHONY: help up start migrate seed_media load_media stop fclean logs
 

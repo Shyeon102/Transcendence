@@ -1,10 +1,10 @@
-from backend.apps.community import models
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from django.db.models import Count
+from django.db import models
 
 
 from apps.media.models import Media, MediaInteraction

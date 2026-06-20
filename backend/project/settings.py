@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "apps.chat",
     "apps.community",
     "apps.media",
+    "apps.ai",
     "corsheaders",
 ]
 
