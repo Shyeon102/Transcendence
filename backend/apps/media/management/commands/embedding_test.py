@@ -2,15 +2,15 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from apps.media.models import Media
 from apps.ai.models import MediaEmbedding
-from apps.ai.embedding.media_embedding import (
+from apps.ai.service.embedding.media_embedding import (
     build_source_text,
     get_embeddings_batch,
 )
 
-from apps.ai.embedding.media_embedding import (
-    BATCH_SIZE,
-)
-from apps.ai.embedding.user_embedding import build_user_embedding
+BATCH_SIZE = 50
+
+
+from apps.ai.service.embedding.user_embedding import build_user_embedding
 
 User = get_user_model()
 

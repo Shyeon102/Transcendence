@@ -69,13 +69,3 @@ class CFModel(models.Model):
             f"users={self.user_count}, "
             f"items={self.item_count})"
         )
-
-
-class UserMediaScore(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    media = models.ForeignKey('media.Media', on_delete=models.CASCADE)
-    score = models.FloatField(default=0.0)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = ('user', 'media')

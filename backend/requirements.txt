@@ -20,3 +20,6 @@ pandas
 
 celery 
 redis
+
+scikit-surprise
+tiktoken
