@@ -2,7 +2,7 @@ Django>=4.2,<5.0
 djangorestframework
 django-cors-headers
 djangorestframework-simplejwt
-openai
+
 pgvector
 redis
 numpy
@@ -19,7 +19,5 @@ requests
 pandas
 
 celery 
-redis
-
 scikit-surprise
 tiktoken

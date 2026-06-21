@@ -6,12 +6,9 @@ from apps.ai.service.embedding.media_embedding import (
     build_source_text,
     get_embeddings_batch,
 )
-
-BATCH_SIZE = 50
-
-
 from apps.ai.service.embedding.user_embedding import build_user_embedding
 
+BATCH_SIZE = 50
 User = get_user_model()
 
 

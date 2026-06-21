@@ -81,8 +81,8 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BEAT_SCHEDULE = {
     "run-svd-training-every-midnight": {
         "task": "apps.ai.service.recommendation.cf.tasks.run_svd_training",
-        "schedule": crontab(hour=3, minute=0), 
-        # "schedule": crontab(minute=0), 
+        "schedule": crontab(hour=3, minute=0),
+        # "schedule": crontab(minute=0),
     },
 }
 
