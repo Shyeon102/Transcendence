@@ -13,6 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('media', '0008_alter_mediainteraction_unique_together_and_more'),
+        ('ai', '0001_enable_pgvector'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

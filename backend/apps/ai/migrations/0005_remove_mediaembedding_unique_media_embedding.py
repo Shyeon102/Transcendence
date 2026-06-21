@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ai', '0003_mediaembedding_unique_media_embedding'),
+        ('ai', '0004_mediaembedding_unique_media_embedding'),
     ]
 
     operations = [

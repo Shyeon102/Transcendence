@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ai', '0002_delete_usermediascore'),
+        ('ai', '0003_delete_usermediascore'),
     ]
 
     operations = [
