@@ -7,6 +7,12 @@ pgvector
 redis
 numpy
 
+pgvector
+redis
+numpy
+hnswlib>=0.7.0,<0.8.0
+google-genai
+
 whitenoise
 daphne
 channels-redis
@@ -17,4 +23,5 @@ requests
 pandas
 
 celery 
-redis
+scikit-surprise
+tiktoken
