@@ -475,10 +475,14 @@ export const authApi = createApi({
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
-        const isOnboardingUpdate = Boolean(payload.favoriteGenres);
+        const isOnboardingUpdate =
+          payload.onboardingCompleted !== undefined ||
+          payload.onboardingAnswers !== undefined ||
+          payload.favoriteGenres !== undefined ||
+          payload.favoriteTitles !== undefined;
         const result = await rawBaseQuery(
           {
-            url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/update/',
+            url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/',
             method: 'PATCH',
             body: {
               username: payload.username,
@@ -487,9 +491,10 @@ export const authApi = createApi({
               last_name: payload.lastName,
               avatar_url: payload.avatarUrl,
               bio: payload.bio,
-                favorite_genres: payload.favoriteGenres,
-                favorite_titles: (payload as unknown as { favoriteTitles?: string[] }).favoriteTitles,
-                onboarding_answers: (payload as unknown as { onboardingAnswers?: OnboardingAnswers }).onboardingAnswers,
+              onboarding_completed: payload.onboardingCompleted,
+              favorite_genres: payload.favoriteGenres,
+              favorite_titles: (payload as unknown as { favoriteTitles?: string[] }).favoriteTitles,
+              onboarding_answers: (payload as unknown as { onboardingAnswers?: OnboardingAnswers }).onboardingAnswers,
             },
           },
           api,
