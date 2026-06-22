@@ -1,15 +1,16 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { getStoredLanguage, type Language } from '../../lib/i18n';
 
 interface UiState {
   theme: 'light' | 'dark';
-  language: 'ko' | 'en' | 'fr';
+  language: Language;
   sidebarOpen: boolean;
   activeModal: string | null;
 }
 
 const initialState: UiState = {
   theme: 'light',
-  language: 'ko',
+  language: getStoredLanguage(),
   sidebarOpen: false,
   activeModal: null,
 };
