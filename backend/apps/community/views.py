@@ -2,9 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from apps.community.models import (
      Comment, Post, TrendingPost, PostLike,
-     Report, CommentLike
+     CommentLike
 )
-from apps.community.serializers import PostSerializer, CommentSerializer
+from apps.community.serializers import (
+     PostSerializer, CommentSerializer,
+     ReportSerializer
+)
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 
@@ -137,7 +140,7 @@ class PostCommentView(APIView):
         comments = (
             post.comments
             .select_related("user")
-            .filter(is_hidden=False)
+            .filter(parent_comment=None, is_hidden=False)
             .order_by("created_at")
         )
 
@@ -202,7 +205,7 @@ class PostLikeView(APIView):
 
 
 class CommentLikeView(APIView):
-    
+
     def post(self, request, pk):
         comment = get_object_or_404(Comment, pk=pk)
 
@@ -233,7 +236,7 @@ class CommentLikeView(APIView):
 
 
 class CommentDetailView(APIView):
-    
+
     def put(self, request, pk):
         comment = get_object_or_404(Comment, pk=pk, user=request.user)
 
@@ -267,22 +270,32 @@ class CommentDetailView(APIView):
 class PostReportView(APIView):
     def post(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
+        serializer = ReportSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        report, created = Report.objects.get_or_create(
+        report = serializer.save(
             user=request.user,
             post=post
         )
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response({
+            "status": report.status,
+            "report_id": report.id
+        }, status=status.HTTP_201_CREATED)
 
 
 class CommentReportView(APIView):
     def post(self, request, pk):
         comment = get_object_or_404(Comment, pk=pk)
+        serializer = ReportSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        report, created = Report.objects.get_or_create(
+        report = serializer.save(
             user=request.user,
             comment=comment
         )
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response({
+            "status": report.status,
+            "report_id": report.id
+        }, status=status.HTTP_201_CREATED)

@@ -119,7 +119,7 @@ class Report(models.Model):
         ]
         constraints = [
             models.CheckConstraint(
-                condition=(
+                check=(
                     models.Q(post__isnull=False, comment__isnull=True) |
                     models.Q(post__isnull=True, comment__isnull=False)
                 ),
@@ -147,7 +147,7 @@ class Follow(models.Model):
         ]
         constraints = [
             models.CheckConstraint(
-                condition=~models.Q(follower=models.F('following')),
+                check=~models.Q(follower=models.F('following')),
                 name='cannot_follow_self'
             )
         ]

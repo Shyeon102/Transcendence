@@ -1,0 +1,122 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyMTQ0NjU5LCJpYXQiOjE3ODIxNDI4NTksImp0aSI6IjIwZWQyMGI5YzhiZTRiNmE4MGIwNmYzZmJmNTc1MTY1IiwidXNlcl9pZCI6IjcifQ.9xr0FXzQFwRNr2_upj395QCUkULsNz7GSgAqkNF0vls
+curl -X POST http://localhost:8000/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "demo",
+    "email": "demo@example.com",
+    "password": "demo"
+  }'
+
+###
+
+curl -X POST http://localhost:8000/api/community/posts/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "title": "My first post",
+    "content": "Hello world from curl",
+    "media_files": []
+  }'
+
+###
+
+curl -X POST http://localhost:8000/api/community/posts/4/comments/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "title": "My first post",
+    "post": 2,
+    "content": "Hello world from curl",
+    "media_files": []
+  }'
+
+###
+
+curl -X POST http://localhost:8000/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "demo",
+    "password": "demo"
+  }'
+
+###
+
+curl -X GET http://localhost:8000/api/community/posts/4/comments \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}"
+
+###
+
+curl -X GET http://localhost:8000/api/community/posts/4/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}"
+
+###
+
+curl -X POST http://localhost:8000/api/community/posts/2/comments/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "content": "This is a test comment"
+  }'
+
+###
+
+curl -X POST http://localhost:8000/api/community/posts/4/comments/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "content": "This is a reply",
+    "parent_comment": 1
+  }'
+
+###
+
+curl -X PUT http://localhost:8000/api/community/comments/4/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "content": "Edited comment text"
+  }'
+
+###
+
+curl -X DELETE http://localhost:8000/api/community/comments/2/ \
+  -H "Authorization: Bearer {{token}}"
+
+###
+
+curl -X POST http://localhost:8000/api/community/comments/1/like/ \
+  -H "Authorization: Bearer {{token}}"
+
+
+###
+
+curl -X DELETE http://localhost:8000/api/community/comments/1/like/ \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "report_type": "spam",
+    "reason": "This comment is spam"
+  }'
+
+###
+
+curl -X POST http://localhost:8000/api/community/comments/1/report/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "report_type": "spam",
+    "reason": "This comment is spam"
+  }'
+
+###
+
+curl -X POST http://localhost:8000/api/community/posts/1/report/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "report_type": "spam",
+    "reason": "This comment is spam"
+  }'
+
+###

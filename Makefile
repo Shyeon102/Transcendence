@@ -23,7 +23,7 @@ start:
 	$(MAKE) seed_media
 	$(MAKE) seed_reviews
 	$(MAKE) load_media
-	$(MAKE) media_embedding
+# 	$(MAKE) media_embedding
 
 migrate:
 	$(COMPOSE) exec backend python manage.py migrate
