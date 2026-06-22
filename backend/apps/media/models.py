@@ -97,6 +97,7 @@ class MediaInteraction(models.Model):
                              related_name='interactions')
     media = models.ForeignKey(Media, on_delete=models.CASCADE,
                               related_name='interactions')
+
     action = models.CharField(max_length=20, choices=ACTIONS)
 
     created_at = models.DateTimeField(auto_now_add=True)
