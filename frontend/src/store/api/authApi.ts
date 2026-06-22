@@ -477,25 +477,24 @@ export const authApi = createApi({
       async queryFn(payload, api) {
         const isOnboardingUpdate =
           payload.onboardingCompleted !== undefined ||
-          payload.onboardingAnswers !== undefined ||
-          payload.favoriteGenres !== undefined ||
-          payload.favoriteTitles !== undefined;
+          payload.onboardingAnswers !== undefined;
         const result = await rawBaseQuery(
           {
             url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/',
             method: 'PATCH',
-            body: {
-              username: payload.username,
-              email: payload.email,
-              first_name: payload.firstName,
-              last_name: payload.lastName,
-              avatar_url: payload.avatarUrl,
-              bio: payload.bio,
-              onboarding_completed: payload.onboardingCompleted,
-              favorite_genres: payload.favoriteGenres,
-              favorite_titles: (payload as unknown as { favoriteTitles?: string[] }).favoriteTitles,
-              onboarding_answers: (payload as unknown as { onboardingAnswers?: OnboardingAnswers }).onboardingAnswers,
-            },
+            body: isOnboardingUpdate
+              ? {
+                  onboarding_completed: payload.onboardingCompleted,
+                  onboarding_answers: payload.onboardingAnswers,
+                }
+              : {
+                  username: payload.username,
+                  email: payload.email,
+                  first_name: payload.firstName,
+                  last_name: payload.lastName,
+                  avatar_url: payload.avatarUrl,
+                  bio: payload.bio,
+                },
           },
           api,
           {}
