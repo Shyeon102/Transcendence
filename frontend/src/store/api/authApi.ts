@@ -89,6 +89,8 @@ type RawDashboardReview = {
 };
 
 type RawDashboard = {
+  activity?: string[];
+  recent_activity?: string[];
   reviews?: RawDashboardReview[];
   watchlist?: string[];
   activities?: string[];
@@ -299,7 +301,7 @@ const normalizeDashboardReview = (review: RawDashboardReview): DashboardReview =
 const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
   reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
   watchlist: payload.watchlist ?? [],
-  activities: payload.activities ?? [],
+  activities: payload.activities ?? payload.activity ?? payload.recent_activity ?? [],
 });
 
 const normalizeReview = (review: RawReview): MediaReview => ({
@@ -603,7 +605,7 @@ export const authApi = createApi({
         const isOnboardingUpdate = Boolean(payload.favoriteGenres);
         const result = await rawBaseQuery(
           {
-            url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/update/',
+            url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/',
             method: 'PATCH',
             body: {
               username: payload.username,
@@ -656,8 +658,8 @@ export const authApi = createApi({
       async queryFn(avatarUrl, api) {
         const result = await rawBaseQuery(
           {
-            url: '/users/me/avatar/',
-            method: 'PUT',
+            url: '/users/profile/avatar/',
+            method: 'PATCH',
             body: { avatar_url: avatarUrl },
           },
           api,
@@ -680,7 +682,7 @@ export const authApi = createApi({
     }),
     changePassword: builder.mutation<{ success: boolean }, PasswordChangeRequest>({
       query: ({ currentPassword, newPassword }) => ({
-        url: '/users/me/password/',
+        url: '/users/changePassword/',
         method: 'POST',
         body: {
           current_password: currentPassword,
@@ -690,7 +692,7 @@ export const authApi = createApi({
     }),
     getMyPageDashboard: builder.query<MyPageDashboardData, void>({
       async queryFn(_arg, api) {
-        const result = await rawBaseQuery('/users/me/dashboard/', api, {});
+        const result = await rawBaseQuery('/users/me/activity/', api, {});
 
         if (result.data) {
           return { data: normalizeDashboard(result.data as RawDashboard) };
@@ -701,6 +703,24 @@ export const authApi = createApi({
         return {
           error: {
             message: toMessage(data) ?? 'Dashboard request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+    }),
+    getUserActivity: builder.query<MyPageDashboardData, number>({
+      async queryFn(userId, api) {
+        const result = await rawBaseQuery(`/users/${userId}/activity/`, api, {});
+
+        if (result.data) {
+          return { data: normalizeDashboard(result.data as RawDashboard) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'User activity request failed.',
             fields: toFieldErrors(data),
           },
         };
@@ -868,6 +888,7 @@ export const {
   useGetMeQuery,
   useGetMediaReviewsQuery,
   useGetMyPageDashboardQuery,
+  useGetUserActivityQuery,
   useLoginMutation,
   useProcessAdminReportMutation,
   useSignupMutation,

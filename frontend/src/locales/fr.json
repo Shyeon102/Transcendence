@@ -116,7 +116,7 @@
     "confirmNewPassword": "Confirmer le nouveau mot de passe",
     "changePassword": "Changer le mot de passe",
     "passwordChanging": "Changement...",
-    "passwordChangeSuccess": "La validation du formulaire de mot de passe est terminee. Il reste seulement le branchement API.",
+    "passwordChangeSuccess": "Le mot de passe a ete modifie.",
     "passwordSameAsCurrent": "Le nouveau mot de passe doit etre different du mot de passe actuel.",
     "deleteAccount": "Supprimer le compte",
     "deleteAccountTitle": "Supprimer ce compte ?",
@@ -274,6 +274,7 @@
     "required": "Veuillez remplir tous les champs.",
     "invalidEmail": "Veuillez saisir une adresse email valide.",
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caracteres.",
+    "passwordWeak": "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.",
     "passwordMismatch": "Les mots de passe ne correspondent pas.",
     "usernameInvalid": "Le nom d'utilisateur doit contenir au moins 3 caracteres et utiliser lettres, chiffres ou tirets bas."
   },

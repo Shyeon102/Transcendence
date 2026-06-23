@@ -116,7 +116,7 @@
     "confirmNewPassword": "Confirm New Password",
     "changePassword": "Change Password",
     "passwordChanging": "Changing...",
-    "passwordChangeSuccess": "Password change form validation passed. Only the API hookup remains.",
+    "passwordChangeSuccess": "Password changed successfully.",
     "passwordSameAsCurrent": "The new password must be different from the current password.",
     "deleteAccount": "Delete Account",
     "deleteAccountTitle": "Delete this account?",
@@ -274,6 +274,7 @@
     "required": "Please fill in every field.",
     "invalidEmail": "Please enter a valid email address.",
     "passwordTooShort": "Password must be at least 8 characters.",
+    "passwordWeak": "Password must include at least one uppercase letter, one lowercase letter, and one number.",
     "passwordMismatch": "Passwords do not match.",
     "usernameInvalid": "Username must be 3+ chars using letters, numbers, or underscores."
   },
