@@ -485,7 +485,9 @@ export const authApi = createApi({
             body: isOnboardingUpdate
               ? {
                   onboarding_completed: payload.onboardingCompleted,
-                  onboarding_answers: payload.onboardingAnswers,
+                  ...(payload.onboardingAnswers !== undefined
+                    ? { onboarding_answers: payload.onboardingAnswers }
+                    : {}),
                 }
               : {
                   username: payload.username,

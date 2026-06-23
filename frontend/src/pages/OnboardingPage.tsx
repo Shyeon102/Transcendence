@@ -48,10 +48,10 @@ export default function OnboardingPage() {
     }));
   };
 
-  const persistOnboarding = async (payloadAnswers: OnboardingAnswers) => {
+  const persistOnboarding = async (payloadAnswers?: OnboardingAnswers) => {
     const payload = {
       onboardingCompleted: true,
-      onboardingAnswers: payloadAnswers,
+      ...(payloadAnswers ? { onboardingAnswers: payloadAnswers } : {}),
     };
 
     try {
@@ -85,7 +85,7 @@ export default function OnboardingPage() {
       return;
     }
 
-    await persistOnboarding(EMPTY_ANSWERS);
+    await persistOnboarding();
   };
 
   return (
