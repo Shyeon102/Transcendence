@@ -1,8 +1,58 @@
 import pandas as pd
 from apps.ai.models import CFModel
-from apps.ai.service.recommendation.cbf.cbf import get_cbf_scores
-from apps.ai.service.recommendation.cf.cf import get_cf_scores
 import math
+from apps.ai.service.recommendation.score_cache import (
+    get_cbf_scores_cached, get_cf_scores_cached
+)
+from apps.media.models import Review, MediaInteraction, Media
+from django.db.models import F
+
+
+def get_user_exclude_ids(user_id: int) -> set[int]:
+    review_ids = (
+        Review.objects
+        .filter(user_id=user_id)
+        .values_list('media_id', flat=True)
+    )
+    interaction_ids = (
+        MediaInteraction.objects
+        .filter(user_id=user_id)
+        .values_list('media_id', flat=True)
+    )
+    return set(review_ids) | set(interaction_ids)
+
+
+def get_user_rated_media_count(user_id: int) -> int:
+    review_ids = (
+        Review.objects.filter(user_id=user_id)
+        .values_list("media_id", flat=True)
+    )
+    interaction_ids = (
+        MediaInteraction.objects.filter(user_id=user_id)
+        .exclude(action="watched").values_list("media_id", flat=True)
+    )
+    rated_media_ids = set(review_ids) | set(interaction_ids)
+
+    return len(rated_media_ids)
+
+
+def get_activity_count(since=None, user_id=None) -> int:
+    review_qs = Review.objects.all()
+    interaction_qs = (
+        MediaInteraction.objects
+        .exclude(action="watched")
+        .values("user_id", "media_id")
+        .distinct()
+    )
+    if since is not None:
+        review_qs = review_qs.filter(created_at__gt=since)
+        interaction_qs = interaction_qs.filter(created_at__gt=since)
+
+    if user_id is not None:
+        review_qs = review_qs.filter(user_id=user_id)
+        interaction_qs = interaction_qs.filter(user_id=user_id)
+
+    return review_qs.count() + interaction_qs.count()
 
 
 def calculate_hybrid_weights(
@@ -34,29 +84,32 @@ def min_max_scale(series: pd.Series) -> pd.Series:
     return (series - min_val) / (max_val - min_val)
 
 
-def get_hybrid_recommendations(
+def get_hybrid_scores(
     user_id: int,
     cf_model: CFModel,
-    exclude_media_ids: list[int] | None = None,
-    cf_weight: float = 0.6,
-    cbf_weight: float = 0.4,
-    top_k: int = 50
+    top_k: int | None = None
 ) -> pd.Series:
 
+    exclude_media_ids = get_user_exclude_ids(user_id)
     if exclude_media_ids is None:
         return pd.Series(dtype=float)
+    user_rating_count = get_activity_count(user_id=user_id)
+    if user_rating_count == 0:
+        return pd.Series(dtype=float)
 
-    cf_series, user_rating_count = get_cf_scores(
-        user_id=user_id,
-        cf_model=cf_model,
-        exclude_media_ids=exclude_media_ids
-    )
-    cbf_series = get_cbf_scores(user_id=user_id,
-                                exclude_media_ids=exclude_media_ids)
-    if cf_series.empty:
-        return cbf_series.sort_values(ascending=False).head(top_k)
-    if cbf_series.empty:
-        return cf_series.sort_values(ascending=False).head(top_k)
+    cbf_series = get_cbf_scores_cached(user_id)
+    cf_series = get_cf_scores_cached(user_id)
+
+    if cbf_series.empty and cf_series.empty:
+        return pd.Series(dtype=float)
+
+    if cf_series.empty or cbf_series.empty:
+        final_scores = cbf_series if cf_series.empty else cf_series
+        if exclude_media_ids:
+            final_scores = final_scores.drop(
+                    exclude_media_ids, errors="ignore"
+                )
+        return final_scores
 
     cf_weight, cbf_weight = calculate_hybrid_weights(
         user_rating_count=user_rating_count,
@@ -70,6 +123,19 @@ def get_hybrid_recommendations(
         cbf_scaled * cbf_weight,
         fill_value=0.0
     )
+    if exclude_media_ids:
+        final_scores = final_scores.drop(exclude_media_ids, errors="ignore")
 
     final_scores.name = f"hybrid_score_user_{user_id}"
     return final_scores.sort_values(ascending=False).head(top_k)
+
+
+def get_popular_series() -> pd.Series:
+    qs = Media.objects.annotate(
+        calculated_score=(F('avg_rating') * 10) + F('rating_count')
+    ).values_list('id', 'calculated_score')
+
+    return pd.Series(
+        {mid: float(score) for mid, score in qs},
+        name="popularity_score"
+    )

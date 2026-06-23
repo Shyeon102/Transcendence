@@ -1,12 +1,42 @@
 from apps.ai.models import CFModel
 import pandas as pd
+from apps.ai.service.recommendation.score_cache import set_cf_scores
 
 
+def build_prediction_scores(cf_model: CFModel) -> dict[int, pd.Series]:
+
+    if cf_model is None:
+        return {}
+    svd_model = cf_model.get_model()
+    trainset = svd_model.trainset
+
+    all_media_ids = [trainset.to_raw_iid(iid) for iid in trainset.all_items()]
+    all_users = [trainset.to_raw_uid(uid) for uid in trainset.all_users()]
+
+    user_scores_map = {}
+
+    for user_id in all_users:
+        scores = {
+            mid: svd_model.predict(user_id, mid).est
+            for mid in all_media_ids
+        }
+        user_scores_map[user_id] = pd.Series(scores)
+    return user_scores_map
+
+
+def cache_cf_scores(cf_model: CFModel) -> None:
+    all_scores = build_prediction_scores(cf_model)
+    for user_id, series in all_scores.items():
+        if series.empty:
+            continue
+        set_cf_scores(user_id, series)
+
+
+"""
 def get_cf_scores(
     user_id: int,
     cf_model: CFModel,
-    exclude_media_ids: list[int] | None = None
-) -> tuple[pd.Series, int]:
+) -> pd.Series:
 
     if cf_model is None:
         return pd.Series(dtype=float)
@@ -16,23 +46,31 @@ def get_cf_scores(
 
     try:
         inner_uid = trainset.to_inner_uid(user_id)
-        user_rating_count = len(trainset.ur[inner_uid])
     except ValueError:
         return pd.Series(dtype=float, name=f'cf_score_user_{user_id}')
 
-    all_mid_set = {trainset.to_raw_iid(inner_id) for inner_id
+    media_ids = {trainset.to_raw_iid(inner_id) for inner_id
                    in trainset.all_items()}
-    if exclude_media_ids:
-        target_ids = all_mid_set - set(exclude_media_ids)
-    else:
-        target_ids = all_mid_set
 
-    scores = {mid: svd_model.predict(user_id, mid).est for mid in target_ids}
+    scores = {mid: svd_model.predict(user_id, mid).est for mid in media_ids}
 
-    return (
-        pd.Series(
+    return pd.Series(
             scores,
             name=f'cf_score_user_{user_id}'
-        ),
-        user_rating_count
     )
+
+def cache_cf_scores(
+    user_id: int,
+    cf_model: CFModel,
+) -> pd.Series:
+    scores = get_cf_scores(user_id, cf_model)
+    if scores.empty:
+        return pd.Series(dtype=float)
+    try:
+        cf_model = CFModel.objects.latest()
+    except CFModel.DoesNotExist:
+        return pd.Series(dtype=float)
+
+    set_cf_scores(user_id, scores)
+    return scores
+"""

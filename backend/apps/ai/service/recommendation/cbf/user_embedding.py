@@ -2,7 +2,10 @@ import numpy as np
 from apps.users.models import User
 from apps.ai.models import UserEmbedding, MediaEmbedding
 from apps.media.models import Review, MediaInteraction
-from apps.ai.constants import EMB_DIM, RATING_WEIGHT, ACTION_WEIGHT
+
+EMB_DIM = 768
+RATING_WEIGHT: dict[int, float] = {1: 0.0, 2: 0.2, 3: 0.5, 4: 0.8, 5: 1.0}
+ACTION_WEIGHT: dict[str, float] = {'like': 0.7, 'dislike': 0.0}
 
 
 def gather_weighted_signals(user: User) -> list[tuple[int, float]]:

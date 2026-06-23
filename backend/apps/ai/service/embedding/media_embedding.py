@@ -33,7 +33,7 @@ def truncate_to_token_limit(
     if len(tokens) <= max_tokens:
         return text
     truncated = _enc.decode(tokens[:max_tokens])
-    logger.debug("텍스트 truncate: %d → %d 토큰", len(tokens), max_tokens)
+    logger.debug("Text truncate: %d → %d tokens", len(tokens), max_tokens)
     return truncated
 
 

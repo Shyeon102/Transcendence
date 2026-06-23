@@ -1,9 +1,5 @@
 from apps.ai.service.recommendation.recommendations import (
-    get_hybrid_recommendations
-)
-from apps.ai.serializers import (
-    HybridRecommendationSerializer,
-    # RAGRecommendationSerializer
+    get_hybrid_scores, get_popular_series
 )
 # from apps.ai.service.retrieval.retrieval import rag_recommendations
 from rest_framework.response import Response
@@ -13,52 +9,29 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 
-def get_user_exclude_ids(user_id: int) -> set[int]:
-    from apps.media.models import Review, MediaInteraction
-
-    review_ids = (
-        Review.objects
-        .filter(user_id=user_id)
-        .values_list('media_id', flat=True)
-    )
-    interaction_ids = (
-        MediaInteraction.objects
-        .filter(user_id=user_id)
-        .values_list('media_id', flat=True)
-    )
-
-    return set(review_ids) | set(interaction_ids)
-
-
 class HybridRecommendationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
             user_id = request.user.id
-            exclude_ids = get_user_exclude_ids(user_id)
             cf_model = CFModel.objects.latest()
             hybrid_series = (
-                get_hybrid_recommendations(user_id=user_id,
-                                           cf_model=cf_model,
-                                           exclude_media_ids=exclude_ids)
+                get_hybrid_scores(user_id=user_id, cf_model=cf_model)
             )
             if hybrid_series.empty:
-                return Response({
-                    "message": "Not enough ratings to make recommended list"
-                }, status=status.HTTP_404_NOT_FOUND)
-
+                result_score = get_popular_series()
+            else:
+                result_score = hybrid_series
             result_data = [
                 {
                     "user_id": user_id,
                     "media_id": int(mid),
                     "score": round(float(score), 4)
                 }
-                for mid, score in hybrid_series.items()
+                for mid, score in result_score.items()
             ]
-            serializer = HybridRecommendationSerializer(data=result_data)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-
+            return Response(result_data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.
                             HTTP_500_INTERNAL_SERVER_ERROR)
