@@ -161,6 +161,33 @@
       "friendRecommendation": "What would you recommend to a friend? Movie, anime, or drama."
     }
   },
+  "admin": {
+    "eyebrow": "Moderation workspace",
+    "title": "Admin console",
+    "description": "Review reported content and manage user account status.",
+    "previewNotice": "UI preview only. Actions update this screen locally and are not saved to the server.",
+    "reportsEyebrow": "Content moderation",
+    "reportsTitle": "Reports",
+    "usersEyebrow": "Account moderation",
+    "usersTitle": "Users",
+    "reportedBy": "Reported by",
+    "reportCount": "Reports: {{count}}",
+    "approve": "Approve",
+    "reject": "Reject",
+    "hide": "Hide content",
+    "unhide": "Unhide content",
+    "suspend": "Suspend",
+    "ban": "Ban",
+    "reactivate": "Reactivate",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "active": "Active",
+      "suspended": "Suspended",
+      "banned": "Banned"
+    }
+  },
   "mypage": {
     "eyebrow": "Personal Space",
     "title": "MY PAGE",
