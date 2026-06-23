@@ -14,6 +14,8 @@ import { OAUTH_42_CALLBACK_PATH } from './lib/oauth';
 import MyPagePage from './pages/MyPagePage';
 import OnboardingPage from './pages/OnboardingPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
+import CommunityPage from './pages/CommunityPage';
+import PostDetailPage from './pages/PostDetailPage';
 
 export default function App() {
   return (
@@ -54,6 +56,8 @@ export default function App() {
               }
             />
             <Route path="/media/:id" element={<MediaDetailPage />} />
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/community/:id" element={<PostDetailPage />} />
           </Route>
           <Route path="/chat/rooms" element={<ChatRoomListPage />} />
           <Route path="/chat/rooms/:id" element={<ChatRoomPage />} />
