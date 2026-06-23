@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ( 
+from .views import (
     PostDetailView, PostView, TrendingPostView,
     PostCommentView, PostLikeView, CommentLikeView,
     CommentDetailView, PostReportView, CommentReportView

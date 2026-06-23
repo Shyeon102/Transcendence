@@ -99,14 +99,16 @@ class Command(BaseCommand):
 
         if not media_items:
             self.stdout.write(self.style.ERROR(
-                "No media items available. Run `manage.py seed_media` or create media first."
+                "No media items available. Run `manage.py seed_media` "
+                "or create media first."
             ))
             return
 
         max_pairs = len(users) * len(media_items)
         if review_count > max_pairs:
             self.stdout.write(self.style.WARNING(
-                f"Requested {review_count} reviews, but only {max_pairs} unique user/media pairs are possible."
+                f"Requested {review_count} reviews, but only {max_pairs}"
+                f"unique user/media pairs are possible."
             ))
             review_count = max_pairs
 
@@ -163,8 +165,10 @@ class Command(BaseCommand):
             media.save(update_fields=["avg_rating", "rating_count"])
 
         self.stdout.write(self.style.SUCCESS(
-            f"Created or updated {created + updated} reviews for {len(users)} users across {len(media_items)} media items."
+            f"Created or updated {created + updated} reviews for {len(users)}"
+            f"users across {len(media_items)} media items."
         ))
         self.stdout.write(self.style.SUCCESS(
-            f"New users created: {sum(1 for u in users if u.date_joined and u.username.startswith('reviewer'))}."
+            f"New users created: {sum(1 for u in users if u.date_joined and
+                                      u.username.startswith('reviewer'))}."
         ))
