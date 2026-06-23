@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyMTQ0NjU5LCJpYXQiOjE3ODIxNDI4NTksImp0aSI6IjIwZWQyMGI5YzhiZTRiNmE4MGIwNmYzZmJmNTc1MTY1IiwidXNlcl9pZCI6IjcifQ.9xr0FXzQFwRNr2_upj395QCUkULsNz7GSgAqkNF0vls
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyMjIzNDQ4LCJpYXQiOjE3ODIyMjE2NDgsImp0aSI6IjAzZTY5ZTIzNjYzODQyMDE4MjczZGYwYTU1YjVlYzQwIiwidXNlcl9pZCI6IjgifQ.aWqH9okahR0O0d3e0r53niw3gkI70j4i-bVRA5MFAps
 curl -X POST http://localhost:8000/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
@@ -47,7 +47,7 @@ curl -X GET http://localhost:8000/api/community/posts/4/comments \
 
 ###
 
-curl -X GET http://localhost:8000/api/community/posts/4/ \
+curl -X GET http://localhost:8000/api/community/posts/1/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}"
 

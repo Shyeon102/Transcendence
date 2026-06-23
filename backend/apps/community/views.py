@@ -278,6 +278,9 @@ class PostReportView(APIView):
             post=post
         )
 
+        post.report_count += 1
+        post.save(update_fields=["report_count"])
+
         return Response({
             "status": report.status,
             "report_id": report.id
@@ -294,6 +297,9 @@ class CommentReportView(APIView):
             user=request.user,
             comment=comment
         )
+
+        comment.report_count += 1
+        comment.save(update_fields=["report_count"])
 
         return Response({
             "status": report.status,
