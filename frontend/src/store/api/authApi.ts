@@ -373,7 +373,7 @@ export const authApi = createApi({
 
           const userResult = await rawBaseQuery(
             {
-              url: '/users/',
+              url: '/users/profile/',
               headers: {
                 Authorization: `Bearer ${tokenPayload.access}`,
               },
