@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { setLanguage } from '../store/slices/uiSlice';
-import type { Language } from '../lib/i18n';
+import { storeLanguage, type Language } from '../lib/i18n';
 
 const languages: Language[] = ['ko', 'en', 'fr'];
 const labels: Record<Language, string> = {
@@ -18,6 +18,7 @@ export default function LanguageSwitcher() {
 
   const handleSelect = (item: Language) => {
     dispatch(setLanguage(item));
+    storeLanguage(item);
     setOpen(false);
   };
 
