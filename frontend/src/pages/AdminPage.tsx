@@ -6,6 +6,7 @@ import type { RootState } from "../store";
 
 type ReportStatus = "pending" | "approved" | "rejected";
 type AccountStatus = "active" | "suspended" | "banned";
+type TabKey = "reports" | "users";
 
 type AdminReport = {
   id: number;
@@ -65,11 +66,46 @@ const initialUsers: ManagedUser[] = [
   { id: 35, username: "posterbot", email: "posterbot@example.com", status: "banned", reportCount: 8 },
 ];
 
+const reportTypeColor: Record<string, string> = {
+  Spam: "border-[#f2b84b]/30 bg-[#f2b84b]/10 text-[#f2b84b]",
+  Abuse: "border-[#ff4f38]/30 bg-[#ff4f38]/10 text-[#ff9c8e]",
+  Copyright: "border-[#d4a847]/30 bg-[#d4a847]/10 text-[#e6bf63]",
+};
+
+function StatusBadge({ status }: { status: string }) {
+  const colors: Record<string, string> = {
+    pending: "border-[#f2b84b]/40 bg-[#f2b84b]/10 text-[#f2d496]",
+    approved: "border-[#6bbf72]/40 bg-[#6bbf72]/10 text-[#9edba2]",
+    rejected: "border-[#f0ead0]/15 bg-[#f0ead0]/5 text-[#8a8474]",
+    active: "border-[#6bbf72]/40 bg-[#6bbf72]/10 text-[#9edba2]",
+    suspended: "border-[#f2b84b]/40 bg-[#f2b84b]/10 text-[#f2d496]",
+    banned: "border-[#ff4f38]/40 bg-[#ff4f38]/10 text-[#ff9c8e]",
+  };
+  const { t } = useI18n();
+  return (
+    <span className={`inline-block border px-2.5 py-1 text-[8px] uppercase tracking-[0.14em] ${colors[status] ?? "text-[#8a8474]"}`}>
+      {t(`admin.status.${status}`)}
+    </span>
+  );
+}
+
+function StatCard({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
+  return (
+    <div className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-4">
+      <p className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">{label}</p>
+      <p className={`mt-1 font-['Bebas_Neue'] text-3xl tracking-[0.04em] ${accent ?? "text-[#f0ead0]"}`}>{value}</p>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
   const [reports, setReports] = useState(initialReports);
   const [users, setUsers] = useState(initialUsers);
+  const [activeTab, setActiveTab] = useState<TabKey>("reports");
+  const [reportFilter, setReportFilter] = useState<ReportStatus | "all">("all");
+  const [userFilter, setUserFilter] = useState<AccountStatus | "all">("all");
 
   if (!user?.isStaff && !import.meta.env.DEV) {
     return <Navigate to="/home" replace />;
@@ -89,109 +125,233 @@ export default function AdminPage() {
     );
   };
 
-  const statusClass = (status: string) => {
-    if (status === "approved" || status === "active") return "text-[#6bbf72]";
-    if (status === "rejected") return "text-[#c8c2a8]";
-    if (status === "suspended") return "text-[#f2b84b]";
-    if (status === "banned") return "text-[#ff4f38]";
-    return "text-[#f2b84b]";
-  };
+  const pendingCount = reports.filter((r) => r.status === "pending").length;
+  const suspendedCount = users.filter((u) => u.status === "suspended").length;
+  const bannedCount = users.filter((u) => u.status === "banned").length;
+
+  const filteredReports = reportFilter === "all" ? reports : reports.filter((r) => r.status === reportFilter);
+  const filteredUsers = userFilter === "all" ? users : users.filter((u) => u.status === userFilter);
+
+  const reportFilterOptions: (ReportStatus | "all")[] = ["all", "pending", "approved", "rejected"];
+  const userFilterOptions: (AccountStatus | "all")[] = ["all", "active", "suspended", "banned"];
 
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8 max-w-3xl">
+        {/* Header */}
+        <div className="mb-10 max-w-3xl">
           <p className="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#d63e2a]">
             {t("admin.eyebrow")}
           </p>
-          <h1 className="font-['Bebas_Neue'] text-[clamp(28px,4vw,40px)] leading-[0.95] tracking-[0.03em]">
+          <h1 className="font-['Bebas_Neue'] text-[clamp(36px,6vw,64px)] leading-[0.92] tracking-[0.03em]">
             {t("admin.title")}
           </h1>
           <p className="mt-4 max-w-2xl font-['IBM_Plex_Serif'] text-sm italic leading-7 text-[#8a8474]">
             {t("admin.description")}
           </p>
-          <p className="mt-4 border-l border-[#d4a847] pl-3 text-xs text-[#c8c2a8]">
+          <p className="mt-4 border-l-2 border-[#d4a847]/60 pl-3 text-[10px] leading-5 text-[#c8c2a8]">
             {t("admin.previewNotice")}
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <section className="border border-[#f0ead0]/10 bg-[#141412] p-6">
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="font-['Bebas_Neue'] text-xl tracking-[0.04em]">{t("admin.reportsTitle")}</h2>
-              <span className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">{reports.length} entries</span>
-            </div>
-
-            <div className="mt-5 space-y-4">
-              {reports.map((report) => (
-                <article key={report.id} className="border border-[#f0ead0]/10 bg-[#1c1c19] p-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.08em] text-[#f0ead0]">{report.target}</p>
-                      <p className="mt-1 text-[9px] uppercase tracking-[0.1em] text-[#8a8474]">
-                        #{report.id} · {report.type} · {report.createdAt} · {t("admin.reportedBy")} {report.reporter}
-                      </p>
-                    </div>
-                    <span className={`text-[9px] uppercase tracking-[0.1em] ${statusClass(report.status)}`}>
-                      {t(`admin.status.${report.status}`)}
-                    </span>
-                  </div>
-                  <p className="mt-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#c8c2a8]">{report.reason}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button type="button" onClick={() => updateReport(report.id, { status: "approved" })} className="border border-[#6bbf72]/50 px-3 py-2 text-[10px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10">
-                      {t("admin.approve")}
-                    </button>
-                    <button type="button" onClick={() => updateReport(report.id, { status: "rejected" })} className="border border-[#f0ead0]/20 px-3 py-2 text-[10px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#f0ead0]/40">
-                      {t("admin.reject")}
-                    </button>
-                    <button type="button" onClick={() => updateReport(report.id, { hidden: !report.hidden })} className="border border-[#ff4f38]/50 px-3 py-2 text-[10px] uppercase tracking-[0.12em] text-[#ff9c8e] transition hover:bg-[#ff4f38]/10">
-                      {report.hidden ? t("admin.unhide") : t("admin.hide")}
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="border border-[#f0ead0]/10 bg-[#141412] p-6">
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="font-['Bebas_Neue'] text-xl tracking-[0.04em]">{t("admin.usersTitle")}</h2>
-              <span className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">{users.length} entries</span>
-            </div>
-
-            <div className="mt-5 space-y-4">
-              {users.map((managedUser) => (
-                <article key={managedUser.id} className="border border-[#f0ead0]/10 bg-[#1c1c19] p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.08em] text-[#f0ead0]">{managedUser.username}</p>
-                      <p className="mt-1 text-[10px] text-[#8a8474]">{managedUser.email}</p>
-                    </div>
-                    <span className={`text-[9px] uppercase tracking-[0.1em] ${statusClass(managedUser.status)}`}>
-                      {t(`admin.status.${managedUser.status}`)}
-                    </span>
-                  </div>
-                  <p className="mt-3 text-[10px] uppercase tracking-[0.12em] text-[#8a8474]">
-                    {t("admin.reportCount").replace("{{count}}", String(managedUser.reportCount))}
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button type="button" onClick={() => updateUserStatus(managedUser.id, "suspended")} className="border border-[#f2b84b]/50 px-3 py-2 text-[10px] uppercase tracking-[0.12em] text-[#f2d496] transition hover:bg-[#f2b84b]/10">
-                      {t("admin.suspend")}
-                    </button>
-                    <button type="button" onClick={() => updateUserStatus(managedUser.id, "banned")} className="border border-[#ff4f38]/50 px-3 py-2 text-[10px] uppercase tracking-[0.12em] text-[#ff9c8e] transition hover:bg-[#ff4f38]/10">
-                      {t("admin.ban")}
-                    </button>
-                    {managedUser.status !== "active" ? (
-                      <button type="button" onClick={() => updateUserStatus(managedUser.id, "active")} className="border border-[#6bbf72]/50 px-3 py-2 text-[10px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10">
-                        {t("admin.reactivate")}
-                      </button>
-                    ) : null}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
+        {/* Stats overview */}
+        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard label={t("admin.reportsTitle")} value={reports.length} />
+          <StatCard label={t("admin.status.pending")} value={pendingCount} accent={pendingCount > 0 ? "text-[#f2b84b]" : "text-[#f0ead0]"} />
+          <StatCard label={t("admin.usersTitle")} value={users.length} />
+          <StatCard label={`${t("admin.status.suspended")} / ${t("admin.status.banned")}`} value={`${suspendedCount} / ${bannedCount}`} accent={suspendedCount + bannedCount > 0 ? "text-[#ff9c8e]" : "text-[#f0ead0]"} />
         </div>
+
+        {/* Tabs */}
+        <div className="mb-6 flex border-b border-[#f0ead0]/10">
+          {([
+            ["reports", t("admin.reportsTitle"), String(reports.length)],
+            ["users", t("admin.usersTitle"), String(users.length)],
+          ] as const).map(([key, label, count]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveTab(key)}
+              className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
+                activeTab === key ? "border-[#d63e2a] text-[#f0ead0]" : "border-transparent text-[#8a8474] hover:text-[#c8c2a8]"
+              }`}
+            >
+              {label} <span className={activeTab === key ? "text-[#d63e2a]" : "text-[#8a8474]"}>{count}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Reports tab */}
+        {activeTab === "reports" ? (
+          <div>
+            {/* Report filters */}
+            <div className="mb-5 flex flex-wrap gap-2">
+              {reportFilterOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setReportFilter(option)}
+                  className={`border px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] transition ${
+                    reportFilter === option
+                      ? "border-[#d63e2a]/60 bg-[#d63e2a]/10 text-[#f0ead0]"
+                      : "border-[#f0ead0]/10 text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]"
+                  }`}
+                >
+                  {option === "all" ? "All" : t(`admin.status.${option}`)}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-3">
+              {filteredReports.length ? (
+                filteredReports.map((report) => (
+                  <article key={report.id} className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/20">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`inline-block border px-2 py-0.5 text-[8px] uppercase tracking-[0.14em] ${reportTypeColor[report.type] ?? "border-[#f0ead0]/10 text-[#8a8474]"}`}>
+                            {report.type}
+                          </span>
+                          <StatusBadge status={report.status} />
+                          {report.hidden ? (
+                            <span className="inline-block border border-[#ff4f38]/30 bg-[#ff4f38]/10 px-2 py-0.5 text-[8px] uppercase tracking-[0.14em] text-[#ff9c8e]">
+                              Hidden
+                            </span>
+                          ) : null}
+                        </div>
+                        <h3 className="mt-2.5 text-[13px] font-bold leading-6 tracking-[0.04em] text-[#f0ead0]">
+                          {report.target}
+                        </h3>
+                        <p className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-[#8a8474]">
+                          #{report.id} · {report.createdAt} · {t("admin.reportedBy")} {report.reporter}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="mt-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#c8c2a8]">
+                      {report.reason}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateReport(report.id, { status: "approved" })}
+                        disabled={report.status === "approved"}
+                        className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                      >
+                        {t("admin.approve")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateReport(report.id, { status: "rejected" })}
+                        disabled={report.status === "rejected"}
+                        className="border border-[#f0ead0]/15 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#f0ead0]/30 disabled:opacity-30 disabled:hover:border-[#f0ead0]/15"
+                      >
+                        {t("admin.reject")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateReport(report.id, { hidden: !report.hidden })}
+                        className="border border-[#ff4f38]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#ff9c8e] transition hover:bg-[#ff4f38]/10"
+                      >
+                        {report.hidden ? t("admin.unhide") : t("admin.hide")}
+                      </button>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
+                  No reports match this filter.
+                </p>
+              )}
+            </div>
+          </div>
+        ) : null}
+
+        {/* Users tab */}
+        {activeTab === "users" ? (
+          <div>
+            {/* User filters */}
+            <div className="mb-5 flex flex-wrap gap-2">
+              {userFilterOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setUserFilter(option)}
+                  className={`border px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] transition ${
+                    userFilter === option
+                      ? "border-[#d63e2a]/60 bg-[#d63e2a]/10 text-[#f0ead0]"
+                      : "border-[#f0ead0]/10 text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]"
+                  }`}
+                >
+                  {option === "all" ? "All" : t(`admin.status.${option}`)}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-3">
+              {filteredUsers.length ? (
+                filteredUsers.map((managedUser) => (
+                  <article key={managedUser.id} className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/20">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        {/* Avatar initials */}
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#f0ead0]/10 bg-[#1c1c19] text-[11px] uppercase tracking-[0.08em] text-[#8a8474]">
+                          {managedUser.username.slice(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-[13px] font-bold tracking-[0.04em] text-[#f0ead0]">
+                              {managedUser.username}
+                            </h3>
+                            <StatusBadge status={managedUser.status} />
+                          </div>
+                          <p className="mt-0.5 text-[10px] text-[#8a8474]">{managedUser.email}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-[9px] uppercase tracking-[0.12em] ${managedUser.reportCount > 5 ? "text-[#ff9c8e]" : "text-[#8a8474]"}`}>
+                          {t("admin.reportCount").replace("{{count}}", String(managedUser.reportCount))}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {managedUser.status !== "suspended" ? (
+                        <button
+                          type="button"
+                          onClick={() => updateUserStatus(managedUser.id, "suspended")}
+                          className="border border-[#f2b84b]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#f2d496] transition hover:bg-[#f2b84b]/10"
+                        >
+                          {t("admin.suspend")}
+                        </button>
+                      ) : null}
+                      {managedUser.status !== "banned" ? (
+                        <button
+                          type="button"
+                          onClick={() => updateUserStatus(managedUser.id, "banned")}
+                          className="border border-[#ff4f38]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#ff9c8e] transition hover:bg-[#ff4f38]/10"
+                        >
+                          {t("admin.ban")}
+                        </button>
+                      ) : null}
+                      {managedUser.status !== "active" ? (
+                        <button
+                          type="button"
+                          onClick={() => updateUserStatus(managedUser.id, "active")}
+                          className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10"
+                        >
+                          {t("admin.reactivate")}
+                        </button>
+                      ) : null}
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
+                  No users match this filter.
+                </p>
+              )}
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );
