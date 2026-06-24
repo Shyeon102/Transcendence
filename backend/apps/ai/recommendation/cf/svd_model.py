@@ -4,8 +4,9 @@ import pandas as pd
 from apps.ai.models import CFModel
 from apps.ai.constants import RATING_WEIGHT, ACTION_WEIGHT
 import hashlib
+import logging
 
-MIN_RATINGS_FOR_TRAINING = 50
+logger = logging.getLogger(__name__)
 
 
 def build_ratings_df() -> pd.DataFrame:
@@ -52,21 +53,22 @@ def build_ratings_df() -> pd.DataFrame:
     return final_df
 
 
-def train_svd_model(latent_dim=12):
-    last_model = CFModel.objects.order_by('-created_at').first()
-
+def train_svd_model(latent_dim: int = 12) -> CFModel | None:
     ratings_df = build_ratings_df()
+    ratings_df['uid'] = ratings_df['uid'].astype(int)
+    ratings_df['iid'] = ratings_df['iid'].astype(int)
+
     current_ratings_count = len(ratings_df)
 
-    if last_model:
-        last_model_ratings_count = last_model.get_item_count()
-        if current_ratings_count <= last_model_ratings_count:
-            print("No new ratings since last model. Skipping training.")
-            return None
+    # if current_ratings_count < MIN_RATINGS_FOR_TRAINING:
+    #     logger.info("Not enough ratings to train (%d < %d)",
+    #                 current_ratings_count, MIN_RATINGS_FOR_TRAINING)
+    #     return None
 
-    if current_ratings_count < MIN_RATINGS_FOR_TRAINING:
-        print("Not enough ratings to train SVD model")
-        return None
+    # last_model = CFModel.objects.order_by('-created_at').first()
+    # if last_model and current_ratings_count <= last_model.rating_count:
+    #     logger.info("No new ratings since last model. Skipping.")
+    #     return None
 
     reader = Reader(rating_scale=(0.0, 1.0))
     data = Dataset.load_from_df(ratings_df[['uid', 'iid', 'rating']], reader)
@@ -88,7 +90,8 @@ def train_svd_model(latent_dim=12):
     return CFModel.save_model(
         svd_model=model,
         version=version,
-        user_count=ratings_df['uid'].nunique(),
-        item_count=ratings_df['iid'].nunique(),
+        user_count=int(ratings_df['uid'].nunique()),
+        item_count=int(ratings_df['iid'].nunique()),
+        rating_count=current_ratings_count,
         latent_dim=latent_dim,
     )

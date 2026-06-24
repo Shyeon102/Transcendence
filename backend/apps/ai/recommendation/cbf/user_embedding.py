@@ -1,8 +1,14 @@
+import logging
 import numpy as np
 from apps.users.models import User
 from apps.ai.models import UserEmbedding, MediaEmbedding
 from apps.media.models import Review, MediaInteraction
-from apps.ai.constants import EMB_DIM, RATING_WEIGHT, ACTION_WEIGHT
+
+logger = logging.getLogger(__name__)
+
+EMB_DIM = 768
+RATING_WEIGHT: dict[int, float] = {1: 0.0, 2: 0.2, 3: 0.5, 4: 0.8, 5: 1.0}
+ACTION_WEIGHT: dict[str, float] = {'like': 0.7, 'dislike': 0.0}
 
 
 def gather_weighted_signals(user: User) -> list[tuple[int, float]]:
@@ -49,8 +55,8 @@ def build_user_embedding(user: User) -> UserEmbedding:
             used_media.append(media_id)
 
     if not used_media:
-        raise ValueError(f"User {user.pk}: all interactions have weight 0 or"
-                         "no MediaEmbedding found.")
+        logger.info(f"No valid media found for user {user.pk}.")
+        return None
 
     # L2 정규화 (코사인 유사도를 위해)
     norm = np.linalg.norm(profile_vec)
