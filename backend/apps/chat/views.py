@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.pagination import CursorPagination
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import BasePermission
@@ -22,11 +23,16 @@ class IsRoomMember(BasePermission):
                                              user=request.user).exists()
 
 
+class ChatRoomCursorPagination(CursorPagination):
+    ordering = "-created_at"
+
+
 class ChatRoomViewSet(viewsets.ModelViewSet):
 
     permission_classes = [IsRoomMember]
     queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
+    pagination_class = ChatRoomCursorPagination
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
