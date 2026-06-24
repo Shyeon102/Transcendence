@@ -47,15 +47,14 @@ class TrendingMediaView(APIView):
 
 class HybridRecommendationView(APIView):
     # only for test
-    from rest_framework.permissions import AllowAny
-    permission_classes = [AllowAny]
-    # need to be removed
+    # from rest_framework.permissions import AllowAny
+    # permission_classes = [AllowAny]
 
-    # permission_classes = [IsAuthenticated]
-    # def get(self, request):
-    def get(self, request, user_id):
+    permission_classes = [IsAuthenticated]
+    # def get(self, request, user_id):
+    def get(self, request):
         try:
-            # user_id = request.user.id
+            user_id = request.user.id # rm for test
             hybrid_series = (
                 get_hybrid_scores(user_id=user_id)
             )
@@ -76,9 +75,8 @@ class HybridRecommendationView(APIView):
 
 class RAGRecommendationView(APIView):
     # only for test
-    from rest_framework.permissions import AllowAny
-    permission_classes = [AllowAny]
-    # need to be removed
+    # from rest_framework.permissions import AllowAny
+    # permission_classes = [AllowAny]
 
     def get(self, request):
 

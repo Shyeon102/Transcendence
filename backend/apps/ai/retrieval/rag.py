@@ -4,6 +4,7 @@ import logging
 from pgvector.django import CosineDistance
 from apps.ai.models import MediaEmbedding
 import pandas as pd
+import json
 from pydantic import BaseModel, Field
 from tenacity import (
     retry,
@@ -81,6 +82,8 @@ def _fallback_parse(text: str) -> ParsedQuery:
 )
 def call_gemini_with_retry(prompt: str) -> ParsedQuery | None:
     api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY is not set")
     url = (
         "https://generativelanguage.googleapis.com/v1beta/"
         f"models/gemini-2.0-flash:generateContent?key={api_key}"
@@ -94,16 +97,12 @@ def call_gemini_with_retry(prompt: str) -> ParsedQuery | None:
             }
         ]
     }
-    try:
-        res = requests.post(url, json=payload, timeout=30)
-        res.raise_for_status()
-        data = res.json()
-        text = data["candidates"][0]["content"]["parts"][0]["text"]
-        import json
-        parsed = json.loads(text)
-        return ParsedQuery(**parsed)
-    except Exception:
-        return None
+    res = requests.post(url, json=payload, timeout=30)
+    res.raise_for_status()
+    data = res.json()
+    text = data["candidates"][0]["content"]["parts"][0]["text"]
+    parsed = json.loads(text)
+    return ParsedQuery(**parsed)
 
 
 def parse_query(text: str) -> ParsedQuery:
@@ -120,9 +119,9 @@ def parse_query(text: str) -> ParsedQuery:
     Output Format:
     Return ONLY a valid JSON object. Do not include any markdown formatting or extra text.
     {{
-        "Type": "string" | null,
-        "Genres": ["string"],
-        "Description": "string"
+        "Type": null,
+        "Genres": [],
+        "Description": ""
     }}
     """
     try:
@@ -136,6 +135,8 @@ def parse_query(text: str) -> ParsedQuery:
 
 def embed_query(text: str) -> list[float]:
     api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY is not set")
     url = (
         "https://generativelanguage.googleapis.com/v1beta/"
         f"models/gemini-embedding-2:embedContent?key={api_key}"
@@ -164,6 +165,10 @@ def retrieve_media(
 
     if media_type:
         qs = qs.filter(media__media_type=media_type)
+
+    if genres:
+        for g in genres:
+            qs = qs.filter(genres__name=g)
 
     qs = qs.distinct()
 

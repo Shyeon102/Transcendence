@@ -53,7 +53,7 @@ def build_source_text(media: Media) -> str:
     raw = (
         f"{media.title} is a {media.media_type}.\n"
         f"Genres: {genres}.\n"
-        f"Story: {media.description or ''}.\n"
+        f"Story: {media.description or ''}\n"
     ).strip()
     return truncate_to_token_limit(raw)
 
