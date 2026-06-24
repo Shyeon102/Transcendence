@@ -32,7 +32,8 @@ def get_cf_scores_cached(user_id: int) -> pd.Series:
     cached = cache.get(CF_KEY.format(user_id=user_id))
     if not cached:
         return pd.Series(dtype=float)
-    s = pd.Series(cached)
+    data = json.loads(cached)
+    s = pd.Series(data, dtype=float)
     s.index = s.index.astype(int)  # str → int
     return s
 

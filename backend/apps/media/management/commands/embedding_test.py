@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from apps.media.models import Media
 from apps.ai.models import MediaEmbedding
-from apps.ai.service.embedding.media_embedding import (
+from apps.ai.embedding.media_embedding import (
     build_source_text,
     get_embeddings_batch,
 )

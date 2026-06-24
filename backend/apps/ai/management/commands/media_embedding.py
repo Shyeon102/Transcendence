@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from apps.media.models import Media
 from apps.ai.models import MediaEmbedding
-from apps.ai.service.embedding.media_embedding import process_embedding_batch
+from apps.ai.embedding.media_embedding import process_embedding_batch
 
 
 class Command(BaseCommand):

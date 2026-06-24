@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
-from apps.ai.service.recommendation.cf.svd_model import train_svd_model
-from apps.ai.service.recommendation.cf.cf import cache_cf_scores
+from apps.ai.recommendation.cf.svd_model import train_svd_model
+from apps.ai.recommendation.cf.cf import cache_cf_scores
 
 
 class Command(BaseCommand):

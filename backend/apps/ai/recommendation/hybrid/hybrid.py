@@ -1,11 +1,15 @@
 import pandas as pd
-from apps.ai.models import CFModel
 import math
-from apps.ai.service.recommendation.score_cache import (
+from apps.ai.recommendation.hybrid.score_cache import (
     get_cbf_scores_cached, get_cf_scores_cached
 )
 from apps.media.models import Review, MediaInteraction, Media
 from django.db.models import F
+import logging
+
+logger = logging.getLogger(__name__)
+
+USER_EMBEDDING_THRESHOLD = 3
 
 
 def get_user_exclude_ids(user_id: int) -> set[int]:
@@ -22,27 +26,12 @@ def get_user_exclude_ids(user_id: int) -> set[int]:
     return set(review_ids) | set(interaction_ids)
 
 
-def get_user_rated_media_count(user_id: int) -> int:
-    review_ids = (
-        Review.objects.filter(user_id=user_id)
-        .values_list("media_id", flat=True)
-    )
-    interaction_ids = (
-        MediaInteraction.objects.filter(user_id=user_id)
-        .exclude(action="watched").values_list("media_id", flat=True)
-    )
-    rated_media_ids = set(review_ids) | set(interaction_ids)
-
-    return len(rated_media_ids)
-
-
 def get_activity_count(since=None, user_id=None) -> int:
-    review_qs = Review.objects.all()
+    review_qs = Review.objects.values_list("user_id", "media_id")
     interaction_qs = (
         MediaInteraction.objects
         .exclude(action="watched")
-        .values("user_id", "media_id")
-        .distinct()
+        .values_list("user_id", "media_id")
     )
     if since is not None:
         review_qs = review_qs.filter(created_at__gt=since)
@@ -52,7 +41,9 @@ def get_activity_count(since=None, user_id=None) -> int:
         review_qs = review_qs.filter(user_id=user_id)
         interaction_qs = interaction_qs.filter(user_id=user_id)
 
-    return review_qs.count() + interaction_qs.count()
+    media_items = set(review_qs) | set(interaction_qs)
+
+    return len(media_items)
 
 
 def calculate_hybrid_weights(
@@ -86,15 +77,14 @@ def min_max_scale(series: pd.Series) -> pd.Series:
 
 def get_hybrid_scores(
     user_id: int,
-    cf_model: CFModel,
-    top_k: int | None = None
 ) -> pd.Series:
 
     exclude_media_ids = get_user_exclude_ids(user_id)
     if exclude_media_ids is None:
         return pd.Series(dtype=float)
+
     user_rating_count = get_activity_count(user_id=user_id)
-    if user_rating_count == 0:
+    if user_rating_count < USER_EMBEDDING_THRESHOLD:
         return pd.Series(dtype=float)
 
     cbf_series = get_cbf_scores_cached(user_id)
@@ -113,7 +103,7 @@ def get_hybrid_scores(
 
     cf_weight, cbf_weight = calculate_hybrid_weights(
         user_rating_count=user_rating_count,
-        total_ratings_count=cf_model.get_item_count()
+        total_ratings_count=get_activity_count(since=None, user_id=None)
     )
 
     cf_scaled = min_max_scale(cf_series)
@@ -126,8 +116,7 @@ def get_hybrid_scores(
     if exclude_media_ids:
         final_scores = final_scores.drop(exclude_media_ids, errors="ignore")
 
-    final_scores.name = f"hybrid_score_user_{user_id}"
-    return final_scores.sort_values(ascending=False).head(top_k)
+    return final_scores.sort_values(ascending=False)
 
 
 def get_popular_series() -> pd.Series:

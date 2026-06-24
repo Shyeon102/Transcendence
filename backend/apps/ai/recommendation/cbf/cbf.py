@@ -1,7 +1,7 @@
 from pgvector.django import CosineDistance
 import pandas as pd
 from apps.ai.models import MediaEmbedding, UserEmbedding
-from apps.ai.service.recommendation.score_cache import set_cbf_scores
+from apps.ai.recommendation.hybrid.score_cache import set_cbf_scores
 
 
 def get_cbf_scores(

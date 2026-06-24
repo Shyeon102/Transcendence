@@ -5,4 +5,4 @@ class AiConfig(AppConfig):
     name = "apps.ai"
 
     def ready(self):
-        import apps.ai.service.recommendation.signals  # noqa: F401
+        import apps.ai.recommendation.signals  # noqa: F401

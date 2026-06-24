@@ -1,6 +1,6 @@
 from apps.ai.models import CFModel
 import pandas as pd
-from apps.ai.service.recommendation.score_cache import set_cf_scores
+from apps.ai.recommendation.hybrid.score_cache import set_cf_scores
 
 
 def build_prediction_scores(cf_model: CFModel) -> dict[int, pd.Series]:
@@ -10,14 +10,26 @@ def build_prediction_scores(cf_model: CFModel) -> dict[int, pd.Series]:
     svd_model = cf_model.get_model()
     trainset = svd_model.trainset
 
-    all_media_ids = [trainset.to_raw_iid(iid) for iid in trainset.all_items()]
-    all_users = [trainset.to_raw_uid(uid) for uid in trainset.all_users()]
+    # all_media_ids = [
+    #     int(trainset.to_raw_iid(iid))
+    #     for iid in trainset.all_items()
+    # ]
+    # all_users = [
+    #     int(trainset.to_raw_uid(uid))
+    #     for uid in trainset.all_users()
+    # ]
+
+    all_media_ids = list(map(
+        int, map(trainset.to_raw_iid, trainset.all_items())
+        ))
+    all_users = list(map(int, map(trainset.to_raw_uid, trainset.all_users())))
 
     user_scores_map = {}
 
     for user_id in all_users:
+        user_id = int(user_id)
         scores = {
-            mid: svd_model.predict(user_id, mid).est
+            int(mid): svd_model.predict(user_id, mid).est
             for mid in all_media_ids
         }
         user_scores_map[user_id] = pd.Series(scores)

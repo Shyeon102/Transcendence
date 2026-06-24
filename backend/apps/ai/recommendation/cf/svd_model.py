@@ -6,7 +6,6 @@ from apps.ai.constants import RATING_WEIGHT, ACTION_WEIGHT
 import hashlib
 import logging
 
-MIN_RATINGS_FOR_TRAINING = 50
 logger = logging.getLogger(__name__)
 
 
@@ -56,6 +55,9 @@ def build_ratings_df() -> pd.DataFrame:
 
 def train_svd_model(latent_dim: int = 12) -> CFModel | None:
     ratings_df = build_ratings_df()
+    ratings_df['uid'] = ratings_df['uid'].astype(int)
+    ratings_df['iid'] = ratings_df['iid'].astype(int)
+
     current_ratings_count = len(ratings_df)
 
     # if current_ratings_count < MIN_RATINGS_FOR_TRAINING:
@@ -88,8 +90,8 @@ def train_svd_model(latent_dim: int = 12) -> CFModel | None:
     return CFModel.save_model(
         svd_model=model,
         version=version,
-        user_count=ratings_df['uid'].nunique(),
-        item_count=ratings_df['iid'].nunique(),
+        user_count=int(ratings_df['uid'].nunique()),
+        item_count=int(ratings_df['iid'].nunique()),
         rating_count=current_ratings_count,
         latent_dim=latent_dim,
     )
