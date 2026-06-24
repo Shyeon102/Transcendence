@@ -37,14 +37,24 @@ def truncate_to_token_limit(
     return truncated
 
 
+# def build_source_text(media: Media) -> str:
+#     genres = ", ".join(g.name for g in media.genres.all())
+#     raw = (
+#         f"Title: {media.title}\n"
+#         f"Type: {media.media_type}\n"
+#         f"Genres: {genres}\n"
+#         f"Description: {media.description or ''}\n"
+#     )
+#     return truncate_to_token_limit(raw)
+
+
 def build_source_text(media: Media) -> str:
     genres = ", ".join(g.name for g in media.genres.all())
     raw = (
-        f"Title: {media.title}\n"
-        f"Type: {media.media_type}\n"
-        f"Genres: {genres}\n"
-        f"Description: {media.description or ''}\n"
-    )
+        f"{media.title} is a {media.media_type}.\n"
+        f"Genres: {genres}.\n"
+        f"Story: {media.description or ''}.\n"
+    ).strip()
     return truncate_to_token_limit(raw)
 
 

@@ -1,11 +1,10 @@
 import logging
 import pandas as pd
-
 from apps.ai.api.serializers import MediaRecommendationSerializer
 from apps.ai.recommendation.hybrid.hybrid import (
     get_hybrid_scores, get_popular_series
 )
-# from apps.ai.service.retrieval.retrieval import rag_recommendations
+from apps.ai.retrieval.rag import rag_recommendations
 from rest_framework.response import Response
 from rest_framework import status
 # from rest_framework.permissions import IsAuthenticated
@@ -47,10 +46,12 @@ class TrendingMediaView(APIView):
 
 
 class HybridRecommendationView(APIView):
-    # permission_classes = [IsAuthenticated]
+    # only for test
     from rest_framework.permissions import AllowAny
     permission_classes = [AllowAny]
+    # need to be removed
 
+    # permission_classes = [IsAuthenticated]
     # def get(self, request):
     def get(self, request, user_id):
         try:
@@ -73,8 +74,12 @@ class HybridRecommendationView(APIView):
             )
 
 
-"""
 class RAGRecommendationView(APIView):
+    # only for test
+    from rest_framework.permissions import AllowAny
+    permission_classes = [AllowAny]
+    # need to be removed
+
     def get(self, request):
 
         try:
@@ -82,18 +87,21 @@ class RAGRecommendationView(APIView):
             if not query:
                 return Response({"error": "Query parameter is required"},
                                 status=status.HTTP_400_BAD_REQUEST)
-
-            media_type = request.query_params.get('media_type')
-
-            rag_series = rag_recommendations(query, media_type)
+            rag_series = rag_recommendations(query)
+            if rag_series.empty:
+                return Response({"error": "No recommendations found"},
+                                status=status.HTTP_404_NOT_FOUND)
+            # if rag_series.empty:
+            #     result_score = get_popular_series()
+            # else:
+            #     result_score = rag_series
             queryset = get_media_with_scores(rag_series)
             serializer = MediaRecommendationSerializer(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         except Exception:
-            logger.exception("MediaSearchView error: query=%s", query)
+            logger.exception("RAGRecommendationView error: query=%s", query)
             return Response(
                 {"error": "Error occurred while searching."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-"""
