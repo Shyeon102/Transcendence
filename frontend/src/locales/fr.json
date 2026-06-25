@@ -207,6 +207,33 @@
       "friendRecommendation": "Que recommanderiez-vous a un ami ? Film, anime ou drama."
     }
   },
+  "admin": {
+    "eyebrow": "Espace de moderation",
+    "title": "Console admin",
+    "description": "Examinez les contenus signales et gerez le statut des comptes.",
+    "previewNotice": "Aperçu de l'interface uniquement. Les actions ne sont pas enregistrees sur le serveur.",
+    "reportsEyebrow": "Moderation du contenu",
+    "reportsTitle": "Signalements",
+    "usersEyebrow": "Moderation des comptes",
+    "usersTitle": "Utilisateurs",
+    "reportedBy": "Signale par",
+    "reportCount": "Signalements : {{count}}",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "hide": "Masquer le contenu",
+    "unhide": "Afficher le contenu",
+    "suspend": "Suspendre",
+    "ban": "Bannir",
+    "reactivate": "Reactiver",
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuve",
+      "rejected": "Rejete",
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "banned": "Banni"
+    }
+  },
   "mypage": {
     "eyebrow": "Espace personnel",
     "title": "MY PAGE",

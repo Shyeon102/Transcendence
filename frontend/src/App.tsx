@@ -33,7 +33,10 @@ export default function App() {
             <Route path="/" element={<InfoPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path={OAUTH_42_CALLBACK_PATH} element={<OAuthCallbackPage />} />
+            <Route
+              path={OAUTH_42_CALLBACK_PATH}
+              element={<OAuthCallbackPage />}
+            />
             <Route
               path="/onboarding"
               element={
@@ -42,10 +45,7 @@ export default function App() {
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/home"
-              element={<HomePage />}
-            />
+
             <Route
               path="/profile"
               element={
@@ -79,7 +79,12 @@ export default function App() {
               }
             />
             <Route path="/media/:id" element={<MediaDetailPage />} />
+            {import.meta.env.DEV ? (
+              <Route path="/admin-preview" element={<AdminPage />} />
+            ) : null}
           </Route>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/media/:id" element={<MediaDetailPage />} />
           <Route path="/chat/rooms" element={<ChatRoomListPage />} />
           <Route path="/chat/rooms/:id" element={<ChatRoomPage />} />
         </Routes>
