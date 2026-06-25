@@ -97,7 +97,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated"
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "apps.users.authentication.CustomJWTAuthentication"
+        "apps.authentication.authentication.CustomJWTAuthentication"
     ],
 }
 
