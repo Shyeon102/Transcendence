@@ -3,7 +3,7 @@ export interface Media {
   title: string;
   director: string;
   genre: Genre[]; // ex) [Crime] [Thriller]
-  releaseDate: string; // ex) "1994-10-26"
+  releaseDate: string | null; // ex) "1994-10-26"
   country: string;
   language: string;
   cast: string[];
