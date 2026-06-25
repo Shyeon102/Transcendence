@@ -1,5 +1,6 @@
 import { useState } from "react";
-//import { useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useGetMediaDetailQuery } from "../store/api/mediaApi";
 import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
 import type { Media, Genre } from "../types/media";
@@ -73,8 +74,12 @@ const mockMedia: Media = {
 };
 
 const MediaDetailPage = () => {
+  const { id } = useParams();
+  const mediaId = Number(id);
+  const { data, isLoading, error } = useGetMediaDetailQuery(mediaId);
   const user = useSelector((state: RootState) => state.auth.user);
   const isDemo = user?.username === "demo";
+  const media = isDemo ? mockMedia : data;
   //const navigate = useNavigate(); // 미디어 탭 이동
   //const { id } = useParams(); // React Router에서  URL 파라미터 읽는 훅. URL: /media/:id
   //useParams(); // // TODO: 백엔드 연동 후 useParams()로 id 받아서 API 호출
@@ -89,7 +94,20 @@ const MediaDetailPage = () => {
   });
   const [myRating, setMyRating] = useState(0); // star rating
 
-  if (!isDemo) {
+  if (!isDemo && isLoading) {
+    return (
+      <div className="flex min-h-screen flex-col bg-[#0c0c0b] text-white">
+        <div className="flex flex-1 items-center justify-center px-6 text-center">
+          <p className="text-[1vw] italic tracking-[0.08em] text-white/50">
+            불러오는 중...
+          </p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!media) {
     return (
       <div className="flex min-h-screen flex-col bg-[#0c0c0b] text-white">
         <div className="flex flex-1 items-center justify-center px-6 text-center">
@@ -109,7 +127,7 @@ const MediaDetailPage = () => {
         {/* 미디어 변환 탭: 제일 왼쪽 */}
         <div className="flex flex-col w-[5vw] text-white gap-[8vh] mt-[10vh] pl-[1vw]">
           <button
-            className={`text-[1vw] -rotate-90 ${mockMedia.type === "Movie" ? "text-teal-600" : "text-white"}`}
+            className={`text-[1vw] -rotate-90 ${media.type === "Movie" ? "text-teal-600" : "text-white"}`}
             onClick={() => {}} // TODO: 백엔드 연동 후 추가
           >
             Movie
@@ -117,14 +135,14 @@ const MediaDetailPage = () => {
           <div className="-rotate-90 w-[4px] h-[2vh] bg-white mx-auto" />{" "}
           {/* 구분선 */}
           <button
-            className={`text-[1vw] -rotate-90 ${mockMedia.type === "Series" ? "text-teal-600" : "text-white"}`}
+            className={`text-[1vw] -rotate-90 ${media.type === "Series" ? "text-teal-600" : "text-white"}`}
             onClick={() => {}}
           >
             Series
           </button>
           <div className="rotate-90 w-[4px] h-[2vh] bg-white mx-auto" />
           <button
-            className={`text-[1vw] -rotate-90 ${mockMedia.type === "Animation" ? "text-teal-600" : "text-white"}`}
+            className={`text-[1vw] -rotate-90 ${media.type === "Animation" ? "text-teal-600" : "text-white"}`}
             onClick={() => {}}
           >
             Animation
@@ -142,7 +160,7 @@ const MediaDetailPage = () => {
             />
             {/* 2. 포스터 (중간) */}
             <img
-              src={mockMedia.frontPosterUrl}
+              src={media.frontPosterUrl}
               className="absolute inset-0 w-full h-full object-fill brightness-95 contrast-110"
             />
             {/* 3. 낡은 질감 커버 (맨 위) */}
@@ -171,10 +189,21 @@ const MediaDetailPage = () => {
               <p className="text-[1.2vw] font-semibold">MY RATING</p>
               {/* setMyRating에 따라 숫자 변경 -> 별 몇개 주느냐에 따라 점수다름 */}
               {/* 숫자 자동으로 바뀜 + toFixed(1) : "1.0", "2,0", "3.0" ... */}
-              <p className="text-[1.5vw] text-teal-600 font-bold">{myRating.toFixed(1)}</p>
-              <p className="text-[1.2vw] font-semibold self-end mb-[0.2vh] ml-[-0.8vw]">/ 5</p>
+              <p className="text-[1.5vw] text-teal-600 font-bold">
+                {myRating.toFixed(1)}
+              </p>
+              <p className="text-[1.2vw] font-semibold self-end mb-[0.2vh] ml-[-0.8vw]">
+                / 5
+              </p>
               {/* 내 리뷰 */}
-              <button onClick={() => alert("The review writing feature is scheduled to be developed later.")} className="border border-teal-600 bg-teal-600 text-white px-[0.5vw] py-[0.1vh] text-[0.9vw] rounded-xl">
+              <button
+                onClick={() =>
+                  alert(
+                    "The review writing feature is scheduled to be developed later.",
+                  )
+                }
+                className="border border-teal-600 bg-teal-600 text-white px-[0.5vw] py-[0.1vh] text-[0.9vw] rounded-xl"
+              >
                 My review
               </button>
             </div>
@@ -185,27 +214,27 @@ const MediaDetailPage = () => {
         <div className="w-[60vw] ml-[12vw]">
           {/* 1994 | Crime, Thriller | Quentin Tarantino */}
           <div className="flex items-center gap-[1vw] text-[0.9vw]">
-            <p>{mockMedia.releaseDate.slice(0, 4)}</p>
+            <p>{media.releaseDate?.slice(0, 4)}</p>
             {/* "1994-10-26" -> "1994" */}
             <p className="font-bold">|</p>
             {/* 각 객체에서 name만 꺼내서 배열을 문자열로 합치기 */}
-            <p>{mockMedia.genre.map((g) => g.name).join(", ")}</p>
+            <p>{media.genre.map((g) => g.name).join(", ")}</p>
             <p className="font-bold">|</p>
-            <p>{mockMedia.director}</p>
+            <p>{media.director}</p>
           </div>
 
           {/* 타이틀 */}
-          <p className="text-[8vw] font-bebas mt-[-2.5vh]">{mockMedia.title}</p>
+          <p className="text-[8vw] font-bebas mt-[-2.5vh]">{media.title}</p>
 
           {/* 2h 34m | USA | Cast: John Travolta, Samuel L. Jackson, ... */}
           <div className="flex items-center gap-[0.5vw] text-[0.9vw] mt-[-3vh]">
-            <p>{mockMedia.runtime}</p>
+            <p>{media.runtime}</p>
             <p className="font-bold">|</p>
-            <p>{mockMedia.country}</p>
+            <p>{media.country}</p>
             <p className="font-bold">|</p>
             <p>
               <span className="font-semibold">Cast: </span>
-              {mockMedia.cast.join(", ")}
+              {media.cast.join(", ")}
             </p>
           </div>
 
@@ -217,7 +246,7 @@ const MediaDetailPage = () => {
               Story
             </p>
             <p className="font-ibm text-[0.9vw] max-w-[23vw] leading-relaxed">
-              {mockMedia.story}
+              {media.story}
             </p>
           </div>
 
@@ -258,11 +287,13 @@ const MediaDetailPage = () => {
 
           {/* 오른쪽: 리뷰 섹션: Reviews 제목 + 리뷰 목록 (가로정렬) */}
           <div className="flex gap-[3vw] mt-[3.6vh]">
-            <p className="font-thin text-[1.8vw] w-[5vw] leading-tight">Reviews</p>
+            <p className="font-thin text-[1.8vw] w-[5vw] leading-tight">
+              Reviews
+            </p>
 
             {/* 유저 리스트 div */}
             <div className="flex flex-col gap-[1vh]">
-              {mockMedia.reviews.map((review) => (
+              {media.reviews.map((review) => (
                 <div
                   key={review.id}
                   className="flex gap-4 text-[0.8vw] items-start"
@@ -295,8 +326,15 @@ const MediaDetailPage = () => {
                 </div>
               ))}
               {/* TODO: 추후 리뷰 전체 리뷰 목록 모달 or 페이지로 교체 */}
-              <button onClick={() => alert("The feature to view all reviews is scheduled to be developed later.")} className="mr-[20vw] mt-[1vh] text-[1vw] text-teal-600">
-                Read More  <span className="font-black">⟶</span>
+              <button
+                onClick={() =>
+                  alert(
+                    "The feature to view all reviews is scheduled to be developed later.",
+                  )
+                }
+                className="mr-[20vw] mt-[1vh] text-[1vw] text-teal-600"
+              >
+                Read More <span className="font-black">⟶</span>
               </button>
             </div>
           </div>
