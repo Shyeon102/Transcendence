@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -17,6 +18,9 @@ const Header = () => {
             className="h-[3.11vh] w-[2.8vw] object-contain"
           />
         </button>
+      </div>
+      <div className="flex gap-[2.99vw]">
+        <LanguageSwitcher />
       </div>
 
       <div className="flex gap-[2.99vw]">

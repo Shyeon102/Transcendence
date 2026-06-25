@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from apps.community.models import (
      Comment, Post, TrendingPost, PostLike,
-     CommentLike
+     CommentLike, Report
 )
 from apps.community.serializers import (
      PostSerializer, CommentSerializer,
@@ -10,6 +10,8 @@ from apps.community.serializers import (
 )
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from rest_framework.permissions import IsAdminUser as isAdminUser
 
 
 # GET    /api/posts                      Board list (cursor pagination)
@@ -305,3 +307,32 @@ class CommentReportView(APIView):
             "status": report.status,
             "report_id": report.id
         }, status=status.HTTP_201_CREATED)
+
+
+class ReportDetailView(APIView):
+    permission_classes = [isAdminUser]
+
+    def patch(self, request, pk):
+        report = get_object_or_404(Report, pk=pk)
+
+        action = request.data.get("action")
+
+        if action == "approve":
+            report.status = "approved"
+
+            if report.post:
+                report.post.is_hidden = True
+                report.post.save(update_fields=["is_hidden"])
+
+            if report.comment:
+                report.comment.is_hidden = True
+                report.comment.save(update_fields=["is_hidden"])
+
+        elif action == "reject":
+            report.status = "rejected"
+
+        report.processed_by = request.user
+        report.processed_at = timezone.now()
+        report.save()
+
+        return Response({"status": report.status})
