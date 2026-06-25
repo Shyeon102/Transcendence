@@ -14,6 +14,7 @@ import { OAUTH_42_CALLBACK_PATH } from './lib/oauth';
 import MyPagePage from './pages/MyPagePage';
 import OnboardingPage from './pages/OnboardingPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
+import AdminPage from './pages/AdminPage';
 
 export default function App() {
   return (
@@ -53,6 +54,17 @@ export default function App() {
                 </PrivateRoute>
               }
             />
+            <Route
+              path="/admin"
+              element={
+                <PrivateRoute>
+                  <AdminPage />
+                </PrivateRoute>
+              }
+            />
+            {import.meta.env.DEV ? (
+              <Route path="/admin-preview" element={<AdminPage />} />
+            ) : null}
             <Route path="/media/:id" element={<MediaDetailPage />} />
           </Route>
           <Route path="/chat/rooms" element={<ChatRoomListPage />} />

@@ -43,7 +43,9 @@ export const chatApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api", // 서버 요청 보낼 때 기본 URL: .env 파일에 정의된 URL을 가져오는 부분. 만약 없으면 || 뒤의 기본값(localhost:8000/api) 사용
     prepareHeaders: (headers, { getState }) => {
-      const token = (getState as () => RootState)().auth.accessToken;
+      const state = (getState as () => RootState)();
+      const token = state.auth.accessToken;
+      headers.set("Accept-Language", state.ui.language);
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
