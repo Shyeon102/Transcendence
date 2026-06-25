@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { Media, Genre } from "../../types/media";
 import type { RootState } from "../index";
-import StarRating from "../../components/StarRating";
 
 export interface BackendMedia {
   id: number;
@@ -25,6 +24,11 @@ export interface BackendMedia {
 // { media((백엔드가 쓰는 키 이름이랑 똑같아야 함): [영화(BackendMedia), 영화, ...] }로 준다
 export interface BackendMediaListResponse {
   media: BackendMedia[];
+}
+
+// 상세는 단일 객체 래퍼: { media: {...} }
+export interface BackendMediaDetailResponse {
+  media: BackendMedia;
 }
 
 export const mediaApi = createApi({
@@ -79,8 +83,35 @@ export const mediaApi = createApi({
         });
       },
     }),
+
+    getMediaDetail: builder.query<Media, number>({
+      query: (id) => `/media/${id}/`,
+      transformResponse: (response: BackendMediaDetailResponse) => {
+        const movie = response.media;
+        const runtimeMinutes = movie.runtime ?? 0;
+        const hours = Math.floor(runtimeMinutes / 60);
+        const minutes = runtimeMinutes % 60;
+        return {
+          id: movie.id,
+          title: movie.title,
+          director: movie.director ?? "",
+          genre: movie.genres,
+          releaseDate: movie.release_date,
+          country: movie.country,
+          language: movie.language ?? "",
+          cast: movie.cast.split(", "),
+          story: movie.description,
+          ageRating: movie.age_rating ?? "",
+          starRating: movie.avg_rating,
+          runtime: `${hours}h ${minutes}m`,
+          type: movie.media_type,
+          frontPosterUrl: movie.image_url,
+          sidePosterUrl: movie.side_poster_url ?? "",
+          reviews: [],
+        };
+      },
+    }),
   }),
 });
 
-// TODO) 훅 export
-export const {} = mediaApi;
+export const { useGetMediaListQuery, useGetMediaDetailQuery } = mediaApi;
