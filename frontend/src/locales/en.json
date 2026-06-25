@@ -166,6 +166,7 @@
     "title": "Admin console",
     "description": "Review reported content and manage user account status.",
     "previewNotice": "UI preview only. Actions update this screen locally and are not saved to the server.",
+    "connectedNotice": "Connected to admin API. Actions are sent to the server.",
     "reportsEyebrow": "Content moderation",
     "reportsTitle": "Reports",
     "usersEyebrow": "Account moderation",

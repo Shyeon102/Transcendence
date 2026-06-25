@@ -166,6 +166,7 @@
     "title": "Console admin",
     "description": "Examinez les contenus signales et gerez le statut des comptes.",
     "previewNotice": "Aperçu de l'interface uniquement. Les actions ne sont pas enregistrees sur le serveur.",
+    "connectedNotice": "Connecte a l'API admin. Les actions sont envoyees au serveur.",
     "reportsEyebrow": "Moderation du contenu",
     "reportsTitle": "Signalements",
     "usersEyebrow": "Moderation des comptes",

@@ -3,31 +3,20 @@ import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useI18n } from "../lib/i18n";
 import type { RootState } from "../store";
+import {
+  useGetAdminReportsQuery,
+  useGetAdminUsersQuery,
+  useProcessAdminReportMutation,
+  useUpdateAdminUserStatusMutation,
+  type AdminAccountStatus,
+  type AdminReport,
+  type AdminReportStatus,
+  type AdminUser,
+} from "../store/api/adminApi";
 
-type ReportStatus = "pending" | "approved" | "rejected";
-type AccountStatus = "active" | "suspended" | "banned";
 type TabKey = "reports" | "users";
 
-type AdminReport = {
-  id: number;
-  reporter: string;
-  target: string;
-  type: string;
-  reason: string;
-  createdAt: string;
-  status: ReportStatus;
-  hidden: boolean;
-};
-
-type ManagedUser = {
-  id: number;
-  username: string;
-  email: string;
-  status: AccountStatus;
-  reportCount: number;
-};
-
-const initialReports: AdminReport[] = [
+const previewReports: AdminReport[] = [
   {
     id: 104,
     reporter: "cinephile42",
@@ -60,7 +49,7 @@ const initialReports: AdminReport[] = [
   },
 ];
 
-const initialUsers: ManagedUser[] = [
+const previewUsers: AdminUser[] = [
   { id: 17, username: "cinephile42", email: "cinephile42@example.com", status: "active", reportCount: 3 },
   { id: 28, username: "screenwriter", email: "screenwriter@example.com", status: "suspended", reportCount: 2 },
   { id: 35, username: "posterbot", email: "posterbot@example.com", status: "banned", reportCount: 8 },
@@ -101,28 +90,68 @@ function StatCard({ label, value, accent }: { label: string; value: string | num
 export default function AdminPage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
-  const [reports, setReports] = useState(initialReports);
-  const [users, setUsers] = useState(initialUsers);
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
+  const [previewReportState, setPreviewReportState] = useState(previewReports);
+  const [previewUserState, setPreviewUserState] = useState(previewUsers);
   const [activeTab, setActiveTab] = useState<TabKey>("reports");
-  const [reportFilter, setReportFilter] = useState<ReportStatus | "all">("all");
-  const [userFilter, setUserFilter] = useState<AccountStatus | "all">("all");
+  const [reportFilter, setReportFilter] = useState<AdminReportStatus | "all">("all");
+  const [userFilter, setUserFilter] = useState<AdminAccountStatus | "all">("all");
+  const shouldFetchAdminData = Boolean(user?.isStaff && accessToken);
+  const reportsQuery = useGetAdminReportsQuery(undefined, { skip: !shouldFetchAdminData });
+  const usersQuery = useGetAdminUsersQuery(undefined, { skip: !shouldFetchAdminData });
+  const [processReport, { isLoading: isProcessingReport }] = useProcessAdminReportMutation();
+  const [updateAccountStatus, { isLoading: isUpdatingUser }] = useUpdateAdminUserStatusMutation();
 
   if (!user?.isStaff && !import.meta.env.DEV) {
     return <Navigate to="/home" replace />;
   }
 
-  const updateReport = (id: number, updates: Partial<AdminReport>) => {
-    setReports((current) =>
+  const isReportPreview = !reportsQuery.isSuccess;
+  const isUserPreview = !usersQuery.isSuccess;
+  const reports = reportsQuery.data ?? previewReportState;
+  const users = usersQuery.data ?? previewUserState;
+
+  const updatePreviewReport = (id: number, updates: Partial<AdminReport>) => {
+    setPreviewReportState((current) =>
       current.map((report) => (report.id === id ? { ...report, ...updates } : report)),
     );
   };
 
-  const updateUserStatus = (id: number, status: AccountStatus) => {
-    setUsers((current) =>
+  const updatePreviewUserStatus = (id: number, status: AdminAccountStatus) => {
+    setPreviewUserState((current) =>
       current.map((managedUser) =>
         managedUser.id === id ? { ...managedUser, status } : managedUser,
       ),
     );
+  };
+
+  const handleReportStatus = async (id: number, status: AdminReportStatus) => {
+    if (isReportPreview) {
+      updatePreviewReport(id, { status });
+      return;
+    }
+
+    await processReport({ id, status });
+  };
+
+  const handleContentVisibility = async (report: AdminReport) => {
+    const hidden = !report.hidden;
+
+    if (isReportPreview) {
+      updatePreviewReport(report.id, { hidden });
+      return;
+    }
+
+    await processReport({ id: report.id, status: report.status, hidden });
+  };
+
+  const handleUserStatus = async (id: number, status: AdminAccountStatus) => {
+    if (isUserPreview) {
+      updatePreviewUserStatus(id, status);
+      return;
+    }
+
+    await updateAccountStatus({ id, status });
   };
 
   const pendingCount = reports.filter((r) => r.status === "pending").length;
@@ -132,8 +161,8 @@ export default function AdminPage() {
   const filteredReports = reportFilter === "all" ? reports : reports.filter((r) => r.status === reportFilter);
   const filteredUsers = userFilter === "all" ? users : users.filter((u) => u.status === userFilter);
 
-  const reportFilterOptions: (ReportStatus | "all")[] = ["all", "pending", "approved", "rejected"];
-  const userFilterOptions: (AccountStatus | "all")[] = ["all", "active", "suspended", "banned"];
+  const reportFilterOptions: (AdminReportStatus | "all")[] = ["all", "pending", "approved", "rejected"];
+  const userFilterOptions: (AdminAccountStatus | "all")[] = ["all", "active", "suspended", "banned"];
 
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
@@ -150,7 +179,7 @@ export default function AdminPage() {
             {t("admin.description")}
           </p>
           <p className="mt-4 border-l-2 border-[#d4a847]/60 pl-3 text-[10px] leading-5 text-[#c8c2a8]">
-            {t("admin.previewNotice")}
+            {isReportPreview || isUserPreview ? t("admin.previewNotice") : t("admin.connectedNotice")}
           </p>
         </div>
 
@@ -233,23 +262,24 @@ export default function AdminPage() {
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button
                         type="button"
-                        onClick={() => updateReport(report.id, { status: "approved" })}
-                        disabled={report.status === "approved"}
+                        onClick={() => void handleReportStatus(report.id, "approved")}
+                        disabled={report.status === "approved" || isProcessingReport}
                         className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10 disabled:opacity-30 disabled:hover:bg-transparent"
                       >
                         {t("admin.approve")}
                       </button>
                       <button
                         type="button"
-                        onClick={() => updateReport(report.id, { status: "rejected" })}
-                        disabled={report.status === "rejected"}
+                        onClick={() => void handleReportStatus(report.id, "rejected")}
+                        disabled={report.status === "rejected" || isProcessingReport}
                         className="border border-[#f0ead0]/15 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#f0ead0]/30 disabled:opacity-30 disabled:hover:border-[#f0ead0]/15"
                       >
                         {t("admin.reject")}
                       </button>
                       <button
                         type="button"
-                        onClick={() => updateReport(report.id, { hidden: !report.hidden })}
+                        onClick={() => void handleContentVisibility(report)}
+                        disabled={isProcessingReport}
                         className="border border-[#ff4f38]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#ff9c8e] transition hover:bg-[#ff4f38]/10"
                       >
                         {report.hidden ? t("admin.unhide") : t("admin.hide")}
@@ -317,7 +347,8 @@ export default function AdminPage() {
                       {managedUser.status !== "suspended" ? (
                         <button
                           type="button"
-                          onClick={() => updateUserStatus(managedUser.id, "suspended")}
+                          onClick={() => void handleUserStatus(managedUser.id, "suspended")}
+                          disabled={isUpdatingUser}
                           className="border border-[#f2b84b]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#f2d496] transition hover:bg-[#f2b84b]/10"
                         >
                           {t("admin.suspend")}
@@ -326,7 +357,8 @@ export default function AdminPage() {
                       {managedUser.status !== "banned" ? (
                         <button
                           type="button"
-                          onClick={() => updateUserStatus(managedUser.id, "banned")}
+                          onClick={() => void handleUserStatus(managedUser.id, "banned")}
+                          disabled={isUpdatingUser}
                           className="border border-[#ff4f38]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#ff9c8e] transition hover:bg-[#ff4f38]/10"
                         >
                           {t("admin.ban")}
@@ -335,7 +367,8 @@ export default function AdminPage() {
                       {managedUser.status !== "active" ? (
                         <button
                           type="button"
-                          onClick={() => updateUserStatus(managedUser.id, "active")}
+                          onClick={() => void handleUserStatus(managedUser.id, "active")}
+                          disabled={isUpdatingUser}
                           className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10"
                         >
                           {t("admin.reactivate")}
