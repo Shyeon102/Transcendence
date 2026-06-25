@@ -1,20 +1,20 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Layout from './components/Layout'
-import PrivateRoute from './components/PrivateRoute'
-import ErrorBoundary from './components/ErrorBoundary'
-import InfoPage from './pages/InfoPage'
-import LoginPage from './pages/LoginPage'
-import HomePage from './pages/HomePage'
-import SignupPage from './pages/SignupPage'
-import ProfilePage from './pages/ProfilePage'
-import MediaDetailPage from './pages/MediaDetailPage'
-import ChatRoomListPage from './pages/ChatRoomListPage'
-import ChatRoomPage from './pages/ChatRoomPage'
-import { OAUTH_42_CALLBACK_PATH } from './lib/oauth';
-import MyPagePage from './pages/MyPagePage';
-import OnboardingPage from './pages/OnboardingPage';
-import OAuthCallbackPage from './pages/OAuthCallbackPage';
-import AdminPage from './pages/AdminPage';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
+import PrivateRoute from "./components/PrivateRoute";
+import ErrorBoundary from "./components/ErrorBoundary";
+import InfoPage from "./pages/InfoPage";
+import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage";
+import SignupPage from "./pages/SignupPage";
+import ProfilePage from "./pages/ProfilePage";
+import MediaDetailPage from "./pages/MediaDetailPage";
+import ChatRoomListPage from "./pages/ChatRoomListPage";
+import ChatRoomPage from "./pages/ChatRoomPage";
+import { OAUTH_42_CALLBACK_PATH } from "./lib/oauth";
+import MyPagePage from "./pages/MyPagePage";
+import OnboardingPage from "./pages/OnboardingPage";
+import OAuthCallbackPage from "./pages/OAuthCallbackPage";
+import AdminPage from "./pages/AdminPage";
 
 export default function App() {
   return (
@@ -25,7 +25,10 @@ export default function App() {
             <Route path="/" element={<InfoPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path={OAUTH_42_CALLBACK_PATH} element={<OAuthCallbackPage />} />
+            <Route
+              path={OAUTH_42_CALLBACK_PATH}
+              element={<OAuthCallbackPage />}
+            />
             <Route
               path="/onboarding"
               element={
@@ -34,10 +37,7 @@ export default function App() {
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/home"
-              element={<HomePage />}
-            />
+
             <Route
               path="/profile"
               element={
@@ -65,8 +65,9 @@ export default function App() {
             {import.meta.env.DEV ? (
               <Route path="/admin-preview" element={<AdminPage />} />
             ) : null}
-            <Route path="/media/:id" element={<MediaDetailPage />} />
           </Route>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/media/:id" element={<MediaDetailPage />} />
           <Route path="/chat/rooms" element={<ChatRoomListPage />} />
           <Route path="/chat/rooms/:id" element={<ChatRoomPage />} />
         </Routes>

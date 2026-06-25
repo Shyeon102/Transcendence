@@ -1,3 +1,4 @@
+import Header from "../components/Header";
 import { useGetMediaReviewsQuery } from "../store/api/authApi";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
@@ -125,6 +126,7 @@ const MediaDetailPage = () => {
 
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white flex flex-col">
+      <Header />
       {/* 레이아웃: 가로로 3등분 */}
       <div className="flex mt-[7vh]">
         {/* 미디어 변환 탭: 제일 왼쪽 */}

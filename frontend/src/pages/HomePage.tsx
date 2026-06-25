@@ -1,3 +1,4 @@
+import Header from "../components/Header";
 import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
 import { useState } from "react";
@@ -191,6 +192,7 @@ const HomePage = () => {
   return (
     // 전체 페이지: 세로 쌓기 (헤더 -> 검색바 -> 필터 -> 카드 -> 화살표 -> 푸터)
     <div className="flex flex-col min-h-screen bg-[#0c0c0b] text-white overflow-x-hidden">
+      <Header />
       {/* 검색바 */}
       <div className="flex justify-center pt-[5vh] pb-[5vh]">
         <div className="flex items-center gap-2 bg-transparent border border-white/30 rounded-full px-[2vw] w-[43vw] h-[4.3vh]">
