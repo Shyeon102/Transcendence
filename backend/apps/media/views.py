@@ -6,6 +6,7 @@ from django.db import IntegrityError
 from django.db.models import Count
 from django.db import models
 
+
 from apps.media.models import Media, MediaInteraction
 from apps.media.serializers import (
     MediaSerializer, ReviewSerializer, MediaInteractionSerializer
