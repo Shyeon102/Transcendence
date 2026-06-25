@@ -220,8 +220,8 @@ class FollowAPIView(APIView):
 class UserBanView(APIView):
     permission_classes = [IsAdminUser]
 
-    def put(self, request, pk):
-        user = get_object_or_404(User, pk=pk)
+    def put(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
 
         user.is_banned = True
         user.banned_at = timezone.now()
@@ -237,8 +237,8 @@ class UserBanView(APIView):
 
         return Response({"status": "banned"})
 
-    def delete(self, request, pk):
-        user = get_object_or_404(User, pk=pk)
+    def delete(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
 
         user.is_banned = False
         user.banned_at = None

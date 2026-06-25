@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
-     AvatarUpdateView, FollowAPIView, OnboardingView, UserProfileView,
-     UserReviewView,
+     AvatarUpdateView, FollowAPIView, OnboardingView, UserBanView,
+     UserProfileView, UserReviewView,
      UserView, test_error, UserActivityView,
      PublicUserActivityView, UserFollowersView, UserFollowingView
 )
@@ -18,4 +18,5 @@ urlpatterns = [
     path("<int:user_id>/followers/", UserFollowersView.as_view()),
     path("<int:user_id>/following/", UserFollowingView.as_view()),
     path("<int:user_id>/reviews/", UserReviewView.as_view()),
+    path("<int:user_id>/ban/", UserBanView.as_view()),
 ]
