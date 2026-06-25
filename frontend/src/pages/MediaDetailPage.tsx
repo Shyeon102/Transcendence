@@ -1,3 +1,4 @@
+import { useGetMediaReviewsQuery } from "../store/api/authApi";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetMediaDetailQuery } from "../store/api/mediaApi";
@@ -33,7 +34,7 @@ const mockMedia: Media = {
     {
       id: 1, //리뷰 자체 고유번호: DB에 저장될 때 순서대로 번호
       userId: 1, //목업이라 그냥 숫자, 추후 유저 정보 필요
-      userName: "seong-ki",
+      username: "seong-ki",
       content: "good blah blah",
       rating: 5,
       visibility: "public",
@@ -43,7 +44,7 @@ const mockMedia: Media = {
     {
       id: 2,
       userId: 2,
-      userName: "jaoh",
+      username: "jaoh",
       content: "good blah blah",
       rating: 5,
       visibility: "public",
@@ -53,7 +54,7 @@ const mockMedia: Media = {
     {
       id: 3,
       userId: 3,
-      userName: "thelee42",
+      username: "thelee42",
       content: "good blah blah",
       rating: 5,
       visibility: "public",
@@ -63,7 +64,7 @@ const mockMedia: Media = {
     {
       id: 4,
       userId: 4,
-      userName: "llarrey",
+      username: "llarrey",
       content: "good blah blah",
       rating: 5,
       visibility: "public",
@@ -76,10 +77,12 @@ const mockMedia: Media = {
 const MediaDetailPage = () => {
   const { id } = useParams();
   const mediaId = Number(id);
-  const { data, isLoading, error } = useGetMediaDetailQuery(mediaId);
+  const { data, isLoading } = useGetMediaDetailQuery(mediaId);
+  const { data: reviews } = useGetMediaReviewsQuery(mediaId);
   const user = useSelector((state: RootState) => state.auth.user);
   const isDemo = user?.username === "demo";
   const media = isDemo ? mockMedia : data;
+  const reviewList = isDemo ? mockMedia.reviews : (reviews ?? []);
   //const navigate = useNavigate(); // 미디어 탭 이동
   //const { id } = useParams(); // React Router에서  URL 파라미터 읽는 훅. URL: /media/:id
   //useParams(); // // TODO: 백엔드 연동 후 useParams()로 id 받아서 API 호출
@@ -293,13 +296,13 @@ const MediaDetailPage = () => {
 
             {/* 유저 리스트 div */}
             <div className="flex flex-col gap-[1vh]">
-              {media.reviews.map((review) => (
+              {reviewList.map((review) => (
                 <div
                   key={review.id}
                   className="flex gap-4 text-[0.8vw] items-start"
                 >
                   {/* 유저명 */}
-                  <p className="w-[5vw]">{review.userName}</p>
+                  <p className="w-[5vw]">{review.username}</p>
 
                   {/* visibility 뱃지 + 커멘트 세로로 */}
                   <div className="flex flex-col">
