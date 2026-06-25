@@ -208,5 +208,18 @@
     "myFav": "MES FAVORIS",
     "random": "ALÉATOIRE",
     "filter": "FILTRER"
+  },
+  "detail": {
+    "movie": "Film",
+    "series": "Série",
+    "animation": "Animation",
+    "myRating": "MA NOTE",
+    "myReview": "Mon avis",
+    "story": "L'Histoire",
+    "cast": "Distribution :",
+    "reviews": "Avis",
+    "readMore": "Voir plus",
+    "noData": "Aucune info média pour le moment.",
+    "loading": "Chargement..."
   }
 }

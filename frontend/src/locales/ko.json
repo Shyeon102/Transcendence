@@ -209,5 +209,18 @@
     "myFav": "내 최애",
     "random": "랜덤",
     "filter": "필터"
+  },
+  "detail": {
+    "movie": "영화",
+    "series": "시리즈",
+    "animation": "애니메이션",
+    "myRating": "내 평점",
+    "myReview": "내 리뷰",
+    "story": "줄거리",
+    "cast": "출연:",
+    "reviews": "리뷰",
+    "readMore": "더 보기",
+    "noData": "미디어 정보가 아직 없어요.",
+    "loading": "불러오는 중..."
   }
 }

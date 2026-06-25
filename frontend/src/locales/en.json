@@ -208,5 +208,18 @@
     "noData": "No media data yet.",
     "loading": "Loading...",
     "loadError": "Failed to load media."
+  },
+  "detail": {
+    "movie": "Movie",
+    "series": "Series",
+    "animation": "Animation",
+    "myRating": "MY RATING",
+    "myReview": "My review",
+    "story": "The Story",
+    "cast": "Cast:",
+    "reviews": "Reviews",
+    "readMore": "Read More",
+    "noData": "No media detail data yet.",
+    "loading": "Loading..."
   }
 }
