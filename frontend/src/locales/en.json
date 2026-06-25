@@ -193,5 +193,20 @@
     "callbackErrorDescription": "There was a problem while handling 42 OAuth. Check the configured callback URL and backend response flow.",
     "callbackContinue": "Continue",
     "callbackRetry": "Back to login"
+  },
+  "footer": {
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "credits": "credits",
+    "rights": "© 2026 Project. All Rights Reserved"
+  },
+  "main": {
+    "search": "Search...",
+    "myFav": "MY FAV",
+    "random": "RANDOM",
+    "filter": "FILTER",
+    "noData": "No media data yet.",
+    "loading": "Loading...",
+    "loadError": "Failed to load media."
   }
 }

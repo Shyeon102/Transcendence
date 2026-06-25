@@ -194,5 +194,20 @@
     "callbackErrorDescription": "42 OAuth 처리 중 문제가 발생했습니다. 설정된 callback URL과 백엔드 응답을 확인해야 합니다.",
     "callbackContinue": "다음으로 이동",
     "callbackRetry": "로그인으로 돌아가기"
+  },
+  "footer": {
+    "privacyPolicy": "개인정보처리방침",
+    "termsOfService": "이용약관",
+    "credits": "크레딧",
+    "rights": "© 2026 Project. All Rights Reserved"
+  },
+  "main": {
+    "search": "검색...",
+    "noData": "아직 미디어가 없어요.",
+    "loading": "불러오는 중...",
+    "loadError": "미디어를 불러오지 못했어요.",
+    "myFav": "내 최애",
+    "random": "랜덤",
+    "filter": "필터"
   }
 }

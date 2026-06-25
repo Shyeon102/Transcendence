@@ -1,4 +1,5 @@
 import Header from "../components/Header";
+import { useI18n } from "../lib/i18n";
 import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
 import { useState } from "react";
@@ -140,6 +141,7 @@ const mockMediaList: Media[] = [
 // 컴포넌트
 
 const HomePage = () => {
+  const { t } = useI18n();
   const { data, isLoading, error } = useGetMediaListQuery();
   const user = useSelector((state: RootState) => state.auth.user);
   const isDemo = user?.username === "demo";
@@ -182,11 +184,15 @@ const HomePage = () => {
   };
 
   if (!isDemo && isLoading) {
-    return <div className="...">불러오는 중...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0c0c0b] text-[1vw] italic text-white/50">
+        {t("main.loading")}
+      </div>
+    );
   }
 
   if (!isDemo && error) {
-    return <div className="...">미디어를 불러오지 못했어요.</div>;
+    return <div className="...">{t("main.loadError")}</div>;
   }
 
   return (
@@ -199,7 +205,7 @@ const HomePage = () => {
           <span>🔍</span>
           <input
             type="text"
-            placeholder="Search..."
+            placeholder={t("main.search")}
             className="bg-transparent outline-none text-white w-full placeholder:text-gray-500 text-[1vw]"
           />
         </div>
@@ -216,7 +222,7 @@ const HomePage = () => {
               : filterBtnClass + " border-white/30 text-white"
           }
         >
-          MY FAV
+          {t("main.myFav")}
         </button>
         <button
           onClick={() => setActiveFilter("RANDOM")}
@@ -227,7 +233,7 @@ const HomePage = () => {
               : filterBtnClass + " border-white/30 text-white"
           }
         >
-          RANDOM
+          {t("main.random")}
         </button>
         <button
           onClick={() => setActiveFilter("FILTER")}
@@ -238,7 +244,7 @@ const HomePage = () => {
               : filterBtnClass + " border-white/30 text-white"
           }
         >
-          FILTER
+          {t("main.filter")}
         </button>
       </div>
 
@@ -269,7 +275,7 @@ const HomePage = () => {
             ))
           ) : (
             <div className="flex min-h-[42vh] w-full items-center justify-center text-[1vw] italic tracking-[0.08em] text-white/50">
-              No media data yet.
+              {t("main.noData")}
             </div>
           )}
         </div>

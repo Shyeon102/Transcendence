@@ -193,5 +193,20 @@
     "callbackErrorDescription": "Un probleme est survenu pendant le traitement de 42 OAuth. Verifiez l'URL de callback configuree et le flux de reponse du backend.",
     "callbackContinue": "Continuer",
     "callbackRetry": "Retour a la connexion"
+  },
+  "footer": {
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "credits": "crédits",
+    "rights": "© 2026 Project. Tous droits réservés"
+  },
+  "main": {
+    "search": "Rechercher...",
+    "noData": "Aucun média pour le moment.",
+    "loading": "Chargement...",
+    "loadError": "Échec du chargement des médias.",
+    "myFav": "MES FAVORIS",
+    "random": "ALÉATOIRE",
+    "filter": "FILTRER"
   }
 }
