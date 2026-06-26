@@ -98,3 +98,32 @@ export interface MediaReviewRequest {
   content: string;
   visibility?: 'public' | 'followers' | 'private';
 }
+
+export type AdminReportStatus = 'pending' | 'approved' | 'rejected';
+export type AdminReportType = 'spam' | 'abuse' | 'nsfw' | 'copyright';
+export type AdminReportTargetType = 'post' | 'comment';
+
+export interface AdminReport {
+  id: number;
+  type: AdminReportType;
+  reason: string;
+  status: AdminReportStatus;
+  targetType: AdminReportTargetType;
+  targetId: number;
+  targetTitle?: string;
+  targetPreview?: string;
+  reporterId: number;
+  reporterUsername: string;
+  processedBy?: string;
+  processedAt?: string;
+  createdAt: string;
+}
+
+export interface AdminUser {
+  id: number;
+  email: string;
+  username: string;
+  isActive: boolean;
+  isStaff: boolean;
+  dateJoined: string;
+}

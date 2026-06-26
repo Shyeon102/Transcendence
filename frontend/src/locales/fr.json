@@ -9,6 +9,71 @@
     "mypage": "Ma page",
     "info": "Info"
   },
+  "admin": {
+    "eyebrow": "Mode admin",
+    "title": "ADMIN DASHBOARD",
+    "forbiddenTitle": "Permission admin requise.",
+    "forbiddenDescription": "Seuls les utilisateurs staff peuvent acceder a cette page.",
+    "tabs": {
+      "reports": "Signalements",
+      "users": "Utilisateurs"
+    },
+    "stats": {
+      "pending": "Signalements en attente",
+      "approved": "Signalements approuves",
+      "activeUsers": "Utilisateurs actifs",
+      "bannedUsers": "Utilisateurs bannis"
+    },
+    "reportStatus": {
+      "all": "Tous",
+      "pending": "En attente",
+      "approved": "Approuve",
+      "rejected": "Rejete"
+    },
+    "reportTypes": {
+      "spam": "Spam",
+      "abuse": "Abus",
+      "nsfw": "Inapproprie",
+      "copyright": "Copyright"
+    },
+    "targets": {
+      "post": "Post",
+      "comment": "Commentaire"
+    },
+    "actions": {
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "ban": "Bannir",
+      "cancel": "Annuler",
+      "confirmBan": "Confirmer"
+    },
+    "reports": {
+      "title": "Liste des signalements",
+      "error": "Impossible de charger les signalements.",
+      "empty": "Aucun signalement a afficher.",
+      "emptyDescription": "Aucun signalement ne correspond au statut choisi.",
+      "untitledTarget": "Cible sans titre",
+      "noReason": "Aucune raison fournie.",
+      "reporter": "Auteur",
+      "processed": "Traite",
+      "processedBy": "Traite par"
+    },
+    "users": {
+      "title": "Liste des utilisateurs",
+      "error": "Impossible de charger les utilisateurs.",
+      "empty": "Aucun utilisateur a afficher.",
+      "emptyDescription": "Aucune donnee utilisateur a gerer.",
+      "username": "Pseudo",
+      "email": "Email",
+      "status": "Statut",
+      "joined": "Inscrit",
+      "actions": "Actions",
+      "active": "Actif",
+      "banned": "Banni",
+      "banTitle": "Bannir cet utilisateur ?",
+      "banDescription": "Utilisateur cible :"
+    }
+  },
   "infoPage": {
     "eyebrow": "ft_transcendence",
     "title": "MVP auth et profil pour le frontend Transcendence.",
@@ -34,6 +99,7 @@
     "communityPosts": "Posts de la communaute",
     "watchlist": "Liste a voir",
     "followers": "Abonnes",
+    "defaultDisplayName": "Utilisateur",
     "editPanelTitle": "Modifier le profil",
     "displayName": "Nom affiche",
     "username": "Nom d'utilisateur",
@@ -53,6 +119,12 @@
     "passwordChangeSuccess": "La validation du formulaire de mot de passe est terminee. Il reste seulement le branchement API.",
     "passwordSameAsCurrent": "Le nouveau mot de passe doit etre different du mot de passe actuel.",
     "deleteAccount": "Supprimer le compte",
+    "deleteAccountTitle": "Supprimer ce compte ?",
+    "deleteAccountDescription": "Cette action est irreversible. Le vrai flux de suppression sera branche quand l'API backend sera confirmee.",
+    "deleteAccountCancel": "Annuler",
+    "deleteAccountConfirm": "Confirmer",
+    "deleteAccountPending": "Le flux de confirmation est pret ; l'API de suppression reste a brancher.",
+    "publicProfilePlaceholder": "Quand l'API de profil public sera branchee, cette zone affichera les critiques et les informations de profil de l'utilisateur.",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - En ce moment, je suis absorbe par le slow cinema et tout ce qui touche a A24."
   },
   "login": {
@@ -135,6 +207,33 @@
       "friendRecommendation": "Que recommanderiez-vous à un ami ?"
     }
   },
+  "admin": {
+    "eyebrow": "Espace de moderation",
+    "title": "Console admin",
+    "description": "Examinez les contenus signales et gerez le statut des comptes.",
+    "previewNotice": "Aperçu de l'interface uniquement. Les actions ne sont pas enregistrees sur le serveur.",
+    "reportsEyebrow": "Moderation du contenu",
+    "reportsTitle": "Signalements",
+    "usersEyebrow": "Moderation des comptes",
+    "usersTitle": "Utilisateurs",
+    "reportedBy": "Signale par",
+    "reportCount": "Signalements : {{count}}",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "hide": "Masquer le contenu",
+    "unhide": "Afficher le contenu",
+    "suspend": "Suspendre",
+    "ban": "Bannir",
+    "reactivate": "Reactiver",
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuve",
+      "rejected": "Rejete",
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "banned": "Banni"
+    }
+  },
   "mypage": {
     "eyebrow": "Espace personnel",
     "title": "MY PAGE",
@@ -142,6 +241,9 @@
     "reviewSection": "Mes critiques",
     "watchlistSection": "Liste a voir",
     "recentActivity": "Activite recente",
+    "entries": "entrees",
+    "queue": "file",
+    "log": "journal",
     "empty": "Aucune donnee a afficher pour le moment."
   },
   "review": {
@@ -151,7 +253,21 @@
     "typePlaceholder": "movie / anime / drama",
     "textPlaceholder": "Ecrivez une courte reaction ou un point de recommandation.",
     "submit": "Ajouter une critique",
-    "validation": "Veuillez saisir le titre, le type, la note et le texte de la critique."
+    "validation": "Veuillez saisir le titre, le type, la note et le texte de la critique.",
+    "visibilityLabel": "Visibilite",
+    "visibility": {
+      "public": "Public",
+      "followers": "Abonnes",
+      "private": "Prive"
+    },
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "sortLabel": "Tri",
+    "sort": {
+      "latest": "Recent",
+      "rating": "Note"
+    },
+    "editDraftSuffix": "(UI de modification en attente)"
   },
   "validation": {
     "required": "Veuillez remplir tous les champs.",
@@ -167,6 +283,7 @@
     "callbackErrorTitle": "AUTH FAILED",
     "callbackErrorDescription": "Un probleme est survenu pendant le traitement de 42 OAuth. Verifiez l'URL de callback configuree et le flux de reponse du backend.",
     "callbackContinue": "Continuer",
-    "callbackRetry": "Retour a la connexion"
+    "callbackRetry": "Retour a la connexion",
+    "startUrlMissing": "L'URL backend 42 OAuth n'est pas encore configuree."
   }
 }
