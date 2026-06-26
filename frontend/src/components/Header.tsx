@@ -26,7 +26,7 @@ const Header = () => {
         <button type="button" onClick={() => navigate("/chat/rooms")} className="text-[0.90vw] text-white">
           LIVE CHAT
         </button>
-        <button type="button" className="text-[0.90vw] text-white">
+        <button type="button" onClick={() => navigate("/community")} className="text-[0.90vw] text-white">
           FORUM
         </button>
         {canAccessAdmin ? (

@@ -17,12 +17,10 @@ import type {
   AdminReportType,
   AdminUser,
   AuthUser,
-  DashboardReview,
   LoginRequest,
   LoginResponse,
   MediaReview,
   MediaReviewRequest,
-  MyPageDashboardData,
   PasswordChangeRequest,
   RefreshTokenResponse,
   SignupRequest,
@@ -75,20 +73,6 @@ type RawUserPayload = RawAuthUser | RawAuthResponse;
 type RawTokenResponse = {
   access?: string;
   refresh?: string;
-};
-
-type RawDashboardReview = {
-  id: number;
-  title: string;
-  note: string;
-  when: string;
-  rating: number;
-};
-
-type RawDashboard = {
-  reviews?: RawDashboardReview[];
-  watchlist?: string[];
-  activities?: string[];
 };
 
 type RawReview = {
@@ -283,20 +267,6 @@ const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse 
     refreshToken,
   };
 };
-
-const normalizeDashboardReview = (review: RawDashboardReview): DashboardReview => ({
-  id: review.id,
-  title: review.title,
-  note: review.note,
-  when: review.when,
-  rating: review.rating,
-});
-
-const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
-  reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
-  watchlist: payload.watchlist ?? [],
-  activities: payload.activities ?? [],
-});
 
 const normalizeReview = (review: RawReview): MediaReview => ({
   id: review.id,
@@ -578,9 +548,16 @@ export const authApi = createApi({
         dispatch(setCredentials(data));
       },
     }),
+    logout: builder.mutation<{ success: boolean }, string | null | undefined>({
+      query: (refreshToken) => ({
+        url: '/auth/logout/',
+        method: 'POST',
+        body: { refresh: refreshToken },
+      }),
+    }),
     getMe: builder.query<AuthUser, void>({
       async queryFn(_arg, api) {
-        const result = await rawBaseQuery('/users/', api, {});
+        const result = await rawBaseQuery('/users/profile/', api, {});
 
         if (result.data) {
           return { data: normalizeUserPayload(result.data as RawUserPayload) };
@@ -598,7 +575,8 @@ export const authApi = createApi({
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
-        const isOnboardingUpdate = payload.onboardingCompleted !== undefined;
+        const isOnboardingUpdate =
+          payload.onboardingCompleted !== undefined;
         const result = await rawBaseQuery(
           {
             url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/',
@@ -655,8 +633,8 @@ export const authApi = createApi({
       async queryFn(avatarUrl, api) {
         const result = await rawBaseQuery(
           {
-            url: '/users/me/avatar/',
-            method: 'PUT',
+            url: '/users/profile/avatar/',
+            method: 'PATCH',
             body: { avatar_url: avatarUrl },
           },
           api,
@@ -679,31 +657,13 @@ export const authApi = createApi({
     }),
     changePassword: builder.mutation<{ success: boolean }, PasswordChangeRequest>({
       query: ({ currentPassword, newPassword }) => ({
-        url: '/users/me/password/',
+        url: '/auth/changePassword/',
         method: 'POST',
         body: {
-          current_password: currentPassword,
+          old_password: currentPassword,
           new_password: newPassword,
         },
       }),
-    }),
-    getMyPageDashboard: builder.query<MyPageDashboardData, void>({
-      async queryFn(_arg, api) {
-        const result = await rawBaseQuery('/users/me/dashboard/', api, {});
-
-        if (result.data) {
-          return { data: normalizeDashboard(result.data as RawDashboard) };
-        }
-
-        const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
-        return {
-          error: {
-            message: toMessage(data) ?? 'Dashboard request failed.',
-            fields: toFieldErrors(data),
-          },
-        };
-      },
     }),
     getMediaReviews: builder.query<MediaReview[], number>({
       async queryFn(mediaId, api) {
@@ -866,8 +826,8 @@ export const {
   useGetAdminUsersQuery,
   useGetMeQuery,
   useGetMediaReviewsQuery,
-  useGetMyPageDashboardQuery,
   useLoginMutation,
+  useLogoutMutation,
   useProcessAdminReportMutation,
   useSignupMutation,
   useUpdateAvatarMutation,
