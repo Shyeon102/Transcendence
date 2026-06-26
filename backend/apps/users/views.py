@@ -5,6 +5,7 @@ from .serializers import UserSerializer, PublicUserProfileSerializer
 from django.shortcuts import get_object_or_404
 from apps.users.models import User
 from apps.community.models import Follow
+from apps.community.models import Follow
 
 
 class UserView(APIView):
