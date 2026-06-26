@@ -30,6 +30,7 @@ class UserSerializer(serializers.ModelSerializer):
             "avatar_url",
             "bio",
             "onboarding_completed",
+            "is_staff",
             "favorite_genres",
             "favorite_titles",
             "onboarding_answers",
@@ -37,6 +38,7 @@ class UserSerializer(serializers.ModelSerializer):
             "followers_count",
             "following_count",
         ]
+        read_only_fields = ["is_staff"]
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):

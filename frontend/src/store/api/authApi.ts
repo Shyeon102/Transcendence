@@ -75,6 +75,22 @@ type RawTokenResponse = {
   refresh?: string;
 };
 
+type RawDashboardReview = {
+  id: number;
+  title: string;
+  note: string;
+  when: string;
+  rating: number;
+};
+
+type RawDashboard = {
+  activity?: string[];
+  recent_activity?: string[];
+  reviews?: RawDashboardReview[];
+  watchlist?: string[];
+  activities?: string[];
+};
+
 type RawReview = {
   id: number;
   user?: RawAuthUser;
@@ -267,6 +283,20 @@ const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse 
     refreshToken,
   };
 };
+
+const normalizeDashboardReview = (review: RawDashboardReview): DashboardReview => ({
+  id: review.id,
+  title: review.title,
+  note: review.note,
+  when: review.when,
+  rating: review.rating,
+});
+
+const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
+  reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
+  watchlist: payload.watchlist ?? [],
+  activities: payload.activities ?? payload.activity ?? payload.recent_activity ?? [],
+});
 
 const normalizeReview = (review: RawReview): MediaReview => ({
   id: review.id,
@@ -665,6 +695,42 @@ export const authApi = createApi({
         },
       }),
     }),
+    getMyPageDashboard: builder.query<MyPageDashboardData, void>({
+      async queryFn(_arg, api) {
+        const result = await rawBaseQuery('/users/me/activity/', api, {});
+
+        if (result.data) {
+          return { data: normalizeDashboard(result.data as RawDashboard) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Dashboard request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+    }),
+    getUserActivity: builder.query<MyPageDashboardData, number>({
+      async queryFn(userId, api) {
+        const result = await rawBaseQuery(`/users/${userId}/activity/`, api, {});
+
+        if (result.data) {
+          return { data: normalizeDashboard(result.data as RawDashboard) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'User activity request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+    }),
     getMediaReviews: builder.query<MediaReview[], number>({
       async queryFn(mediaId, api) {
         const result = await rawBaseQuery(`/media/${mediaId}/reviews/`, api, {});
@@ -826,6 +892,8 @@ export const {
   useGetAdminUsersQuery,
   useGetMeQuery,
   useGetMediaReviewsQuery,
+  useGetMyPageDashboardQuery,
+  useGetUserActivityQuery,
   useLoginMutation,
   useLogoutMutation,
   useProcessAdminReportMutation,

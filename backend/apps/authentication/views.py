@@ -71,14 +71,19 @@ class ChangePasswordView(APIView):
         if not old_password or not new_password:
             return Response(
                 {"error": "old_password and new_password are required."},
-                status=400)
+                status=400
+            )
 
         if not user.check_password(old_password):
-            return Response({"error": "Old password is incorrect."},
-                            status=400)
+            return Response(
+                {"error": "Old password is incorrect."},
+                status=400
+            )
 
         user.set_password(new_password)
         user.save()
 
-        return Response({"success": True, "message":
-                         "Password changed successfully."})
+        return Response({
+            "success": True,
+            "message": "Password changed successfully."
+        })

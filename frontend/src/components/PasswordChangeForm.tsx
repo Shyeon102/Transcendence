@@ -52,6 +52,14 @@ export default function PasswordChangeForm({
       return t('validation.passwordTooShort');
     }
 
+    if (
+      !/[a-z]/.test(form.newPassword) ||
+      !/[A-Z]/.test(form.newPassword) ||
+      !/\d/.test(form.newPassword)
+    ) {
+      return t('validation.passwordWeak');
+    }
+
     if (form.newPassword !== form.confirmNewPassword) {
       return t('validation.passwordMismatch');
     }
