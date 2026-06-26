@@ -1,3 +1,6 @@
+import EmptyState from './ui/EmptyState';
+import SectionCard from './ui/SectionCard';
+
 const reviewItems = [
   {
     title: 'The Substance',
@@ -26,8 +29,11 @@ const activityItems = [
 
 type MyPageDashboardProps = {
   activities?: string[];
+  entriesLabel: string;
   emptyLabel: string;
   isDemo: boolean;
+  logLabel: string;
+  queueLabel: string;
   recentActivityLabel: string;
   reviews?: typeof reviewItems;
   reviewSectionLabel: string;
@@ -37,8 +43,11 @@ type MyPageDashboardProps = {
 
 export default function MyPageDashboard({
   activities: actualActivities,
+  entriesLabel,
   emptyLabel,
   isDemo,
+  logLabel,
+  queueLabel,
   recentActivityLabel,
   reviews: actualReviews,
   reviewSectionLabel,
@@ -51,10 +60,12 @@ export default function MyPageDashboard({
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-      <section className="border border-[#f0ead0]/10 bg-[#141412] p-6">
+      <SectionCard className="p-6">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="font-['Bebas_Neue'] text-3xl tracking-[0.04em]">{reviewSectionLabel}</h2>
-          <span className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">{reviews.length} entries</span>
+          <span className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">
+            {reviews.length} {entriesLabel}
+          </span>
         </div>
         <div className="space-y-4">
           {reviews.length ? (
@@ -70,16 +81,16 @@ export default function MyPageDashboard({
               </article>
             ))
           ) : (
-            <span className="text-xs italic text-[#8a8474]">{emptyLabel}</span>
+            <EmptyState title={emptyLabel} />
           )}
         </div>
-      </section>
+      </SectionCard>
 
       <div className="space-y-6">
-        <section className="border border-[#f0ead0]/10 bg-[#141412] p-6">
+        <SectionCard className="p-6">
           <div className="mb-5 flex items-center justify-between">
             <h2 className="font-['Bebas_Neue'] text-3xl tracking-[0.04em]">{watchlistLabel}</h2>
-            <span className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">queue</span>
+            <span className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">{queueLabel}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {watchlist.length ? (
@@ -92,15 +103,15 @@ export default function MyPageDashboard({
                 </span>
               ))
             ) : (
-              <span className="text-xs italic text-[#8a8474]">{emptyLabel}</span>
+              <EmptyState title={emptyLabel} className="w-full" />
             )}
           </div>
-        </section>
+        </SectionCard>
 
-        <section className="border border-[#f0ead0]/10 bg-[#141412] p-6">
+        <SectionCard className="p-6">
           <div className="mb-5 flex items-center justify-between">
             <h2 className="font-['Bebas_Neue'] text-3xl tracking-[0.04em]">{recentActivityLabel}</h2>
-            <span className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">log</span>
+            <span className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">{logLabel}</span>
           </div>
           <div className="space-y-3">
             {activities.length ? (
@@ -110,10 +121,10 @@ export default function MyPageDashboard({
                 </div>
               ))
             ) : (
-              <span className="text-xs italic text-[#8a8474]">{emptyLabel}</span>
+              <EmptyState title={emptyLabel} />
             )}
           </div>
-        </section>
+        </SectionCard>
       </div>
     </div>
   );
