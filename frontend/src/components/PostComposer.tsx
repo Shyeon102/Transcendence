@@ -3,8 +3,6 @@ import { useI18n } from '../lib/i18n';
 import { useCreatePostMutation, useUpdatePostMutation } from '../store/api/postApi';
 import type { CommunityPost } from '../types/community';
 import StatusMessage from './ui/StatusMessage';
-import TextAreaField from './ui/TextAreaField';
-import TextField from './ui/TextField';
 
 type PostComposerProps = {
   post?: CommunityPost;
@@ -25,7 +23,6 @@ export default function PostComposer({ post, onDone }: PostComposerProps) {
       setError(t('community.postValidation'));
       return;
     }
-
     try {
       const body = { title: title.trim(), content: content.trim() };
       if (post) {
@@ -43,31 +40,61 @@ export default function PostComposer({ post, onDone }: PostComposerProps) {
   };
 
   return (
-    <section className="border border-[#f0ead0]/10 bg-[#141412] p-5">
-      <p className="text-[10px] uppercase tracking-[0.18em] text-[#8a8474]">
+    <section className="border border-[#f0ead0]/10 bg-[#141412] p-6">
+      <p className="mb-6 text-[9px] uppercase tracking-[0.22em] text-[#d63e2a]">
         {t(post ? 'community.editPost' : 'community.writePost')}
       </p>
-      <TextField
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
-        placeholder={t('community.titlePlaceholder')}
-        className="mt-4 px-4 py-3 text-[13px]"
-      />
-      <TextAreaField
-        value={content}
-        onChange={(event) => setContent(event.target.value)}
-        placeholder={t('community.contentPlaceholder')}
-        className="mt-3 min-h-28 px-4 py-3 font-['IBM_Plex_Serif'] text-[13px] leading-6"
-      />
-      {error ? <StatusMessage className="mt-3">{error}</StatusMessage> : null}
-      <button
-        type="button"
-        onClick={submit}
-        disabled={isSaving}
-        className="mt-4 bg-[#d63e2a] px-4 py-3 text-[10px] uppercase tracking-[0.15em] text-[#f0ead0] transition hover:bg-[#ff4f38] disabled:opacity-50"
-      >
-        {isSaving ? t('community.saving') : t(post ? 'community.save' : 'community.publish')}
-      </button>
+
+      <div className="space-y-5">
+        <div>
+          <label className="mb-2 block text-[9px] uppercase tracking-[0.18em] text-[#8a8474]">
+            {t('community.titlePlaceholder').replace('.', '')}
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={t('community.titlePlaceholder')}
+            className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 font-['Bebas_Neue'] text-xl tracking-[0.04em] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474]/50 placeholder:font-['IBM_Plex_Serif'] placeholder:text-sm placeholder:normal-case placeholder:tracking-normal focus:border-[#f0ead0]/25"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-[9px] uppercase tracking-[0.18em] text-[#8a8474]">
+            {t('community.contentPlaceholder').replace('?', '')}
+          </label>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder={t('community.contentPlaceholder')}
+            className="w-full resize-y border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 font-['IBM_Plex_Serif'] text-[13px] leading-7 text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25 min-h-32"
+          />
+        </div>
+      </div>
+
+      {error ? <StatusMessage className="mt-4">{error}</StatusMessage> : null}
+
+      <div className="mt-5 flex items-center justify-between">
+        {post && onDone ? (
+          <button
+            type="button"
+            onClick={onDone}
+            className="text-[9px] uppercase tracking-[0.18em] text-[#8a8474] transition hover:text-[#c8c2a8]"
+          >
+            {t('community.cancel')}
+          </button>
+        ) : (
+          <span />
+        )}
+        <button
+          type="button"
+          onClick={submit}
+          disabled={isSaving}
+          className="bg-[#d63e2a] px-5 py-3 text-[10px] uppercase tracking-[0.18em] text-[#f0ead0] transition hover:bg-[#ff4f38] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSaving ? t('community.saving') : t(post ? 'community.save' : 'community.publish')}
+        </button>
+      </div>
     </section>
   );
 }
