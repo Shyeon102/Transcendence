@@ -250,37 +250,18 @@ export default function OnboardingPage() {
                         <label className="mb-2 block text-[10px] uppercase tracking-[0.12em] text-[#c8c2a8]">
                           {t(`onboarding.questions.${questionId}`)}
                         </label>
-                        <input
-                          type="search"
+                        <OnboardingSearchInput
                           value={answers[questionId]}
-                          onChange={(e) =>
-                            handleAnswerChange(questionId, e.target.value)
-                          }
+                          onChange={(value) => handleAnswerChange(questionId, value)}
+                          onSelect={(media) => handleAnswerChange(questionId, media.title)}
                           placeholder={t("onboarding.questionPlaceholder")}
-                          className="w-full border border-[#f0ead0]/10 bg-[#141412] px-3 py-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
+                          searchingLabel={t("onboarding.searching")}
+                          noResultsLabel={t("onboarding.noResults")}
                         />
                       </div>
                     ))}
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={handleSkipAnswers}
-                    className="mt-4 border border-[#f0ead0]/10 bg-transparent px-4 py-2.5 text-[9px] uppercase tracking-[0.14em] text-[#8a8474] transition hover:border-[#f0ead0]/25 hover:text-[#f0ead0]"
-                  >
-                    <label className="mb-2 block text-[10px] uppercase tracking-[0.12em] text-[#c8c2a8]">
-                      {t(`onboarding.questions.${questionId}`)}
-                    </label>
-                    <OnboardingSearchInput
-                      value={answers[questionId]}
-                      onChange={(value) => handleAnswerChange(questionId, value)}
-                      onSelect={(media) => handleAnswerChange(questionId, media.title)}
-                      placeholder={t("onboarding.questionPlaceholder")}
-                      searchingLabel={t("onboarding.searching")}
-                      noResultsLabel={t("onboarding.noResults")}
-                    />
-                  </div>
-                ))}
+                </section>
               </div>
 
               <aside className="h-fit border border-[#f0ead0]/10 bg-[#141412] p-6">
