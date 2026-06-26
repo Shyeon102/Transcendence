@@ -16,7 +16,7 @@ class Command(BaseCommand):
             choices=["tmdb", "anilist", "all"],
             default="all",
         )
-        parser.add_argument("--limit", type=int, default=10)  # 100
+        parser.add_argument("--limit", type=int, default=25)  # 100
 
     def handle(self, *args, **options):
         source = options["source"]

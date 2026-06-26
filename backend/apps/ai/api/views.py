@@ -19,12 +19,12 @@ class HybridRecommendationView(APIView):
     # permission_classes = [AllowAny]
 
     permission_classes = [IsAuthenticated]
-    # def get(self, request, user_id):
 
-    def get(self, request):
+    # def get(self, request):
+    def get(self, request, user_id):
         try:
             media_type = request.query_params.get("type")
-            user_id = request.user.id  # rm for test
+            #user_id = request.user.id  # rm for test
             hybrid_series = (
                 get_hybrid_scores(user_id=user_id)
             )
