@@ -44,7 +44,7 @@ export default function App() {
               path="/profile"
               element={
                 <PrivateRoute>
-                  <ProfileRedirect />
+                  <ProfilePage />
                 </PrivateRoute>
               }
             />
