@@ -87,7 +87,7 @@ export const apiSlice = createApi({
     }),
     logout: builder.mutation({
       query: (refreshToken: string) => ({
-        url: 'auth/logout/',
+        url: '/auth/logout/',
         method: 'POST',
         body: { refresh: refreshToken },
       }),
