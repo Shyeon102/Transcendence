@@ -17,6 +17,7 @@ import OnboardingPage from './pages/OnboardingPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
 import CommunityPage from './pages/CommunityPage';
 import PostDetailPage from './pages/PostDetailPage';
+import LegalPage from './pages/LegalPage';
 
 export default function App() {
   return (
@@ -75,6 +76,9 @@ export default function App() {
             <Route path="/media/:id" element={<MediaDetailPage />} />
             <Route path="/community" element={<CommunityPage />} />
             <Route path="/community/:id" element={<PostDetailPage />} />
+            <Route path="/privacy" element={<LegalPage documentKey="privacy" />} />
+            <Route path="/terms" element={<LegalPage documentKey="terms" />} />
+            <Route path="/credits" element={<LegalPage documentKey="credits" />} />
           </Route>
           <Route path="/home" element={<HomePage />} />
           <Route path="/media/:id" element={<MediaDetailPage />} />
