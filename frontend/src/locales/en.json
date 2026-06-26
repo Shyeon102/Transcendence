@@ -9,6 +9,71 @@
     "mypage": "My Page",
     "info": "Info"
   },
+  "admin": {
+    "eyebrow": "Admin Mode",
+    "title": "ADMIN DASHBOARD",
+    "forbiddenTitle": "Admin permission required.",
+    "forbiddenDescription": "Only staff users can access this page.",
+    "tabs": {
+      "reports": "Reports",
+      "users": "Users"
+    },
+    "stats": {
+      "pending": "Pending Reports",
+      "approved": "Approved Reports",
+      "activeUsers": "Active Users",
+      "bannedUsers": "Banned Users"
+    },
+    "reportStatus": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "reportTypes": {
+      "spam": "Spam",
+      "abuse": "Abuse",
+      "nsfw": "Inappropriate",
+      "copyright": "Copyright"
+    },
+    "targets": {
+      "post": "Post",
+      "comment": "Comment"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "ban": "Ban",
+      "cancel": "Cancel",
+      "confirmBan": "Confirm Ban"
+    },
+    "reports": {
+      "title": "Report List",
+      "error": "Failed to load reports.",
+      "empty": "No reports to show.",
+      "emptyDescription": "There are no reports for the selected status.",
+      "untitledTarget": "Untitled target",
+      "noReason": "No report reason was provided.",
+      "reporter": "Reporter",
+      "processed": "Processed",
+      "processedBy": "Processed by"
+    },
+    "users": {
+      "title": "User List",
+      "error": "Failed to load users.",
+      "empty": "No users to show.",
+      "emptyDescription": "There is no user data to manage.",
+      "username": "Username",
+      "email": "Email",
+      "status": "Status",
+      "joined": "Joined",
+      "actions": "Actions",
+      "active": "Active",
+      "banned": "Banned",
+      "banTitle": "Ban this user?",
+      "banDescription": "Target user:"
+    }
+  },
   "infoPage": {
     "eyebrow": "ft_transcendence",
     "title": "Curated auth and profile MVP for the Transcendence frontend.",
@@ -34,6 +99,7 @@
     "communityPosts": "Community Posts",
     "watchlist": "Watchlist",
     "followers": "Followers",
+    "defaultDisplayName": "User",
     "editPanelTitle": "Edit Profile",
     "displayName": "Display Name",
     "username": "Username",
@@ -50,9 +116,15 @@
     "confirmNewPassword": "Confirm New Password",
     "changePassword": "Change Password",
     "passwordChanging": "Changing...",
-    "passwordChangeSuccess": "Password change form validation passed. Only the API hookup remains.",
+    "passwordChangeSuccess": "Password changed successfully.",
     "passwordSameAsCurrent": "The new password must be different from the current password.",
     "deleteAccount": "Delete Account",
+    "deleteAccountTitle": "Delete this account?",
+    "deleteAccountDescription": "This cannot be undone. The real deletion flow will be connected once the backend API is confirmed.",
+    "deleteAccountCancel": "Cancel",
+    "deleteAccountConfirm": "Confirm delete",
+    "deleteAccountPending": "The confirmation flow is ready; the account deletion API is still pending.",
+    "publicProfilePlaceholder": "Once the public profile API is connected, this area will show user-specific reviews and profile details.",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - Currently obsessed with slow cinema and anything A24."
   },
   "login": {
@@ -110,55 +182,75 @@
     "toLoginCta": "Sign in here"
   },
   "onboarding": {
-    "eyebrow": "Initial Taste Setup",
-    "titleLine1": "CURATE",
-    "titleLine2": "YOUR TASTE.",
-    "description": "Pick the genres and titles you love, then answer a few short questions so the first recommendation flow starts with your voice.",
-    "genreEyebrow": "STEP 01",
-    "genreTitle": "Choose your genres",
-    "genreCounter": "genres picked",
-    "titleEyebrow": "STEP 02",
-    "titleTitle": "Pick titles you loved",
-    "titleCounter": "titles picked",
-    "questionEyebrow": "STEP 03",
-    "questionTitle": "Answer the prompts",
-    "questionCounter": "answers ready",
-    "questionPlaceholder": "Write the title or your reason here.",
-    "validation": "Select at least {genres} genres and {titles} titles.",
-    "questionValidation": "Please answer all three onboarding prompts.",
-    "saveError": "Saving to the server failed. The backend endpoint still needs to be verified.",
+    "eyebrow": "Tell Us What You Like",
+    "titleLine1": "WHAT DO",
+    "titleLine2": "YOU LOVE?",
+    "description": "Search for movies, anime, or dramas that match each question.",
+    "questionEyebrow": "THREE QUESTIONS",
+    "questionTitle": "Tell us about your favorites",
+    "questionCounter": "answers completed",
+    "questionPlaceholder": "Search for a title.",
+    "searching": "Searching...",
+    "noResults": "No matching titles found.",
+    "questionValidation": "Please answer all three questions.",
+    "saveError": "We couldn't complete onboarding. Please try again.",
     "saving": "Saving...",
-    "selected": "selected",
-    "tapToSelect": "tap to select",
-    "summaryEyebrow": "SUMMARY",
-    "summaryTitle": "YOUR TASTE MAP",
-    "selectedGenres": "Selected Genres",
-    "selectedTitles": "Selected Titles",
-    "answerSummary": "Recommendation Answers",
-    "emptyGenres": "No genres selected yet.",
-    "emptyTitles": "No titles selected yet.",
-    "emptyAnswer": "No answer yet.",
-    "complete": "Complete Onboarding",
-    "genreOptions": {
-      "drama": "Drama",
-      "sciFi": "Sci-Fi",
-      "thriller": "Thriller",
-      "animation": "Animation",
-      "indie": "Indie",
-      "documentary": "Documentary"
-    },
-    "titleOptions": {
-      "poorThings": "Poor Things",
-      "duneTwo": "Dune: Part Two",
-      "pastLives": "Past Lives",
-      "theZone": "The Zone of Interest",
-      "perfectDays": "Perfect Days",
-      "anora": "Anora"
-    },
+    "skip": "Skip",
+    "summaryEyebrow": "YOUR ANSWERS",
+    "summaryTitle": "YOUR TASTE",
+    "answerSummary": "YOUR ANSWERS",
+    "emptyAnswer": "No answers yet.",
+    "complete": "Finish Onboarding",
     "questions": {
-      "allTimeFavorite": "What is your all-time favorite? Movie, anime, or drama.",
-      "recentFavorite": "What media did you enjoy recently? Movie, anime, or drama.",
-      "friendRecommendation": "What would you recommend to a friend? Movie, anime, or drama."
+      "allTimeFavorite": "What is your favorite movie, anime, or drama?",
+      "recentFavorite": "What have you enjoyed watching recently?",
+      "friendRecommendation": "What would you recommend to a friend?"
+    }
+  },
+  "community": {
+    "eyebrow": "Community",
+    "title": "Share What You Love",
+    "description": "Talk about the media you enjoy and discover new conversations.",
+    "writePost": "Write a post",
+    "editPost": "Edit post",
+    "titlePlaceholder": "Enter a title.",
+    "contentPlaceholder": "What would you like to talk about?",
+    "postValidation": "Please enter a title and content.",
+    "publish": "Publish",
+    "save": "Save",
+    "saving": "Saving...",
+    "saveError": "Could not save your changes. Please try again.",
+    "searchPlaceholder": "Search posts",
+    "recent": "Recent",
+    "trending": "Trending",
+    "loading": "Loading...",
+    "loadError": "Could not load this content.",
+    "empty": "No posts yet.",
+    "user": "User",
+    "likes": "Likes",
+    "views": "Views",
+    "back": "Back to posts",
+    "like": "Like",
+    "report": "Report",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this post?",
+    "comments": "Comments",
+    "commentPlaceholder": "Write a comment.",
+    "commentValidation": "Please enter a comment.",
+    "addComment": "Add comment",
+    "loginToComment": "Log in to write a comment.",
+    "reportTitle": "Report this content?",
+    "reportPlaceholder": "Tell us why you are reporting it.",
+    "reportValidation": "Please enter a reason.",
+    "reportError": "Could not submit the report. Please try again.",
+    "cancel": "Cancel",
+    "submitReport": "Submit report",
+    "reportTypes": {
+      "spam": "Spam",
+      "abuse": "Abuse or harassment",
+      "nsfw": "Inappropriate content",
+      "copyright": "Copyright infringement"
     }
   },
   "admin": {
@@ -195,6 +287,9 @@
     "reviewSection": "My Reviews",
     "watchlistSection": "Watchlist",
     "recentActivity": "Recent Activity",
+    "entries": "entries",
+    "queue": "queue",
+    "log": "log",
     "empty": "There is no data to show yet."
   },
   "review": {
@@ -204,12 +299,27 @@
     "typePlaceholder": "movie / anime / drama",
     "textPlaceholder": "Write a short reaction or recommendation point.",
     "submit": "Add Review",
-    "validation": "Please enter the title, type, star rating, and review text."
+    "validation": "Please enter the title, type, star rating, and review text.",
+    "visibilityLabel": "Visibility",
+    "visibility": {
+      "public": "Public",
+      "followers": "Followers",
+      "private": "Private"
+    },
+    "edit": "Edit",
+    "delete": "Delete",
+    "sortLabel": "Sort",
+    "sort": {
+      "latest": "Latest",
+      "rating": "Rating"
+    },
+    "editDraftSuffix": "(edit UI pending)"
   },
   "validation": {
     "required": "Please fill in every field.",
     "invalidEmail": "Please enter a valid email address.",
     "passwordTooShort": "Password must be at least 8 characters.",
+    "passwordWeak": "Password must include at least one uppercase letter, one lowercase letter, and one number.",
     "passwordMismatch": "Passwords do not match.",
     "usernameInvalid": "Username must be 3+ chars using letters, numbers, or underscores."
   },
@@ -220,6 +330,35 @@
     "callbackErrorTitle": "AUTH FAILED",
     "callbackErrorDescription": "There was a problem while handling 42 OAuth. Check the configured callback URL and backend response flow.",
     "callbackContinue": "Continue",
-    "callbackRetry": "Back to login"
+    "callbackRetry": "Back to login",
+    "startUrlMissing": "42 OAuth backend URL is not configured yet."
+  },
+  "footer": {
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "credits": "Credits",
+    "rights": "© 2026 Project. All Rights Reserved"
+  },
+  "main": {
+    "search": "Search...",
+    "myFav": "MY FAV",
+    "random": "RANDOM",
+    "filter": "FILTER",
+    "noData": "No media data yet.",
+    "loading": "Loading...",
+    "loadError": "Failed to load media."
+  },
+  "detail": {
+    "movie": "Movie",
+    "series": "Series",
+    "animation": "Animation",
+    "myRating": "MY RATING",
+    "myReview": "My review",
+    "story": "The Story",
+    "cast": "Cast:",
+    "reviews": "Reviews",
+    "readMore": "Read More",
+    "noData": "No media detail data yet.",
+    "loading": "Loading..."
   }
 }

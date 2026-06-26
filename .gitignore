@@ -87,3 +87,10 @@ docker-compose.override.yml
 Thumbs.db
 
 .claude/
+
+# ============================
+# Database backups
+# ============================
+
+backups/
+!backups/.gitkeep

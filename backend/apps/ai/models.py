@@ -38,6 +38,7 @@ class CFModel(models.Model):
     model_data = models.BinaryField()
     user_count = models.IntegerField()
     item_count = models.IntegerField()
+    rating_count = models.IntegerField(default=0)
     latent_dim = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -53,13 +54,20 @@ class CFModel(models.Model):
         return svd_model.n_items
 
     @classmethod
-    def save_model(cls, svd_model, version: str, user_count: int,
-                   item_count: int, latent_dim: int) -> 'CFModel':
+    def save_model(
+        cls,
+        svd_model,
+        version: str,
+        user_count: int,
+        item_count: int, rating_count: int,
+        latent_dim: int
+    ) -> 'CFModel':
         return cls.objects.create(
             version=version,
             model_data=pickle.dumps(svd_model),
             user_count=user_count,
             item_count=item_count,
+            rating_count=rating_count,
             latent_dim=latent_dim,
         )
 
@@ -68,4 +76,6 @@ class CFModel(models.Model):
             f"CFModel(v={self.version}, "
             f"users={self.user_count}, "
             f"items={self.item_count})"
+            f"ratings={self.rating_count}, "
+            f"latent_dim={self.latent_dim}"
         )

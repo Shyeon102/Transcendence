@@ -1,9 +1,3 @@
-export interface OnboardingAnswers {
-  allTimeFavorite: string;
-  recentFavorite: string;
-  friendRecommendation: string;
-}
-
 export interface AuthUser {
   id: number;
   email: string;
@@ -14,7 +8,6 @@ export interface AuthUser {
   bio?: string;
   favoriteGenres?: number[];
   favoriteTitles?: string[];
-  onboardingAnswers?: OnboardingAnswers;
   onboardingCompleted?: boolean;
   favoriteCountries?: string[];
   isStaff?: boolean;
@@ -44,7 +37,6 @@ export interface SignupRequest {
   passwordConfirm: string;
   favoriteGenres?: number[];
   favoriteTitles?: string[];
-  onboardingAnswers?: OnboardingAnswers;
 }
 
 export interface SignupResponse {
@@ -105,4 +97,33 @@ export interface MediaReviewRequest {
   rating: number;
   content: string;
   visibility?: 'public' | 'followers' | 'private';
+}
+
+export type AdminReportStatus = 'pending' | 'approved' | 'rejected';
+export type AdminReportType = 'spam' | 'abuse' | 'nsfw' | 'copyright';
+export type AdminReportTargetType = 'post' | 'comment';
+
+export interface AdminReport {
+  id: number;
+  type: AdminReportType;
+  reason: string;
+  status: AdminReportStatus;
+  targetType: AdminReportTargetType;
+  targetId: number;
+  targetTitle?: string;
+  targetPreview?: string;
+  reporterId: number;
+  reporterUsername: string;
+  processedBy?: string;
+  processedAt?: string;
+  createdAt: string;
+}
+
+export interface AdminUser {
+  id: number;
+  email: string;
+  username: string;
+  isActive: boolean;
+  isStaff: boolean;
+  dateJoined: string;
 }
