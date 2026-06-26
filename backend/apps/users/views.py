@@ -4,8 +4,6 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer, PublicUserProfileSerializer
 from django.shortcuts import get_object_or_404
 from apps.users.models import User
-from apps.community.models import Follow
-from apps.community.models import Follow
 
 
 class UserView(APIView):
@@ -118,75 +116,3 @@ class PublicUserActivityView(APIView):
     def get(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
         return Response(serialize_activity(user))
-
-
-# class FollowAPIView(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def post(self, request, user_id):
-#         target = get_object_or_404(User, pk=user_id)
-#         if target == request.user:
-#             return Response({"error": "Cannot follow yourself."}, status=400)
-
-#         follow, created = Follow.objects.get_or_create(
-#             follower=request.user,
-#             following=target,
-#         )
-#         return Response({"following": True, "created": created})
-
-#     def delete(self, request, user_id):
-#         target = get_object_or_404(User, pk=user_id)
-#         deleted, _ = Follow.objects.filter(
-#             follower=request.user,
-#             following=target,
-#         ).delete()
-#         return Response({"following": False, "deleted": bool(deleted)})
-
-
-# class UserFollowersView(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request, user_id):
-#         user = get_object_or_404(User, pk=user_id)
-#         followers = User.objects.filter(following__following=user)
-#         serializer = PublicUserProfileSerializer(
-#             followers,
-#             many=True,
-#             context={"request": request},
-#         )
-#         return Response({"users": serializer.data})
-
-
-# class UserFollowingView(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request, user_id):
-#         user = get_object_or_404(User, pk=user_id)
-#         following = User.objects.filter(followers__follower=user)
-#         serializer = PublicUserProfileSerializer(
-#             following,
-#             many=True,
-#             context={"request": request},
-#         )
-#         return Response({"users": serializer.data})
-
-
-# class UserReviewView(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request, user_id):
-#         user = get_object_or_404(User, pk=user_id)
-#         return Response(serialize_activity(user)["reviews"])
-
-
-# class UserBanView(APIView):
-#     permission_classes = [IsAuthenticated]
-
-#     def patch(self, request, user_id):
-#         if not request.user.is_staff:
-#             return Response({"error": "Forbidden"}, status=403)
-
-#         user = get_object_or_404(User, pk=user_id)
-#         user.is_active = False
-#         user.save(update_fields=["is_active"])
-#         return Response({"is_active": user.is_active})
