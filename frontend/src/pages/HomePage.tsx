@@ -1,7 +1,7 @@
 import Header from "../components/Header";
 import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Footer from "../components/Footer";

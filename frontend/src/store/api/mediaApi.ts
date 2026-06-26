@@ -53,7 +53,7 @@ export const mediaApi = createApi({
     },
   }),
   // 실제 API 호출들
-  endpoints: (builder:any) => ({
+  endpoints: (builder) => ({
     getMediaList: builder.query<
       Media[],
       {
