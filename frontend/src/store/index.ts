@@ -5,6 +5,7 @@ import authReducer from "./slices/authSlice";
 import uiReducer from "./slices/uiSlice";
 import { chatApi } from "./api/chatApi";
 import chatReducer from "./slices/chatSlice";
+import { clearAuthSession, saveAuthSession } from "../features/auth/authStorage";
 import type {
   AuthErrorResponse,
   AuthSession,
@@ -33,6 +34,26 @@ export const store = configureStore({
   // concat: 배열에 새 요소 붙이는 메서드: C 비유: 배열 끝에 append
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(apiSlice.middleware, authApi.middleware, chatApi.middleware),
+});
+
+let previousAuthSession = "";
+
+store.subscribe(() => {
+  const { user, accessToken, refreshToken, isAuthenticated } = store.getState().auth;
+  const serializedSession = JSON.stringify({ user, accessToken, refreshToken, isAuthenticated });
+
+  if (serializedSession === previousAuthSession) {
+    return;
+  }
+
+  previousAuthSession = serializedSession;
+
+  if (isAuthenticated && user && accessToken) {
+    saveAuthSession({ user, accessToken, refreshToken });
+    return;
+  }
+
+  clearAuthSession();
 });
 
 export type RootState = ReturnType<typeof store.getState>;
