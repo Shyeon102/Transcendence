@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSerializer
+from django.shortcuts import get_object_or_404
+from .models import User
 
 
 class UserView(APIView):
@@ -46,3 +48,48 @@ class OnboardingView(APIView):
             })
 
         return Response(serializer.errors, status=400)
+
+
+def serialize_activity(user):
+    reviews = user.reviews.select_related("media").order_by("-created_at")[:10]
+    interactions = user.interactions.select_related("media").all()
+
+    watchlist = [
+        interaction.media.title
+        for interaction in interactions
+        if interaction.action == "watchlist"
+    ]
+    activities = [
+        f"{interaction.action.title()} {interaction.media.title}"
+        for interaction in interactions[:10]
+    ]
+
+    return {
+        "reviews": [
+            {
+                "id": review.id,
+                "title": review.media.title,
+                "note": review.content,
+                "when": review.created_at.isoformat(),
+                "rating": review.rating,
+            }
+            for review in reviews
+        ],
+        "watchlist": watchlist,
+        "activities": activities,
+    }
+
+
+class UserActivityView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(serialize_activity(request.user))
+
+
+class PublicUserActivityView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
+        return Response(serialize_activity(user))
