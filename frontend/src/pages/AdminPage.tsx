@@ -25,6 +25,15 @@ const reportTypeColor: Record<string, string> = {
   nsfw: "border-[#d63e2a]/30 bg-[#d63e2a]/10 text-[#ff9c8e]",
 };
 
+const formatDate = (value?: string) => {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+};
+
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
     pending: "border-[#f2b84b]/40 bg-[#f2b84b]/10 text-[#f2d496]",
@@ -34,6 +43,7 @@ function StatusBadge({ status }: { status: string }) {
     banned: "border-[#ff4f38]/40 bg-[#ff4f38]/10 text-[#ff9c8e]",
   };
   const { t } = useI18n();
+
   return (
     <span className={`inline-block border px-2.5 py-1 text-[8px] uppercase tracking-[0.14em] ${colors[status] ?? "text-[#8a8474]"}`}>
       {t(`admin.status.${status}`)}
@@ -41,9 +51,14 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
-};
+function StatCard({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
+  return (
+    <div className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-4">
+      <p className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">{label}</p>
+      <p className={`mt-1 font-['Bebas_Neue'] text-3xl tracking-[0.04em] ${accent ?? "text-[#f0ead0]"}`}>{value}</p>
+    </div>
+  );
+}
 
 export default function AdminPage() {
   const { t } = useI18n();
@@ -66,11 +81,10 @@ export default function AdminPage() {
   const reports = reportsQuery.data ?? [];
   const users = usersQuery.data ?? [];
 
-  const handleReportStatus = async (id: number, status: AdminReportStatus) => {
-    if (status === "pending") {
-      return;
-    }
-
+  const handleReportStatus = async (
+    id: number,
+    status: Exclude<AdminReportStatus, "pending">,
+  ) => {
     await processReport({ id, status });
   };
 
@@ -83,22 +97,19 @@ export default function AdminPage() {
     await unbanUser(id);
   };
 
-  const pendingCount = reports.filter((r) => r.status === "pending").length;
-  const bannedCount = users.filter((u) => u.status === "banned").length;
-
-  const handleConfirmBan = async () => {
-    if (!selectedUser) {
-      return;
-    }
-
+  const pendingCount = reports.filter((report) => report.status === "pending").length;
+  const bannedCount = users.filter((managedUser) => managedUser.status === "banned").length;
+  const filteredReports =
+    reportFilter === "all" ? reports : reports.filter((report) => report.status === reportFilter);
+  const filteredUsers =
+    userFilter === "all" ? users : users.filter((managedUser) => managedUser.status === userFilter);
   const reportFilterOptions: (AdminReportStatus | "all")[] = ["all", "pending", "approved", "rejected"];
   const userFilterOptions: (AdminAccountStatus | "all")[] = ["all", "active", "banned"];
   const isUpdatingUser = isBanningUser || isUnbanningUser;
 
   return (
-    <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-12 text-[#f0ead0]">
+    <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
-        {/* Header */}
         <div className="mb-10 max-w-3xl">
           <p className="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#d63e2a]">
             {t("admin.eyebrow")}
@@ -114,7 +125,6 @@ export default function AdminPage() {
           </p>
         </div>
 
-        {/* Stats overview */}
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard label={t("admin.reportsTitle")} value={reports.length} />
           <StatCard label={t("admin.status.pending")} value={pendingCount} accent={pendingCount > 0 ? "text-[#f2b84b]" : "text-[#f0ead0]"} />
@@ -122,43 +132,41 @@ export default function AdminPage() {
           <StatCard label={t("admin.status.banned")} value={bannedCount} accent={bannedCount > 0 ? "text-[#ff9c8e]" : "text-[#f0ead0]"} />
         </div>
 
-        <div className="mb-8 grid gap-3 md:grid-cols-4">
-          <SectionCard className="p-5">
-            <p className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">{t('admin.stats.pending')}</p>
-            <p className="mt-3 text-3xl font-bold text-[#f0ead0]">{reportCounts.pending}</p>
-          </SectionCard>
-          <SectionCard className="p-5">
-            <p className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">{t('admin.stats.approved')}</p>
-            <p className="mt-3 text-3xl font-bold text-[#f0ead0]">{reportCounts.approved}</p>
-          </SectionCard>
-          <SectionCard className="p-5">
-            <p className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">{t('admin.stats.activeUsers')}</p>
-            <p className="mt-3 text-3xl font-bold text-[#f0ead0]">{activeUsers}</p>
-          </SectionCard>
-          <SectionCard className="p-5">
-            <p className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">{t('admin.stats.bannedUsers')}</p>
-            <p className="mt-3 text-3xl font-bold text-[#f0ead0]">{bannedUsers}</p>
-          </SectionCard>
+        <div className="mb-6 flex border-b border-[#f0ead0]/10">
+          {([
+            ["reports", t("admin.reportsTitle"), String(reports.length)],
+            ["users", t("admin.usersTitle"), String(users.length)],
+          ] as const).map(([key, label, count]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveTab(key)}
+              className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
+                activeTab === key ? "border-[#d63e2a] text-[#f0ead0]" : "border-transparent text-[#8a8474] hover:text-[#c8c2a8]"
+              }`}
+            >
+              {label} <span className={activeTab === key ? "text-[#d63e2a]" : "text-[#8a8474]"}>{count}</span>
+            </button>
+          ))}
         </div>
 
-        {activeTab === 'reports' ? (
+        {activeTab === "reports" ? (
           <div>
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-sm font-bold uppercase tracking-[0.12em]">
-                {t('admin.reports.title')}
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {reportFilters.map((filter) => (
-                  <Button
-                    key={filter}
-                    size="sm"
-                    variant={reportFilter === filter ? 'primary' : 'ghost'}
-                    onClick={() => setReportFilter(filter)}
-                  >
-                    {t(`admin.reportStatus.${filter}`)} {reportCounts[filter]}
-                  </Button>
-                ))}
-              </div>
+            <div className="mb-5 flex flex-wrap gap-2">
+              {reportFilterOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setReportFilter(option)}
+                  className={`border px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] transition ${
+                    reportFilter === option
+                      ? "border-[#d63e2a]/60 bg-[#d63e2a]/10 text-[#f0ead0]"
+                      : "border-[#f0ead0]/10 text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]"
+                  }`}
+                >
+                  {option === "all" ? "All" : t(`admin.status.${option}`)}
+                </button>
+              ))}
             </div>
 
             {reportsQuery.isLoading ? (
@@ -185,19 +193,11 @@ export default function AdminPage() {
                           </span>
                           <StatusBadge status={report.status} />
                         </div>
-                        <h3 className="text-sm font-bold tracking-[0.04em]">
-                          {report.targetTitle || t('admin.reports.untitledTarget')}
+                        <h3 className="mt-2.5 text-[13px] font-bold leading-6 tracking-[0.04em] text-[#f0ead0]">
+                          {report.target}
                         </h3>
-                        {report.targetPreview ? (
-                          <p className="mt-2 max-w-3xl text-xs leading-6 text-[#8a8474]">
-                            {report.targetPreview}
-                          </p>
-                        ) : null}
-                        <p className="mt-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#c8c2a8]">
-                          {report.reason || t('admin.reports.noReason')}
-                        </p>
-                        <p className="mt-3 text-[9px] uppercase tracking-[0.1em] text-[#8a8474]">
-                          {t('admin.reports.reporter')}: {report.reporterUsername || report.reporterId} · {formatDate(report.createdAt)}
+                        <p className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-[#8a8474]">
+                          #{report.id} · {formatDate(report.createdAt)} · {t("admin.reportedBy")} {report.reporter}
                         </p>
                       </div>
                     </div>
@@ -233,11 +233,24 @@ export default function AdminPage() {
           </div>
         ) : null}
 
-        {activeTab === 'users' ? (
+        {activeTab === "users" ? (
           <div>
-            <h2 className="mb-5 text-sm font-bold uppercase tracking-[0.12em]">
-              {t('admin.users.title')}
-            </h2>
+            <div className="mb-5 flex flex-wrap gap-2">
+              {userFilterOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setUserFilter(option)}
+                  className={`border px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] transition ${
+                    userFilter === option
+                      ? "border-[#d63e2a]/60 bg-[#d63e2a]/10 text-[#f0ead0]"
+                      : "border-[#f0ead0]/10 text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]"
+                  }`}
+                >
+                  {option === "all" ? "All" : t(`admin.status.${option}`)}
+                </button>
+              ))}
+            </div>
 
             {usersQuery.isLoading ? (
               <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
@@ -257,7 +270,6 @@ export default function AdminPage() {
                   <article key={managedUser.id} className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/20">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-4">
-                        {/* Avatar initials */}
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#f0ead0]/10 bg-[#1c1c19] text-[11px] uppercase tracking-[0.08em] text-[#8a8474]">
                           {managedUser.username.slice(0, 2).toUpperCase()}
                         </div>
@@ -283,7 +295,7 @@ export default function AdminPage() {
                           type="button"
                           onClick={() => void handleUserStatus(managedUser.id, "banned")}
                           disabled={isUpdatingUser || managedUser.isStaff || managedUser.id === user.id}
-                          className="border border-[#ff4f38]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#ff9c8e] transition hover:bg-[#ff4f38]/10"
+                          className="border border-[#ff4f38]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#ff9c8e] transition hover:bg-[#ff4f38]/10 disabled:opacity-30 disabled:hover:bg-transparent"
                         >
                           {t("admin.ban")}
                         </button>
@@ -293,7 +305,7 @@ export default function AdminPage() {
                           type="button"
                           onClick={() => void handleUserStatus(managedUser.id, "active")}
                           disabled={isUpdatingUser}
-                          className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10"
+                          className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10 disabled:opacity-30 disabled:hover:bg-transparent"
                         >
                           {t("admin.reactivate")}
                         </button>
@@ -310,45 +322,6 @@ export default function AdminPage() {
           </div>
         ) : null}
       </div>
-
-      {selectedUser ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0c0b]/80 px-5"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="ban-user-title"
-        >
-          <SectionCard className="w-full max-w-sm p-6 shadow-2xl shadow-black/40">
-            <p className="mb-2 text-[9px] uppercase tracking-[0.18em] text-[#d63e2a]">
-              {t('admin.actions.ban')}
-            </p>
-            <h2
-              id="ban-user-title"
-              className="font-['Bebas_Neue'] text-4xl tracking-[0.04em] text-[#f0ead0]"
-            >
-              {t('admin.users.banTitle')}
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-[#8a8474]">
-              {t('admin.users.banDescription')} {selectedUser.username}
-            </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <Button
-                variant="secondary"
-                onClick={() => setSelectedUser(null)}
-              >
-                {t('admin.actions.cancel')}
-              </Button>
-              <Button
-                variant="danger"
-                disabled={isBanningUser}
-                onClick={handleConfirmBan}
-              >
-                {t('admin.actions.confirmBan')}
-              </Button>
-            </div>
-          </SectionCard>
-        </div>
-      ) : null}
     </section>
   );
 }
