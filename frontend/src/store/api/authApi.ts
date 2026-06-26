@@ -582,6 +582,13 @@ export const authApi = createApi({
         dispatch(setCredentials(data));
       },
     }),
+    logout: builder.mutation<{ success: boolean }, string | null | undefined>({
+      query: (refreshToken) => ({
+        url: '/auth/logout/',
+        method: 'POST',
+        body: { refresh: refreshToken },
+      }),
+    }),
     getMe: builder.query<AuthUser, void>({
       async queryFn(_arg, api) {
         const result = await rawBaseQuery('/users/', api, {});
@@ -682,10 +689,10 @@ export const authApi = createApi({
     }),
     changePassword: builder.mutation<{ success: boolean }, PasswordChangeRequest>({
       query: ({ currentPassword, newPassword }) => ({
-        url: '/users/changePassword/',
+        url: '/auth/changePassword/',
         method: 'POST',
         body: {
-          current_password: currentPassword,
+          old_password: currentPassword,
           new_password: newPassword,
         },
       }),
@@ -890,6 +897,7 @@ export const {
   useGetMyPageDashboardQuery,
   useGetUserActivityQuery,
   useLoginMutation,
+  useLogoutMutation,
   useProcessAdminReportMutation,
   useSignupMutation,
   useUpdateAvatarMutation,
