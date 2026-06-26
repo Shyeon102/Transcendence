@@ -1,9 +1,18 @@
+from apps.media.models import Review
+from apps.community.models import Follow
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser
+from rest_framework_simplejwt.token_blacklist.models import (
+    OutstandingToken,
+    BlacklistedToken
+)
 from .serializers import UserSerializer, PublicUserProfileSerializer
+from apps.media.serializers import ReviewSerializer
 from django.shortcuts import get_object_or_404
 from apps.users.models import User
+from django.utils import timezone
 
 
 class UserView(APIView):
@@ -73,41 +82,49 @@ class OnboardingView(APIView):
         return Response(serializer.errors, status=400)
 
 
-def serialize_activity(user):
-    reviews = user.reviews.select_related("media").order_by("-created_at")[:10]
-    interactions = user.interactions.select_related("media").all()
-
-    watchlist = [
-        interaction.media.title
-        for interaction in interactions
-        if interaction.action == "watchlist"
-    ]
-    activities = [
-        f"{interaction.action.title()} {interaction.media.title}"
-        for interaction in interactions[:10]
-    ]
-
-    return {
-        "reviews": [
-            {
-                "id": review.id,
-                "title": review.media.title,
-                "note": review.content,
-                "when": review.created_at.isoformat(),
-                "rating": review.rating,
-            }
-            for review in reviews
-        ],
-        "watchlist": watchlist,
-        "activities": activities,
-    }
-
-
 class UserActivityView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response(serialize_activity(request.user))
+        user = request.user
+        interactions = user.interactions.select_related("media").all()
+        reviews = user.reviews.select_related("media").all()
+        activity = getattr(user, "activity", None)
+
+        data = {
+            "current_chat_room": (
+                {
+                    "id": activity.current_chat_room.id,
+                    "title": activity.current_chat_room.title,
+                }
+                if activity and activity.current_chat_room
+                else None
+            ),
+            "interactions": {
+                "like": [],
+                "dislike": [],
+                "watchlist": [],
+                "watched": [],
+            },
+            "reviews": ReviewSerializer(reviews, many=True).data
+        }
+
+        for i in interactions:
+            data["interactions"][i.action].append({
+                "media_id": i.media.id,
+                "media_title": i.media.title,
+            })
+
+        return Response(data)
+
+
+class UserReviewView(APIView):
+    def get(self, request, user_id):
+        reviews = Review.objects.filter(user_id=user_id)
+
+        return Response({
+            "reviews": ReviewSerializer(reviews, many=True).data
+        })
 
 
 class PublicUserActivityView(APIView):
@@ -115,4 +132,116 @@ class PublicUserActivityView(APIView):
 
     def get(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
-        return Response(serialize_activity(user))
+
+        reviews = user.reviews.select_related("media")
+
+        return Response({
+            "user": UserSerializer(user).data,
+            "reviews": ReviewSerializer(reviews, many=True).data
+        })
+
+
+class UserFollowersView(APIView):
+    def get(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
+
+        followers = user.followers.select_related("follower")
+
+        data = [
+            {
+                "id": f.follower.id,
+                "username": f.follower.username,
+                "avatar_url": f.follower.avatar_url,
+            }
+            for f in followers
+        ]
+
+        return Response({"followers": data})
+
+
+class UserFollowingView(APIView):
+    def get(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
+
+        following = user.following.select_related("following")
+
+        data = [
+            {
+                "id": f.following.id,
+                "username": f.following.username,
+                "avatar_url": f.following.avatar_url,
+            }
+            for f in following
+        ]
+
+        return Response({"following": data})
+
+
+class FollowAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        target_user = get_object_or_404(User, pk=user_id)
+
+        if request.user == target_user:
+            return Response({"error": "You cannot follow yourself."},
+                            status=400)
+
+        follow, created = Follow.objects.get_or_create(
+            follower=request.user,
+            following=target_user
+        )
+
+        if not created:
+            return Response({"error": "Already following"}, status=400)
+
+        return Response({"success": True})
+
+    def delete(self, request, user_id):
+        target_user = get_object_or_404(User, pk=user_id)
+
+        follow = Follow.objects.filter(
+            follower=request.user,
+            following=target_user
+        ).first()
+
+        if not follow:
+            return Response(
+                {"error": "You are not following this user."},
+                status=400
+            )
+
+        follow.delete()
+        return Response({"success": f"You have unfollowed"
+                         f"{target_user.username}."})
+
+
+class UserBanView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def put(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
+
+        user.is_banned = True
+        user.banned_at = timezone.now()
+        user.ban_reason = request.data.get("reason", "")
+        user.save()
+
+        tokens = OutstandingToken.objects.filter(user=user)
+
+        BlacklistedToken.objects.bulk_create([
+            BlacklistedToken(token=t)
+            for t in tokens
+        ], ignore_conflicts=True)
+
+        return Response({"status": "banned"})
+
+    def delete(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
+
+        user.is_banned = False
+        user.banned_at = None
+        user.ban_reason = ""
+        user.save()
+
+        return Response({"status": "unbanned"})
