@@ -3,7 +3,7 @@ export interface Media {
   title: string;
   director: string;
   genre: Genre[]; // ex) [Crime] [Thriller]
-  releaseDate: string; // ex) "1994-10-26"
+  releaseDate: string | null; // ex) "1994-10-26"
   country: string;
   language: string;
   cast: string[];
@@ -20,7 +20,7 @@ export interface Media {
 export interface Review {
   id: number; // 리뷰 자체 고유번호: DB에 저장될 때 순서대로 번호 (미디어 id랑 다름)
   userId: number; // 리뷰 쓴 유저 번호
-  userName: string; // "jihyeki2"
+  username: string; // "jihyeki2"
   content: string; // review text
   rating: number; // (1-5)
   visibility: "public" | "followers" | "private";
