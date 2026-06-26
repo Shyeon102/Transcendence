@@ -25,3 +25,6 @@ pandas
 celery 
 scikit-surprise
 tiktoken
+
+pydantic
+tenacity

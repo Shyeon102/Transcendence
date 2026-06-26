@@ -58,20 +58,30 @@ class Command(BaseCommand):
                 self.style.WARNING("[dry-run] Processing not performed.")
             )
             return
-
+        all_success = True
         for idx, batch in enumerate(batches, start=1):
             self.stdout.write(
                 f"Batch {idx}/{len(batches)} processing... "
                 f"({len(batch)} items)"
             )
-            try:
-                process_embedding_batch(batch)
+            success = process_embedding_batch(batch)
+            if success:
                 self.stdout.write(
                     self.style.SUCCESS(f"  Batch {idx} completed")
                 )
-            except Exception as e:
+            else:
+                all_success = False
                 self.stdout.write(
-                    self.style.ERROR(f"  Batch {idx} failed: {e}")
+                    self.style.ERROR(f"  Batch {idx} failed")
                 )
-                raise
-        self.stdout.write(self.style.SUCCESS(f"Total {total} items embedded."))
+                continue
+        if all_success:
+            self.stdout.write(
+                self.style.SUCCESS(f"Total {total} items embedded.")
+            )
+        else:
+            self.stdout.write(
+                self.style.ERROR(
+                    "Embedding finished with errors. Total may be incomplete."
+                )
+            )
