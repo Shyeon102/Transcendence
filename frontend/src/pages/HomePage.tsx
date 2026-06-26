@@ -1,7 +1,7 @@
 import Header from "../components/Header";
 import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
@@ -140,8 +140,17 @@ const mockMediaList: Media[] = [
 // 컴포넌트
 
 const HomePage = () => {
-  const { data, isLoading, error } = useGetMediaListQuery();
+  const [source, setSource] = useState<"RANDOM" | "TRENDING">("TRENDING");
+  const [type, setType] = useState<string | null>(null);
   const user = useSelector((state: RootState) => state.auth.user);
+  const userId = user?.id;
+  const { data, isLoading, error } = 
+    useGetMediaListQuery({
+      source,
+      type,
+      userId,
+    });
+
   const isDemo = user?.username === "demo";
   const mediaList = isDemo ? mockMediaList : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
   // 필터 버튼 공통 스타일 (반복 방지용)
@@ -149,7 +158,7 @@ const HomePage = () => {
     "border rounded-full px-[1.1vw] py-[0.4vw] text-[0.7vw] hover:bg-white/10 transition w-[4.7vw] h-[3vh] whitespace-nowrap flex items-center justify-center font-light";
 
   // 필터 버튼 클릭 상태 (null = 아무것도 선택 안 됨)
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
 
   // 선택된 미디어 상태 (null = 아무것도 선택 안 됨)
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
@@ -208,20 +217,9 @@ const HomePage = () => {
       {/* 필터 버튼 (MY FAV / RANDOM / FILTER) */}
       <div className="flex gap-[0.8vw] px-[2vw] pb-[2.7vh]">
         <button
-          onClick={() => setActiveFilter("MY FAV")}
+          onClick={() => setSource("RANDOM")}
           className={
-            activeFilter === "MY FAV"
-              ? filterBtnClass +
-                " shadow-[0_0_28px_1px_#00ffff] border-[#00ffff] text-[#00ffff]"
-              : filterBtnClass + " border-white/30 text-white"
-          }
-        >
-          MY FAV
-        </button>
-        <button
-          onClick={() => setActiveFilter("RANDOM")}
-          className={
-            activeFilter === "RANDOM"
+            source === "RANDOM"
               ? filterBtnClass +
                 " shadow-[0_0_28px_1px_#00ffff] border-[#00ffff] text-[#00ffff]"
               : filterBtnClass + " border-white/30 text-white"
@@ -230,16 +228,21 @@ const HomePage = () => {
           RANDOM
         </button>
         <button
-          onClick={() => setActiveFilter("FILTER")}
+          onClick={() => setSource("MY FAV")}
           className={
-            activeFilter === "FILTER"
+            source === "MY FAV"
               ? filterBtnClass +
                 " shadow-[0_0_28px_1px_#00ffff] border-[#00ffff] text-[#00ffff]"
               : filterBtnClass + " border-white/30 text-white"
           }
         >
-          FILTER
+          MY FAV
         </button>
+
+        <button onClick={() => setType("movie")}>MOVIE</button>
+        <button onClick={() => setType("drama")}>DRAMA</button>
+        <button onClick={() => setType("anime")}>ANIME</button>
+
       </div>
 
       {/* 카드 슬라이드 */}

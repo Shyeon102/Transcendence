@@ -14,6 +14,6 @@ urlpatterns = [
          ReviewCreateView.as_view()),
     path("<int:media_id>/interactions/",
          MediaInteractionView.as_view()),
-    path("media/random/", RandomMediaView.as_view()),
-    path("media/trending/", TrendingMediaView.as_view()),
+    path("random/", RandomMediaView.as_view()),
+    path("trending/", TrendingMediaView.as_view()),
 ]
