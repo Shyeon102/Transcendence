@@ -26,10 +26,12 @@ class UserSerializer(serializers.ModelSerializer):
             "avatar_url",
             "bio",
             "onboarding_completed",
+            "is_staff",
             "favorite_genres",
             "favorite_titles",
             "onboarding_answers",
         ]
+        read_only_fields = ["is_staff"]
 
     def update(self, instance, validated_data):
         # Remove frontend-only fields before delegating to super()
