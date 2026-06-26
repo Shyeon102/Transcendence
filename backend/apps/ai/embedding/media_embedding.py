@@ -83,7 +83,9 @@ def get_batch_embeddings(texts: list[str]) -> list[list[float]]:
         for attempt in range(5):
             response = requests.post(url, json=payload, timeout=30)
             if response.status_code in (400, 404, 410):
-                raise ValueError(f"invalid endpoint or payload: {response.text}")
+                raise ValueError(
+                    f"invalid endpoint or payload: {response.text}"
+                )
             if response.status_code == 429:
                 wait = int(response.headers.get("Retry-After", 15))
                 logger.warning(

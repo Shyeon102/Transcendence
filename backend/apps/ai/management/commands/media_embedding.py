@@ -76,8 +76,12 @@ class Command(BaseCommand):
                 )
                 continue
         if all_success:
-            self.stdout.write(self.style.SUCCESS(f"Total {total} items embedded."))
+            self.stdout.write(
+                self.style.SUCCESS(f"Total {total} items embedded.")
+            )
         else:
             self.stdout.write(
-                self.style.ERROR(f"Embedding finished with errors. Total may be incomplete.")
+                self.style.ERROR(
+                    "Embedding finished with errors. Total may be incomplete."
+                )
             )

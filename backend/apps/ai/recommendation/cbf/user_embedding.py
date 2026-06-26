@@ -47,7 +47,10 @@ def build_user_embedding(user: User) -> UserEmbedding:
     )
     logger.info("💚embeddings_qs count: %d", embeddings_qs.count())
     if not embeddings_qs.exists():
-        logger.info(f"User {user.pk}: no MediaEmbedding found for given media_ids")
+        logger.info(
+            f"User {user.pk}: "
+            "no MediaEmbedding found for given media_ids"
+        )
         return None
 
     profile_vec = np.zeros(EMB_DIM, dtype=np.float32)
