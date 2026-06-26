@@ -10,6 +10,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from apps.media.models import Media
+from apps.media.serializers import MediaSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -47,15 +48,14 @@ class TrendingMediaView(APIView):
 
 class HybridRecommendationView(APIView):
     # only for test
-    # from rest_framework.permissions import AllowAny
-    # permission_classes = [AllowAny]
+    from rest_framework.permissions import AllowAny
+    permission_classes = [AllowAny]
 
-    permission_classes = [IsAuthenticated]
-    # def get(self, request, user_id):
-
-    def get(self, request):
+    #permission_classes = [IsAuthenticated]
+    def get(self, request, user_id):
+    # def get(self, request):
         try:
-            user_id = request.user.id  # rm for test
+            #user_id = request.user.id  # rm for test
             hybrid_series = (
                 get_hybrid_scores(user_id=user_id)
             )
@@ -76,8 +76,8 @@ class HybridRecommendationView(APIView):
 
 class RAGRecommendationView(APIView):
     # only for test
-    # from rest_framework.permissions import AllowAny
-    # permission_classes = [AllowAny]
+    from rest_framework.permissions import AllowAny
+    permission_classes = [AllowAny]
 
     def get(self, request):
 
@@ -90,13 +90,18 @@ class RAGRecommendationView(APIView):
             if rag_series.empty:
                 return Response({"error": "No recommendations found"},
                                 status=status.HTTP_404_NOT_FOUND)
-            # if rag_series.empty:
-            #     result_score = get_popular_series()
-            # else:
-            #     result_score = rag_series
-            queryset = get_media_with_scores(rag_series)
-            serializer = MediaRecommendationSerializer(queryset, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            score_dict = rag_series.to_dict()
+            medias = list(
+                    Media.objects
+                    .filter(id__in=score_dict.keys())
+                    .prefetch_related("genres")
+                )
+            medias.sort(key=lambda m: score_dict[m.id], reverse=True)
+            serializer = MediaSerializer(medias, many=True)
+            return Response(
+                    {"media": serializer.data},
+                    status=status.HTTP_200_OK
+                )
 
         except Exception:
             logger.exception("RAGRecommendationView error: query=%s", query)

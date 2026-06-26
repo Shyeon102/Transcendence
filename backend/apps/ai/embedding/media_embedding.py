@@ -60,6 +60,8 @@ def build_source_text(media: Media) -> str:
 
 def get_batch_embeddings(texts: list[str]) -> list[list[float]]:
     api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY is missing")
     url = (
         f"https://generativelanguage.googleapis.com/v1beta/"
         f"models/gemini-embedding-2:batchEmbedContents?key={api_key}"
@@ -78,11 +80,12 @@ def get_batch_embeddings(texts: list[str]) -> list[list[float]]:
                 for t in chunk
             ]
         }
-
         for attempt in range(5):
             response = requests.post(url, json=payload, timeout=30)
+            if response.status_code in (400, 404, 410):
+                raise ValueError(f"invalid endpoint or payload: {response.text}")
             if response.status_code == 429:
-                wait = int(response.headers.get("Retry-After", 30))
+                wait = int(response.headers.get("Retry-After", 15))
                 logger.warning(
                     "429 rate limit, %dsec wait (attempt %d/%d)",
                     wait,
@@ -134,23 +137,27 @@ def process_embedding_batch(media_ids: list[int]) -> None:
         .prefetch_related("genres")
     )
     texts = [build_source_text(m) for m in medias]
-    vectors = get_batch_embeddings(texts)
+    try:
+        vectors = get_batch_embeddings(texts)
+        if len(vectors) != len(medias):
+            raise ValueError(
+                f"Vector count mismatch: "
+                f"m - {len(medias)}, v - {len(vectors)}"
+            )
 
-    if len(vectors) != len(medias):
-        raise ValueError(
-            f"Vector count mismatch: "
-            f"m - {len(medias)}, v - {len(vectors)}"
-        )
+        embeddings_to_save = [
+            MediaEmbedding(media=m, embedding=v, source_text=t)
+            for m, v, t in zip(medias, vectors, texts)
+        ]
 
-    embeddings_to_save = [
-        MediaEmbedding(media=m, embedding=v, source_text=t)
-        for m, v, t in zip(medias, vectors, texts)
-    ]
-
-    with transaction.atomic():
-        MediaEmbedding.objects.bulk_create(
-            embeddings_to_save,
-            update_conflicts=True,
-            unique_fields=["media"],
-            update_fields=["embedding", "source_text"],
-        )
+        with transaction.atomic():
+            MediaEmbedding.objects.bulk_create(
+                embeddings_to_save,
+                update_conflicts=True,
+                unique_fields=["media"],
+                update_fields=["embedding", "source_text"],
+            )
+        return True
+    except ValueError as e:
+        logger.error("Embedding generation failed: %s", e)
+        return False

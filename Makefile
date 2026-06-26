@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-COMPOSE := podman compose
+COMPOSE := docker compose
 
 .PHONY: help up start migrate seed_media load_media stop fclean logs
 
@@ -20,7 +20,7 @@ up: start
 start:
 	$(COMPOSE) up --build -d
 	$(MAKE) migrate
-	$(MAKE) seed_media
+#	$(MAKE) seed_media
 	$(MAKE) seed_reviews
 	$(MAKE) load_media
 # 	$(MAKE) media_embedding
@@ -45,7 +45,7 @@ stop:
 
 fclean:
 	$(COMPOSE) down -v --remove-orphans
-	podman system prune -af --volumes
+	docker system prune -af --volumes
 
 logs:
 	$(COMPOSE) logs -f

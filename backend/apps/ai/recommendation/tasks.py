@@ -22,24 +22,24 @@ def maybe_refresh_user_embedding_task(user_id: int):
     new_activity_delta = activity_count - last_count
     if new_activity_delta >= USER_EMBEDDING_THRESHOLD:
         chain(
-            refresh_user_embedding_task.s(user_id),
-            compute_cbf_score_task.s(),
+            refresh_user_embedding_task.si(user_id),
+            compute_cbf_score_task.si(user_id),
         ).delay()
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=30)
+@shared_task(bind=True)
 def refresh_user_embedding_task(self, user_id: int) -> int:
-    try:
-        User = get_user_model()
-        user = User.objects.get(id=user_id)
-        build_user_embedding(user=user)
-        logger.info("User profile embedding completed: user=%s", user_id)
-        return user_id
-    except Exception as exc:
-        raise self.retry(exc=exc)
+    User = get_user_model()
+    user = User.objects.get(id=user_id)
+    result = build_user_embedding(user=user)
+    if result is None:
+        logger.info("Skip embedding: user=%s (no data)", user_id)
+        return
+    logger.info("User profile embedding completed: user=%s", user_id)
+    return
 
 
-@shared_task(bind=True, max_retries=3, default_retry_delay=30)
+@shared_task(bind=True)
 def compute_cbf_score_task(self, user_id: int):
     from apps.ai.recommendation.cbf.cbf import cache_cbf_scores
     try:

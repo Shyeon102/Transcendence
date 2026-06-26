@@ -204,4 +204,9 @@ LOGGING = {
         "handlers": ["console"],
         "level": "DEBUG",
     },
+    "loggers": {
+        "celery": {
+            "level": "INFO",  # INFO → WARNING으로 올리면 사라짐
+        },
+    }
 }
