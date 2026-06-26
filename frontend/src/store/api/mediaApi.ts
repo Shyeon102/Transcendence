@@ -59,7 +59,7 @@ export const mediaApi = createApi({
       {
         source: "RANDOM" | "MY FAV";
         type: string | null;
-        userId: int
+        userId: number
       }
     >({
       // TODO) getMediaDetail (단일 mock, 백엔드 detail endpoint 머지되면 query로 교체)
@@ -104,6 +104,7 @@ export const mediaApi = createApi({
       },
     }),
 
+    // /media/:id/ (상세)
     getMediaDetail: builder.query<Media, number>({
       query: (id) => `/media/${id}/`,
       transformResponse: (response: BackendMediaDetailResponse) => {
@@ -131,7 +132,41 @@ export const mediaApi = createApi({
         };
       },
     }),
+
+    // /media/search/?q= (검색)
+    searchMedia: builder.query<Media[], string>({
+      query: (q) => `/media/search/?q=${q}`,
+      transformResponse: (response: BackendMediaListResponse) => {
+        return response.media.map((movie) => {
+          const runtimeMinutes = movie.runtime ?? 0;
+          const hours = Math.floor(runtimeMinutes / 60);
+          const minutes = runtimeMinutes % 60;
+          return {
+            id: movie.id,
+            title: movie.title,
+            director: movie.director ?? "",
+            genre: movie.genres,
+            releaseDate: movie.release_date,
+            country: movie.country,
+            language: movie.language ?? "",
+            cast: movie.cast.split(", "),
+            story: movie.description,
+            ageRating: movie.age_rating ?? "",
+            starRating: movie.avg_rating,
+            runtime: `${hours}h ${minutes}m`,
+            type: movie.media_type,
+            frontPosterUrl: movie.image_url,
+            sidePosterUrl: movie.side_poster_url ?? "",
+            reviews: [],
+          };
+        });
+      },
+    }),
   }),
 });
 
-export const { useGetMediaListQuery, useGetMediaDetailQuery } = mediaApi;
+export const {
+  useGetMediaListQuery,
+  useGetMediaDetailQuery,
+  useLazySearchMediaQuery,
+} = mediaApi;

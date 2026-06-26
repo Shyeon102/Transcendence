@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    PostDetailView, PostView, TrendingPostView,
+    PostDetailView, PostView, ReportDetailView, TrendingPostView,
     PostCommentView, PostLikeView, CommentLikeView,
     CommentDetailView, PostReportView, CommentReportView
 )
@@ -18,4 +18,5 @@ urlpatterns = [
 
     path("posts/<int:pk>/report/", PostReportView.as_view()),
     path("comments/<int:pk>/report/", CommentReportView.as_view()),
+    path("reports/<int:pk>/", ReportDetailView.as_view()),
 ]

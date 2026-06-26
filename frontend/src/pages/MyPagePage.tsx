@@ -2,14 +2,10 @@ import { useSelector } from 'react-redux';
 import MyPageDashboard from '../components/MyPageDashboard';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
-import { useGetMyPageDashboardQuery } from '../store/api/authApi';
 
 export default function MyPagePage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
-  const { data: dashboard } = useGetMyPageDashboardQuery(undefined, {
-    skip: !user,
-  });
 
   if (!user) {
     return null;
@@ -36,13 +32,13 @@ export default function MyPagePage() {
         </div>
 
         <MyPageDashboard
-          activities={dashboard?.activities}
           emptyLabel={t('mypage.empty')}
+          entriesLabel={t('mypage.entries')}
           isDemo={isDemo}
+          logLabel={t('mypage.log')}
+          queueLabel={t('mypage.queue')}
           recentActivityLabel={t('mypage.recentActivity')}
-          reviews={dashboard?.reviews}
           reviewSectionLabel={t('mypage.reviewSection')}
-          watchlist={dashboard?.watchlist}
           watchlistLabel={t('mypage.watchlistSection')}
         />
       </div>

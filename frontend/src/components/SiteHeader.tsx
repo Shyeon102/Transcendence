@@ -2,7 +2,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
-import { logout } from '../store/slices/authSlice';
+import { useLogoutMutation } from '../store/api/authApi';
+import { logout as clearAuth } from '../store/slices/authSlice';
 import LanguageSwitcher from './LanguageSwitcher';
 
 export default function SiteHeader() {
@@ -10,11 +11,20 @@ export default function SiteHeader() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t } = useI18n();
-  const { isAuthenticated, user, accessToken } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, user, accessToken, refreshToken } = useSelector((state: RootState) => state.auth);
+  const [logout] = useLogoutMutation();
   const hasSession = isAuthenticated && Boolean(user) && Boolean(accessToken);
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    if (refreshToken) {
+      try {
+        await logout(refreshToken).unwrap();
+      } catch {
+        // Local logout should still proceed if the server session is already invalid.
+      }
+    }
+
+    dispatch(clearAuth());
     navigate('/login');
   };
 

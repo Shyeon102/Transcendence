@@ -97,7 +97,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated"
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication"
+        "apps.authentication.authentication.CustomJWTAuthentication"
     ],
 }
 
@@ -204,4 +204,9 @@ LOGGING = {
         "handlers": ["console"],
         "level": "DEBUG",
     },
+    "loggers": {
+        "celery": {
+            "level": "INFO",  # INFO → WARNING으로 올리면 사라짐
+        },
+    }
 }

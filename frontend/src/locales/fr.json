@@ -9,6 +9,71 @@
     "mypage": "Ma page",
     "info": "Info"
   },
+  "admin": {
+    "eyebrow": "Mode admin",
+    "title": "ADMIN DASHBOARD",
+    "forbiddenTitle": "Permission admin requise.",
+    "forbiddenDescription": "Seuls les utilisateurs staff peuvent acceder a cette page.",
+    "tabs": {
+      "reports": "Signalements",
+      "users": "Utilisateurs"
+    },
+    "stats": {
+      "pending": "Signalements en attente",
+      "approved": "Signalements approuves",
+      "activeUsers": "Utilisateurs actifs",
+      "bannedUsers": "Utilisateurs bannis"
+    },
+    "reportStatus": {
+      "all": "Tous",
+      "pending": "En attente",
+      "approved": "Approuve",
+      "rejected": "Rejete"
+    },
+    "reportTypes": {
+      "spam": "Spam",
+      "abuse": "Abus",
+      "nsfw": "Inapproprie",
+      "copyright": "Copyright"
+    },
+    "targets": {
+      "post": "Post",
+      "comment": "Commentaire"
+    },
+    "actions": {
+      "approve": "Approuver",
+      "reject": "Rejeter",
+      "ban": "Bannir",
+      "cancel": "Annuler",
+      "confirmBan": "Confirmer"
+    },
+    "reports": {
+      "title": "Liste des signalements",
+      "error": "Impossible de charger les signalements.",
+      "empty": "Aucun signalement a afficher.",
+      "emptyDescription": "Aucun signalement ne correspond au statut choisi.",
+      "untitledTarget": "Cible sans titre",
+      "noReason": "Aucune raison fournie.",
+      "reporter": "Auteur",
+      "processed": "Traite",
+      "processedBy": "Traite par"
+    },
+    "users": {
+      "title": "Liste des utilisateurs",
+      "error": "Impossible de charger les utilisateurs.",
+      "empty": "Aucun utilisateur a afficher.",
+      "emptyDescription": "Aucune donnee utilisateur a gerer.",
+      "username": "Pseudo",
+      "email": "Email",
+      "status": "Statut",
+      "joined": "Inscrit",
+      "actions": "Actions",
+      "active": "Actif",
+      "banned": "Banni",
+      "banTitle": "Bannir cet utilisateur ?",
+      "banDescription": "Utilisateur cible :"
+    }
+  },
   "infoPage": {
     "eyebrow": "ft_transcendence",
     "title": "MVP auth et profil pour le frontend Transcendence.",
@@ -34,6 +99,7 @@
     "communityPosts": "Posts de la communaute",
     "watchlist": "Liste a voir",
     "followers": "Abonnes",
+    "defaultDisplayName": "Utilisateur",
     "editPanelTitle": "Modifier le profil",
     "displayName": "Nom affiche",
     "username": "Nom d'utilisateur",
@@ -50,9 +116,15 @@
     "confirmNewPassword": "Confirmer le nouveau mot de passe",
     "changePassword": "Changer le mot de passe",
     "passwordChanging": "Changement...",
-    "passwordChangeSuccess": "La validation du formulaire de mot de passe est terminee. Il reste seulement le branchement API.",
+    "passwordChangeSuccess": "Le mot de passe a ete modifie.",
     "passwordSameAsCurrent": "Le nouveau mot de passe doit etre different du mot de passe actuel.",
     "deleteAccount": "Supprimer le compte",
+    "deleteAccountTitle": "Supprimer ce compte ?",
+    "deleteAccountDescription": "Cette action est irreversible. Le vrai flux de suppression sera branche quand l'API backend sera confirmee.",
+    "deleteAccountCancel": "Annuler",
+    "deleteAccountConfirm": "Confirmer",
+    "deleteAccountPending": "Le flux de confirmation est pret ; l'API de suppression reste a brancher.",
+    "publicProfilePlaceholder": "Quand l'API de profil public sera branchee, cette zone affichera les critiques et les informations de profil de l'utilisateur.",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - En ce moment, je suis absorbe par le slow cinema et tout ce qui touche a A24."
   },
   "login": {
@@ -110,27 +182,75 @@
     "toLoginCta": "Se connecter ici"
   },
   "onboarding": {
-    "eyebrow": "Premiere configuration",
-    "titleLine1": "CURATE",
-    "titleLine2": "YOUR TASTE.",
-    "description": "Saisissez vos gouts comme une recherche. Ces reponses servent de premiere base pour les recommandations.",
-    "questionEyebrow": "STEP 01",
-    "questionTitle": "Repondez aux questions",
-    "questionCounter": "reponses pretes",
-    "questionPlaceholder": "Saisissez un titre comme une recherche.",
-    "questionValidation": "Veuillez repondre aux trois questions de l'onboarding.",
-    "saveError": "L'enregistrement sur le serveur a echoue. Il faut encore verifier l'endpoint backend.",
+    "eyebrow": "Vos goûts",
+    "titleLine1": "CE QUE VOUS",
+    "titleLine2": "AIMEZ.",
+    "description": "Recherchez des films, animes ou séries correspondant à chaque question.",
+    "questionEyebrow": "TROIS QUESTIONS",
+    "questionTitle": "Parlez-nous de vos coups de cœur",
+    "questionCounter": "réponses complétées",
+    "questionPlaceholder": "Recherchez un titre.",
+    "searching": "Recherche en cours...",
+    "noResults": "Aucun titre correspondant.",
+    "questionValidation": "Répondez aux trois questions.",
+    "saveError": "Nous n'avons pas pu terminer l'onboarding. Réessayez.",
     "saving": "Enregistrement...",
     "skip": "Passer",
-    "summaryEyebrow": "SUMMARY",
-    "summaryTitle": "YOUR TASTE MAP",
-    "answerSummary": "Reponses de recommandation",
-    "emptyAnswer": "Pas encore de reponse.",
+    "summaryEyebrow": "VOS RÉPONSES",
+    "summaryTitle": "VOS GOÛTS",
+    "answerSummary": "VOS RÉPONSES",
+    "emptyAnswer": "Pas encore de réponses.",
     "complete": "Terminer l'onboarding",
     "questions": {
-      "allTimeFavorite": "Quelle est votre oeuvre de vie ? Film, anime ou drama.",
-      "recentFavorite": "Quel media avez-vous aime recemment ? Film, anime ou drama.",
-      "friendRecommendation": "Que recommanderiez-vous a un ami ? Film, anime ou drama."
+      "allTimeFavorite": "Quel est votre film, anime ou série préféré ?",
+      "recentFavorite": "Qu'avez-vous aimé regarder récemment ?",
+      "friendRecommendation": "Que recommanderiez-vous à un ami ?"
+    }
+  },
+  "community": {
+    "eyebrow": "Communauté",
+    "title": "Partagez vos coups de cœur",
+    "description": "Parlez des œuvres que vous aimez et découvrez de nouvelles discussions.",
+    "writePost": "Écrire un message",
+    "editPost": "Modifier le message",
+    "titlePlaceholder": "Saisissez un titre.",
+    "contentPlaceholder": "De quoi voulez-vous parler ?",
+    "postValidation": "Saisissez un titre et un contenu.",
+    "publish": "Publier",
+    "save": "Enregistrer",
+    "saving": "Enregistrement...",
+    "saveError": "Impossible d'enregistrer vos modifications. Réessayez.",
+    "searchPlaceholder": "Rechercher des messages",
+    "recent": "Récents",
+    "trending": "Tendances",
+    "loading": "Chargement...",
+    "loadError": "Impossible de charger ce contenu.",
+    "empty": "Aucun message pour le moment.",
+    "user": "Utilisateur",
+    "likes": "J'aime",
+    "views": "Vues",
+    "back": "Retour aux messages",
+    "like": "J'aime",
+    "report": "Signaler",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer ce message ?",
+    "comments": "Commentaires",
+    "commentPlaceholder": "Écrivez un commentaire.",
+    "commentValidation": "Saisissez un commentaire.",
+    "addComment": "Ajouter un commentaire",
+    "loginToComment": "Connectez-vous pour écrire un commentaire.",
+    "reportTitle": "Signaler ce contenu ?",
+    "reportPlaceholder": "Indiquez la raison du signalement.",
+    "reportValidation": "Saisissez une raison.",
+    "reportError": "Impossible d'envoyer le signalement. Réessayez.",
+    "cancel": "Annuler",
+    "submitReport": "Envoyer le signalement",
+    "reportTypes": {
+      "spam": "Spam",
+      "abuse": "Abus ou harcèlement",
+      "nsfw": "Contenu inapproprié",
+      "copyright": "Atteinte aux droits d'auteur"
     }
   },
   "admin": {
@@ -167,6 +287,9 @@
     "reviewSection": "Mes critiques",
     "watchlistSection": "Liste a voir",
     "recentActivity": "Activite recente",
+    "entries": "entrees",
+    "queue": "file",
+    "log": "journal",
     "empty": "Aucune donnee a afficher pour le moment."
   },
   "review": {
@@ -176,12 +299,27 @@
     "typePlaceholder": "movie / anime / drama",
     "textPlaceholder": "Ecrivez une courte reaction ou un point de recommandation.",
     "submit": "Ajouter une critique",
-    "validation": "Veuillez saisir le titre, le type, la note et le texte de la critique."
+    "validation": "Veuillez saisir le titre, le type, la note et le texte de la critique.",
+    "visibilityLabel": "Visibilite",
+    "visibility": {
+      "public": "Public",
+      "followers": "Abonnes",
+      "private": "Prive"
+    },
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "sortLabel": "Tri",
+    "sort": {
+      "latest": "Recent",
+      "rating": "Note"
+    },
+    "editDraftSuffix": "(UI de modification en attente)"
   },
   "validation": {
     "required": "Veuillez remplir tous les champs.",
     "invalidEmail": "Veuillez saisir une adresse email valide.",
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caracteres.",
+    "passwordWeak": "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.",
     "passwordMismatch": "Les mots de passe ne correspondent pas.",
     "usernameInvalid": "Le nom d'utilisateur doit contenir au moins 3 caracteres et utiliser lettres, chiffres ou tirets bas."
   },
@@ -192,6 +330,35 @@
     "callbackErrorTitle": "AUTH FAILED",
     "callbackErrorDescription": "Un probleme est survenu pendant le traitement de 42 OAuth. Verifiez l'URL de callback configuree et le flux de reponse du backend.",
     "callbackContinue": "Continuer",
-    "callbackRetry": "Retour a la connexion"
+    "callbackRetry": "Retour a la connexion",
+    "startUrlMissing": "L'URL backend 42 OAuth n'est pas encore configuree."
+  },
+  "footer": {
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "credits": "Crédits",
+    "rights": "© 2026 Project. Tous droits réservés"
+  },
+  "main": {
+    "search": "Rechercher...",
+    "noData": "Aucun média pour le moment.",
+    "loading": "Chargement...",
+    "loadError": "Échec du chargement des médias.",
+    "myFav": "MES FAVORIS",
+    "random": "ALÉATOIRE",
+    "filter": "FILTRER"
+  },
+  "detail": {
+    "movie": "Film",
+    "series": "Série",
+    "animation": "Animation",
+    "myRating": "MA NOTE",
+    "myReview": "Mon avis",
+    "story": "L'Histoire",
+    "cast": "Distribution :",
+    "reviews": "Avis",
+    "readMore": "Voir plus",
+    "noData": "Aucune info média pour le moment.",
+    "loading": "Chargement..."
   }
 }
