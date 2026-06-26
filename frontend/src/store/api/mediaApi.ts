@@ -73,7 +73,7 @@ export const mediaApi = createApi({
         const qs = queryString ? `?${queryString}` : "";
 
         if (source === "RANDOM") return `/media/random/${qs}`;
-        if (source === "MY FAV") return `/ai/recommend/${userId}/${qs}`;
+        if (source === "MY FAV") return `/ai/recommend/${userId}${qs}`;
 
         return `/media/random/${qs}`;
       },

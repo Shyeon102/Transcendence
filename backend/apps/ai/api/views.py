@@ -23,6 +23,7 @@ class HybridRecommendationView(APIView):
     def get(self, request, user_id):
         try:
             # user_id = request.user.id
+            media_type = request.query_params.get("type")
             hybrid_series = (
                 get_hybrid_scores(user_id=user_id)
             )
@@ -33,19 +34,23 @@ class HybridRecommendationView(APIView):
                     .filter(id__in=score_dict.keys())
                     .prefetch_related("genres")
                 )
+                if media_type:
+                    medias = medias.filter(media_type=media_type)
                 medias.sort(key=lambda m: score_dict[m.id], reverse=True)
-                serializer = MediaSerializer(medias, many=True)
-                return Response(
-                    {"media": serializer.data},
-                    status=status.HTTP_200_OK
-                )
+                # serializer = MediaSerializer(medias, many=True)
+                # return Response(
+                #     {"media": serializer.data},
+                #     status=status.HTTP_200_OK
+                # )
             else:
-                queryset = (
+                medias = (
                     Media.objects
                     .prefetch_related("genres")
                     .order_by("-avg_rating")
                 )
-            serializer = MediaSerializer(queryset, many=True)
+                if media_type:
+                    medias = medias.filter(media_type=media_type)
+            serializer = MediaSerializer(medias, many=True)
             return Response(
                 {"media": serializer.data},
                 status=status.HTTP_200_OK
