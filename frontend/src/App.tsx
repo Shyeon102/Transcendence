@@ -1,5 +1,4 @@
-import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import PrivateRoute from './components/PrivateRoute'
 import ErrorBoundary from './components/ErrorBoundary'
