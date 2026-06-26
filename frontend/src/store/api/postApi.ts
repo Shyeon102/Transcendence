@@ -16,16 +16,19 @@ type PostListArgs = {
   cursor?: string;
 };
 
+type PostResponse = CommunityPost | { post: CommunityPost };
+
 const postsFrom = (response: PostListResponse | CommunityPost[]) =>
   Array.isArray(response) ? { posts: response } : response;
 const commentsFrom = (response: CommentListResponse | CommunityComment[]) =>
   Array.isArray(response) ? { comments: response } : response;
+const postFrom = (response: PostResponse) => ('post' in response ? response.post : response);
 
 export const postApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getPosts: builder.query<PostListResponse, PostListArgs>({
       query: ({ search, sort = 'recent', cursor }) => ({
-        url: '/posts',
+        url: '/community/posts/',
         params: { search: search || undefined, sort, cursor },
       }),
       transformResponse: postsFrom,
@@ -35,48 +38,51 @@ export const postApi = apiSlice.injectEndpoints({
       ],
     }),
     getTrendingPosts: builder.query<PostListResponse, void>({
-      query: () => '/posts/trending',
+      query: () => '/community/posts/trending/',
       transformResponse: postsFrom,
       providesTags: ['Posts'],
     }),
     getPost: builder.query<CommunityPost, number>({
-      query: (id) => `/posts/${id}`,
+      query: (id) => `/community/posts/${id}/`,
+      transformResponse: postFrom,
       providesTags: (_result, _error, id) => [{ type: 'Posts', id }],
     }),
     createPost: builder.mutation<CommunityPost, PostPayload>({
-      query: (body) => ({ url: '/posts', method: 'POST', body }),
+      query: (body) => ({ url: '/community/posts/', method: 'POST', body }),
+      transformResponse: postFrom,
       invalidatesTags: ['Posts'],
     }),
     updatePost: builder.mutation<CommunityPost, { id: number; body: PostPayload }>({
-      query: ({ id, body }) => ({ url: `/posts/${id}`, method: 'PUT', body }),
+      query: ({ id, body }) => ({ url: `/community/posts/${id}/`, method: 'PUT', body }),
+      transformResponse: postFrom,
       invalidatesTags: ['Posts'],
     }),
     deletePost: builder.mutation<void, number>({
-      query: (id) => ({ url: `/posts/${id}`, method: 'DELETE' }),
+      query: (id) => ({ url: `/community/posts/${id}/`, method: 'DELETE' }),
       invalidatesTags: ['Posts'],
     }),
     getComments: builder.query<CommentListResponse, number>({
-      query: (postId) => `/posts/${postId}/comments`,
+      query: (postId) => `/community/posts/${postId}/comments/`,
       transformResponse: commentsFrom,
       providesTags: ['Posts'],
     }),
     createComment: builder.mutation<CommunityComment, { postId: number; body: CommentPayload }>({
-      query: ({ postId, body }) => ({ url: `/posts/${postId}/comments`, method: 'POST', body }),
+      query: ({ postId, body }) => ({ url: `/community/posts/${postId}/comments/`, method: 'POST', body }),
       invalidatesTags: ['Posts'],
     }),
     likePost: builder.mutation<void, { id: number; liked: boolean }>({
-      query: ({ id, liked }) => ({ url: `/posts/${id}/like`, method: liked ? 'DELETE' : 'POST' }),
+      query: ({ id, liked }) => ({ url: `/community/posts/${id}/like/`, method: liked ? 'DELETE' : 'POST' }),
       invalidatesTags: ['Posts'],
     }),
     likeComment: builder.mutation<void, { id: number; liked: boolean }>({
-      query: ({ id, liked }) => ({ url: `/comments/${id}/like`, method: liked ? 'DELETE' : 'POST' }),
+      query: ({ id, liked }) => ({ url: `/community/comments/${id}/like/`, method: liked ? 'DELETE' : 'POST' }),
       invalidatesTags: ['Posts'],
     }),
     reportPost: builder.mutation<void, { id: number; body: ReportPayload }>({
-      query: ({ id, body }) => ({ url: `/posts/${id}/report`, method: 'POST', body }),
+      query: ({ id, body }) => ({ url: `/community/posts/${id}/report/`, method: 'POST', body }),
     }),
     reportComment: builder.mutation<void, { id: number; body: ReportPayload }>({
-      query: ({ id, body }) => ({ url: `/comments/${id}/report`, method: 'POST', body }),
+      query: ({ id, body }) => ({ url: `/community/comments/${id}/report/`, method: 'POST', body }),
     }),
   }),
 });
