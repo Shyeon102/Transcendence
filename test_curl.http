@@ -1,5 +1,6 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyMjIzNDQ4LCJpYXQiOjE3ODIyMjE2NDgsImp0aSI6IjAzZTY5ZTIzNjYzODQyMDE4MjczZGYwYTU1YjVlYzQwIiwidXNlcl9pZCI6IjgifQ.aWqH9okahR0O0d3e0r53niw3gkI70j4i-bVRA5MFAps
-curl -X POST http://localhost:8000/api/auth/register/ \
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyMzk2NDAyLCJpYXQiOjE3ODIzOTQ2MDIsImp0aSI6ImVjOTkwOTdkOTI5MTQ4NTRhYTUwOTNmMDg4NjNkOWJjIiwidXNlcl9pZCI6IjcifQ.QkpvgBE89vPdq_ut-eE5u5ppTyAvkr_ev1nNsLN4KA8
+###
+Curl -X POST http://localhost:8000/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "demo",
@@ -120,3 +121,45 @@ curl -X POST http://localhost:8000/api/community/posts/1/report/ \
   }'
 
 ###
+
+curl -X PATCH http://localhost:8000/api/community/reports/3/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "action": ""
+  }'
+
+###
+
+curl -X GET http://localhost:8000/api/users/2/reviews/ \
+  -H "Authorization: Bearer {{token}}"
+
+###
+
+curl -X GET http://localhost:8000/api/users/2/activity/ \
+  -H "Authorization: Bearer {{token}}"
+
+###
+
+curl -X GET http://localhost:8000/api/users/2/followers/ \
+  -H "Authorization: Bearer {{token}}"
+
+###
+
+curl -X GET http://localhost:8000/api/users/2/following/ \
+  -H "Authorization: Bearer {{token}}"
+
+###
+
+curl -X POST http://localhost:8000/api/users/2/follow/ \
+  -H "Authorization: Bearer {{token}}"
+
+###
+
+curl -X DELETE http://localhost:8000/api/users/2/follow/ \
+  -H "Authorization: Bearer {{token}}"
+
+###
+
+curl -X GET  http://localhost:8000/api/users/profile/7/ \
+  -H "Authorization: Bearer {{token}}"

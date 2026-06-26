@@ -9,6 +9,71 @@
     "mypage": "마이페이지",
     "info": "소개"
   },
+  "admin": {
+    "eyebrow": "관리자 모드",
+    "title": "ADMIN DASHBOARD",
+    "forbiddenTitle": "관리자 권한이 필요합니다.",
+    "forbiddenDescription": "이 페이지는 staff 권한이 있는 사용자만 접근할 수 있습니다.",
+    "tabs": {
+      "reports": "신고 처리",
+      "users": "유저 관리"
+    },
+    "stats": {
+      "pending": "대기 중 신고",
+      "approved": "승인된 신고",
+      "activeUsers": "활성 유저",
+      "bannedUsers": "정지 유저"
+    },
+    "reportStatus": {
+      "all": "전체",
+      "pending": "대기",
+      "approved": "승인",
+      "rejected": "반려"
+    },
+    "reportTypes": {
+      "spam": "스팸",
+      "abuse": "욕설/괴롭힘",
+      "nsfw": "부적절한 콘텐츠",
+      "copyright": "저작권"
+    },
+    "targets": {
+      "post": "게시글",
+      "comment": "댓글"
+    },
+    "actions": {
+      "approve": "승인",
+      "reject": "반려",
+      "ban": "정지",
+      "cancel": "취소",
+      "confirmBan": "정지 확인"
+    },
+    "reports": {
+      "title": "신고 목록",
+      "error": "신고 목록을 불러오지 못했습니다.",
+      "empty": "표시할 신고가 없습니다.",
+      "emptyDescription": "선택한 상태에 해당하는 신고가 없습니다.",
+      "untitledTarget": "제목 없는 신고 대상",
+      "noReason": "신고 사유가 없습니다.",
+      "reporter": "신고자",
+      "processed": "처리 완료",
+      "processedBy": "처리자"
+    },
+    "users": {
+      "title": "유저 목록",
+      "error": "유저 목록을 불러오지 못했습니다.",
+      "empty": "표시할 유저가 없습니다.",
+      "emptyDescription": "관리 대상 유저 데이터가 없습니다.",
+      "username": "사용자명",
+      "email": "이메일",
+      "status": "상태",
+      "joined": "가입일",
+      "actions": "작업",
+      "active": "활성",
+      "banned": "정지",
+      "banTitle": "이 유저를 정지할까요?",
+      "banDescription": "정지 대상:"
+    }
+  },
   "infoPage": {
     "eyebrow": "ft_transcendence",
     "title": "Transcendence 프런트엔드를 위한 인증/프로필 MVP입니다.",
@@ -34,6 +99,7 @@
     "communityPosts": "커뮤니티 게시글",
     "watchlist": "워치리스트",
     "followers": "팔로워",
+    "defaultDisplayName": "사용자",
     "editPanelTitle": "프로필 수정",
     "displayName": "표시 이름",
     "username": "사용자명",
@@ -50,9 +116,15 @@
     "confirmNewPassword": "새 비밀번호 확인",
     "changePassword": "비밀번호 변경",
     "passwordChanging": "변경 중...",
-    "passwordChangeSuccess": "비밀번호 변경 폼 검증이 완료되었습니다. API 연결만 남았습니다.",
+    "passwordChangeSuccess": "비밀번호가 변경되었습니다.",
     "passwordSameAsCurrent": "새 비밀번호는 현재 비밀번호와 달라야 합니다.",
     "deleteAccount": "계정 삭제",
+    "deleteAccountTitle": "계정을 삭제할까요?",
+    "deleteAccountDescription": "이 작업은 되돌릴 수 없습니다. 실제 삭제는 백엔드 API가 확정된 뒤 연결됩니다.",
+    "deleteAccountCancel": "취소",
+    "deleteAccountConfirm": "삭제 확인",
+    "deleteAccountPending": "계정 삭제 API 연결 전 확인 흐름만 준비되어 있습니다.",
+    "publicProfilePlaceholder": "공개 프로필 조회 API가 연결되면 이 영역에 유저별 리뷰와 프로필 정보가 표시됩니다.",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - 슬로우 시네마와 A24 작품에 빠져 있습니다."
   },
   "login": {
@@ -111,27 +183,102 @@
     "toLoginCta": "여기서 로그인"
   },
   "onboarding": {
-    "eyebrow": "첫 취향 설정",
-    "titleLine1": "CURATE",
-    "titleLine2": "YOUR TASTE.",
-    "description": "영화, 애니, 드라마 취향을 검색하듯 입력해주세요. 바로 추천 흐름의 첫 기준으로 사용됩니다.",
-    "questionEyebrow": "STEP 01",
-    "questionTitle": "질문에 답하세요",
-    "questionCounter": "answers ready",
-    "questionPlaceholder": "작품명을 검색하듯 입력해주세요.",
-    "questionValidation": "온보딩 질문 3개에 모두 답변해야 합니다.",
-    "saveError": "서버 저장에는 실패했습니다. 백엔드 endpoint를 확인해야 합니다.",
+    "eyebrow": "취향 알아보기",
+    "titleLine1": "내가 좋아하는",
+    "titleLine2": "작품은?",
+    "description": "각 질문에 맞는 영화, 애니, 드라마를 검색해보세요.",
+    "questionEyebrow": "질문 3개",
+    "questionTitle": "좋아하는 작품을 알려주세요",
+    "questionCounter": "답변 완료",
+    "questionPlaceholder": "작품명을 검색해주세요.",
+    "searching": "검색 중...",
+    "noResults": "일치하는 작품을 찾지 못했습니다.",
+    "questionValidation": "세 질문에 모두 답해주세요.",
+    "saveError": "온보딩을 완료하지 못했습니다. 다시 시도해주세요.",
     "saving": "저장 중...",
     "skip": "건너뛰기",
-    "summaryEyebrow": "SUMMARY",
-    "summaryTitle": "YOUR TASTE MAP",
-    "answerSummary": "추천 답변",
-    "emptyAnswer": "아직 답변이 없습니다.",
+    "summaryEyebrow": "내 답변",
+    "summaryTitle": "내 취향",
+    "answerSummary": "내 답변",
+    "emptyAnswer": "아직 입력한 답변이 없습니다.",
     "complete": "온보딩 완료",
     "questions": {
-      "allTimeFavorite": "인생작은 무엇인가요? 영화/애니/드라마 중에서",
-      "recentFavorite": "최근 재밌게 본 미디어는 무엇인가요? 영화/애니/드라마 중에서",
-      "friendRecommendation": "친구에게 추천한다면 어떤 작품을 추천하나요? 영화/애니/드라마 중에서"
+      "allTimeFavorite": "가장 좋아하는 작품은 무엇인가요?",
+      "recentFavorite": "최근에 재미있게 본 작품은 무엇인가요?",
+      "friendRecommendation": "친구에게 추천하고 싶은 작품은 무엇인가요?"
+    }
+  },
+  "community": {
+    "eyebrow": "커뮤니티",
+    "title": "함께 이야기해요",
+    "description": "좋아하는 작품에 대한 생각을 나누고 새로운 이야기를 만나보세요.",
+    "writePost": "새 글 작성",
+    "editPost": "글 수정",
+    "titlePlaceholder": "제목을 입력해주세요.",
+    "contentPlaceholder": "어떤 이야기를 나누고 싶나요?",
+    "postValidation": "제목과 내용을 모두 입력해주세요.",
+    "publish": "게시하기",
+    "save": "저장",
+    "saving": "저장 중...",
+    "saveError": "저장하지 못했습니다. 다시 시도해주세요.",
+    "searchPlaceholder": "게시글 검색",
+    "recent": "최신순",
+    "trending": "인기글",
+    "loading": "불러오는 중...",
+    "loadError": "내용을 불러오지 못했습니다.",
+    "empty": "아직 게시글이 없습니다.",
+    "user": "사용자",
+    "likes": "좋아요",
+    "views": "조회",
+    "back": "목록으로",
+    "like": "좋아요",
+    "report": "신고",
+    "edit": "수정",
+    "delete": "삭제",
+    "deleteConfirm": "이 게시글을 삭제할까요?",
+    "comments": "댓글",
+    "commentPlaceholder": "댓글을 입력해주세요.",
+    "commentValidation": "댓글을 입력해주세요.",
+    "addComment": "댓글 작성",
+    "loginToComment": "댓글을 작성하려면 로그인해주세요.",
+    "reportTitle": "이 콘텐츠를 신고할까요?",
+    "reportPlaceholder": "신고 사유를 입력해주세요.",
+    "reportValidation": "신고 사유를 입력해주세요.",
+    "reportError": "신고하지 못했습니다. 다시 시도해주세요.",
+    "cancel": "취소",
+    "submitReport": "신고하기",
+    "reportTypes": {
+      "spam": "스팸",
+      "abuse": "욕설·괴롭힘",
+      "nsfw": "부적절한 콘텐츠",
+      "copyright": "저작권 침해"
+    }
+  },
+  "admin": {
+    "eyebrow": "운영 관리",
+    "title": "관리자 콘솔",
+    "description": "신고된 콘텐츠를 검토하고 사용자 계정 상태를 관리합니다.",
+    "previewNotice": "UI 초안입니다. 동작은 화면 상태만 변경하며 서버에 저장되지 않습니다.",
+    "reportsEyebrow": "콘텐츠 관리",
+    "reportsTitle": "신고 목록",
+    "usersEyebrow": "계정 관리",
+    "usersTitle": "사용자",
+    "reportedBy": "신고자",
+    "reportCount": "신고 {{count}}건",
+    "approve": "승인",
+    "reject": "반려",
+    "hide": "콘텐츠 숨김",
+    "unhide": "콘텐츠 표시",
+    "suspend": "정지",
+    "ban": "차단",
+    "reactivate": "정지 해제",
+    "status": {
+      "pending": "대기",
+      "approved": "승인",
+      "rejected": "반려",
+      "active": "활성",
+      "suspended": "정지",
+      "banned": "차단"
     }
   },
   "mypage": {
@@ -141,6 +288,9 @@
     "reviewSection": "내 리뷰",
     "watchlistSection": "찜 목록",
     "recentActivity": "최근 활동",
+    "entries": "개",
+    "queue": "대기열",
+    "log": "로그",
     "empty": "아직 표시할 데이터가 없습니다."
   },
   "review": {
@@ -150,12 +300,27 @@
     "typePlaceholder": "movie / anime / drama",
     "textPlaceholder": "짧은 감상이나 추천 포인트를 적어주세요.",
     "submit": "리뷰 추가",
-    "validation": "제목, 타입, 별점, 내용을 모두 입력해주세요."
+    "validation": "제목, 타입, 별점, 내용을 모두 입력해주세요.",
+    "visibilityLabel": "공개 범위",
+    "visibility": {
+      "public": "전체 공개",
+      "followers": "팔로워 공개",
+      "private": "비공개"
+    },
+    "edit": "수정",
+    "delete": "삭제",
+    "sortLabel": "정렬",
+    "sort": {
+      "latest": "최신순",
+      "rating": "평점순"
+    },
+    "editDraftSuffix": "(수정 UI 연결 대기)"
   },
   "validation": {
     "required": "모든 필드를 입력해주세요.",
     "invalidEmail": "올바른 이메일 형식이 아닙니다.",
     "passwordTooShort": "비밀번호는 8자 이상이어야 합니다.",
+    "passwordWeak": "비밀번호는 대문자, 소문자, 숫자를 각각 1개 이상 포함해야 합니다.",
     "passwordMismatch": "비밀번호가 일치하지 않습니다.",
     "usernameInvalid": "사용자명은 3자 이상이며 영문자, 숫자, 밑줄만 사용할 수 있습니다."
   },
@@ -166,6 +331,35 @@
     "callbackErrorTitle": "AUTH FAILED",
     "callbackErrorDescription": "42 OAuth 처리 중 문제가 발생했습니다. 설정된 callback URL과 백엔드 응답을 확인해야 합니다.",
     "callbackContinue": "다음으로 이동",
-    "callbackRetry": "로그인으로 돌아가기"
+    "callbackRetry": "로그인으로 돌아가기",
+    "startUrlMissing": "42 OAuth 백엔드 URL이 아직 설정되지 않았습니다."
+  },
+  "footer": {
+    "privacyPolicy": "개인정보처리방침",
+    "termsOfService": "이용약관",
+    "credits": "크레딧",
+    "rights": "© 2026 Project. All Rights Reserved"
+  },
+  "main": {
+    "search": "검색...",
+    "noData": "아직 미디어가 없어요.",
+    "loading": "불러오는 중...",
+    "loadError": "미디어를 불러오지 못했어요.",
+    "myFav": "내 최애",
+    "random": "랜덤",
+    "filter": "필터"
+  },
+  "detail": {
+    "movie": "영화",
+    "series": "시리즈",
+    "animation": "애니메이션",
+    "myRating": "내 평점",
+    "myReview": "내 리뷰",
+    "story": "줄거리",
+    "cast": "출연:",
+    "reviews": "리뷰",
+    "readMore": "더 보기",
+    "noData": "미디어 정보가 아직 없어요.",
+    "loading": "불러오는 중..."
   }
 }
