@@ -2,6 +2,7 @@ import type { RootState } from "../store";
 import { storeLanguage, type Language, useI18n } from "../lib/i18n";
 import { useDispatch, useSelector } from "react-redux";
 import { setLanguage } from "../store/slices/uiSlice";
+import { Link } from "react-router-dom";
 //import { useTranslation } from "react-i18next";
 
 const Footer = () => {
@@ -10,11 +11,9 @@ const Footer = () => {
   const languages: Language[] = ["ko", "en", "fr"];
   const current = useSelector((state: RootState) => state.ui.language);
   const cycleLanguage = () => {
-    console.log("버튼 눌림! 현재:", current); // ← 이 줄 임시 추가
     const currentIndex = languages.indexOf(current);
     const nextIndex = (currentIndex + 1) % languages.length;
     const next = languages[nextIndex];
-    console.log("다음 언어:", next); // ← 이 줄도
     dispatch(setLanguage(next));
     storeLanguage(next);
   };
@@ -22,9 +21,15 @@ const Footer = () => {
     <div className="flex justify-between text-[0.80vw] px-[2vw] pt-[7vh]">
       {/* 왼쪽 */}
       <div className="flex gap-[2vw]">
-        <p>{t("footer.privacyPolicy")}</p>
-        <p>{t("footer.termsOfService")}</p>
-        <p>{t("footer.credits")}</p>
+        <Link to="/privacy" className="transition hover:text-white">
+          {t("footer.privacyPolicy")}
+        </Link>
+        <Link to="/terms" className="transition hover:text-white">
+          {t("footer.termsOfService")}
+        </Link>
+        <Link to="/credits" className="transition hover:text-white">
+          {t("footer.credits")}
+        </Link>
       </div>
       {/* 오른쪽 */}
       <div className="flex gap-[2vw]">
