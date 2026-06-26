@@ -1,3 +1,4 @@
+import { useI18n } from "../lib/i18n";
 import Header from "../components/Header";
 import { useGetMediaReviewsQuery } from "../store/api/authApi";
 import { useState } from "react";
@@ -9,7 +10,6 @@ import type { Media, Genre } from "../types/media";
 import type { RootState } from "../store";
 
 // 임시 목업 데이터: 현재 백엔드가 없으므로 목업 데이터 임시 선언
-// TODO) 추후 백엔드 연동후 useParams()로 받은 id로 API 호출, 그 영화 데이터를 받아오기
 const genreCrime: Genre = { id: 1, name: "Crime" };
 const genreThriller: Genre = { id: 2, name: "Thriller" };
 
@@ -76,6 +76,7 @@ const mockMedia: Media = {
 };
 
 const MediaDetailPage = () => {
+  const { t } = useI18n();
   const { id } = useParams();
   const mediaId = Number(id);
   const { data, isLoading } = useGetMediaDetailQuery(mediaId);
@@ -103,7 +104,7 @@ const MediaDetailPage = () => {
       <div className="flex min-h-screen flex-col bg-[#0c0c0b] text-white">
         <div className="flex flex-1 items-center justify-center px-6 text-center">
           <p className="text-[1vw] italic tracking-[0.08em] text-white/50">
-            불러오는 중...
+            {t("detail.loading")}
           </p>
         </div>
         <Footer />
@@ -116,7 +117,7 @@ const MediaDetailPage = () => {
       <div className="flex min-h-screen flex-col bg-[#0c0c0b] text-white">
         <div className="flex flex-1 items-center justify-center px-6 text-center">
           <p className="text-[1vw] italic tracking-[0.08em] text-white/50">
-            No media detail data yet.
+            {t("detail.noData")}
           </p>
         </div>
         <Footer />
@@ -135,7 +136,7 @@ const MediaDetailPage = () => {
             className={`text-[1vw] -rotate-90 ${media.type === "Movie" ? "text-teal-600" : "text-white"}`}
             onClick={() => {}} // TODO: 백엔드 연동 후 추가
           >
-            Movie
+            {t("detail.movie")}
           </button>
           <div className="-rotate-90 w-[4px] h-[2vh] bg-white mx-auto" />{" "}
           {/* 구분선 */}
@@ -143,14 +144,14 @@ const MediaDetailPage = () => {
             className={`text-[1vw] -rotate-90 ${media.type === "Series" ? "text-teal-600" : "text-white"}`}
             onClick={() => {}}
           >
-            Series
+            {t("detail.series")}
           </button>
           <div className="rotate-90 w-[4px] h-[2vh] bg-white mx-auto" />
           <button
             className={`text-[1vw] -rotate-90 ${media.type === "Animation" ? "text-teal-600" : "text-white"}`}
             onClick={() => {}}
           >
-            Animation
+            {t("detail.animation")}
           </button>
         </div>
 
@@ -191,7 +192,9 @@ const MediaDetailPage = () => {
 
             {/* MY RATING + 숫자 + My review 버튼 */}
             <div className="flex items-center gap-[1vw] mt-[0.2vh]">
-              <p className="text-[1.2vw] font-semibold">MY RATING</p>
+              <p className="text-[1.2vw] font-semibold">
+                {t("detail.myRating")}
+              </p>
               {/* setMyRating에 따라 숫자 변경 -> 별 몇개 주느냐에 따라 점수다름 */}
               {/* 숫자 자동으로 바뀜 + toFixed(1) : "1.0", "2,0", "3.0" ... */}
               <p className="text-[1.5vw] text-teal-600 font-bold">
@@ -209,7 +212,7 @@ const MediaDetailPage = () => {
                 }
                 className="border border-teal-600 bg-teal-600 text-white px-[0.5vw] py-[0.1vh] text-[0.9vw] rounded-xl"
               >
-                My review
+                {t("detail.myReview")}
               </button>
             </div>
           </div>
@@ -238,7 +241,7 @@ const MediaDetailPage = () => {
             <p>{media.country}</p>
             <p className="font-bold">|</p>
             <p>
-              <span className="font-semibold">Cast: </span>
+              <span className="font-semibold">{t("detail.cast")} </span>
               {media.cast.join(", ")}
             </p>
           </div>
@@ -246,9 +249,7 @@ const MediaDetailPage = () => {
           {/* story */}
           <div className="flex gap-[3vw] mt-[6.2vh] items-start">
             <p className="font-thin text-[1.8vw] w-[5vw] leading-tight">
-              The
-              <br />
-              Story
+              {t("detail.story")}
             </p>
             <p className="font-ibm text-[0.9vw] max-w-[23vw] leading-relaxed">
               {media.story}
@@ -293,7 +294,7 @@ const MediaDetailPage = () => {
           {/* 오른쪽: 리뷰 섹션: Reviews 제목 + 리뷰 목록 (가로정렬) */}
           <div className="flex gap-[3vw] mt-[3.6vh]">
             <p className="font-thin text-[1.8vw] w-[5vw] leading-tight">
-              Reviews
+              {t("detail.reviews")}
             </p>
 
             {/* 유저 리스트 div */}
@@ -339,7 +340,8 @@ const MediaDetailPage = () => {
                 }
                 className="mr-[20vw] mt-[1vh] text-[1vw] text-teal-600"
               >
-                Read More <span className="font-black">⟶</span>
+                {t("detail.readMore")}
+                <span className="font-black">⟶</span>
               </button>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import Header from "../components/Header";
+import { useI18n } from "../lib/i18n";
 import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
 import { useState } from "react";
@@ -6,7 +7,10 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
 import type { RootState } from "../store";
-import { useGetMediaListQuery } from "../store/api/mediaApi";
+import {
+  useGetMediaListQuery,
+  useLazySearchMediaQuery,
+} from "../store/api/mediaApi";
 
 // 목업 데이터
 
@@ -140,10 +144,22 @@ const mockMediaList: Media[] = [
 // 컴포넌트
 
 const HomePage = () => {
+  const { t } = useI18n();
   const { data, isLoading, error } = useGetMediaListQuery();
+  const [triggerSearch, searchResult] = useLazySearchMediaQuery();
   const user = useSelector((state: RootState) => state.auth.user);
   const isDemo = user?.username === "demo";
-  const mediaList = isDemo ? mockMediaList : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
+
+  // AI 검색 기능
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isAiMode, setIsAiMode] = useState(false);
+
+  const mediaList = isDemo
+    ? mockMediaList
+    : searchQuery.trim() && searchResult.data
+      ? searchResult.data.slice(0, 10)
+      : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
+
   // 필터 버튼 공통 스타일 (반복 방지용)
   const filterBtnClass =
     "border rounded-full px-[1.1vw] py-[0.4vw] text-[0.7vw] hover:bg-white/10 transition w-[4.7vw] h-[3vh] whitespace-nowrap flex items-center justify-center font-light";
@@ -170,6 +186,18 @@ const HomePage = () => {
     }
   };
 
+  const handleSearch = () => {
+    if (!searchQuery.trim()) return; // 빈 검색어면 아무것도 안 함
+
+    if (isAiMode) {
+      // AI(RAG) 검색 — 백엔드 머지되면 연결
+      console.log("RAG 검색:", searchQuery);
+    } else {
+      // 일반 검색
+      triggerSearch(searchQuery);
+    }
+  };
+
   // 왼쪽 화살표: 첫 번째 카드일 때는 이동 안 함, 15는 한 페이지당 보이는 vhs 개수
   const handlePrev = () => {
     if (currentIndex > 0) setCurrentIndex((prev) => prev - 15);
@@ -182,11 +210,15 @@ const HomePage = () => {
   };
 
   if (!isDemo && isLoading) {
-    return <div className="...">불러오는 중...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0c0c0b] text-[1vw] italic text-white/50">
+        {t("main.loading")}
+      </div>
+    );
   }
 
   if (!isDemo && error) {
-    return <div className="...">미디어를 불러오지 못했어요.</div>;
+    return <div className="...">{t("main.loadError")}</div>;
   }
 
   return (
@@ -197,9 +229,24 @@ const HomePage = () => {
       <div className="flex justify-center pt-[5vh] pb-[5vh]">
         <div className="flex items-center gap-2 bg-transparent border border-white/30 rounded-full px-[2vw] w-[43vw] h-[4.3vh]">
           <span>🔍</span>
+          <button
+            onClick={() => setIsAiMode(!isAiMode)}
+            className={
+              isAiMode
+                ? "border border-[#00ffff] text-[#00ffff] rounded-full px-[1vw] text-[0.8vw]"
+                : "border border-white/30 text-white rounded-full px-[1vw] text-[0.8vw]"
+            }
+          >
+            AI
+          </button>
           <input
             type="text"
-            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearch();
+            }}
+            placeholder={t("main.search")}
             className="bg-transparent outline-none text-white w-full placeholder:text-gray-500 text-[1vw]"
           />
         </div>
@@ -216,7 +263,7 @@ const HomePage = () => {
               : filterBtnClass + " border-white/30 text-white"
           }
         >
-          MY FAV
+          {t("main.myFav")}
         </button>
         <button
           onClick={() => setActiveFilter("RANDOM")}
@@ -227,7 +274,7 @@ const HomePage = () => {
               : filterBtnClass + " border-white/30 text-white"
           }
         >
-          RANDOM
+          {t("main.random")}
         </button>
         <button
           onClick={() => setActiveFilter("FILTER")}
@@ -238,7 +285,7 @@ const HomePage = () => {
               : filterBtnClass + " border-white/30 text-white"
           }
         >
-          FILTER
+          {t("main.filter")}
         </button>
       </div>
 
@@ -269,7 +316,7 @@ const HomePage = () => {
             ))
           ) : (
             <div className="flex min-h-[42vh] w-full items-center justify-center text-[1vw] italic tracking-[0.08em] text-white/50">
-              No media data yet.
+              {t("main.noData")}
             </div>
           )}
         </div>
