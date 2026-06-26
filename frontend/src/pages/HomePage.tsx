@@ -7,7 +7,10 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
 import type { RootState } from "../store";
-import { useGetMediaListQuery } from "../store/api/mediaApi";
+import {
+  useGetMediaListQuery,
+  useLazySearchMediaQuery,
+} from "../store/api/mediaApi";
 
 // 목업 데이터
 
@@ -143,9 +146,20 @@ const mockMediaList: Media[] = [
 const HomePage = () => {
   const { t } = useI18n();
   const { data, isLoading, error } = useGetMediaListQuery();
+  const [triggerSearch, searchResult] = useLazySearchMediaQuery();
   const user = useSelector((state: RootState) => state.auth.user);
   const isDemo = user?.username === "demo";
-  const mediaList = isDemo ? mockMediaList : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
+
+  // AI 검색 기능
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isAiMode, setIsAiMode] = useState(false);
+
+  const mediaList = isDemo
+    ? mockMediaList
+    : searchQuery.trim() && searchResult.data
+      ? searchResult.data.slice(0, 10)
+      : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
+
   // 필터 버튼 공통 스타일 (반복 방지용)
   const filterBtnClass =
     "border rounded-full px-[1.1vw] py-[0.4vw] text-[0.7vw] hover:bg-white/10 transition w-[4.7vw] h-[3vh] whitespace-nowrap flex items-center justify-center font-light";
@@ -169,6 +183,18 @@ const HomePage = () => {
       setSelectedMedia(null);
     } else {
       setSelectedMedia(media);
+    }
+  };
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) return; // 빈 검색어면 아무것도 안 함
+
+    if (isAiMode) {
+      // AI(RAG) 검색 — 백엔드 머지되면 연결
+      console.log("RAG 검색:", searchQuery);
+    } else {
+      // 일반 검색
+      triggerSearch(searchQuery);
     }
   };
 
@@ -203,8 +229,23 @@ const HomePage = () => {
       <div className="flex justify-center pt-[5vh] pb-[5vh]">
         <div className="flex items-center gap-2 bg-transparent border border-white/30 rounded-full px-[2vw] w-[43vw] h-[4.3vh]">
           <span>🔍</span>
+          <button
+            onClick={() => setIsAiMode(!isAiMode)}
+            className={
+              isAiMode
+                ? "border border-[#00ffff] text-[#00ffff] rounded-full px-[1vw] text-[0.8vw]"
+                : "border border-white/30 text-white rounded-full px-[1vw] text-[0.8vw]"
+            }
+          >
+            AI
+          </button>
           <input
             type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSearch();
+            }}
             placeholder={t("main.search")}
             className="bg-transparent outline-none text-white w-full placeholder:text-gray-500 text-[1vw]"
           />
