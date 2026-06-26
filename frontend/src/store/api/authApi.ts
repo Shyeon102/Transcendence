@@ -24,7 +24,6 @@ import type {
   MediaReviewRequest,
   MyPageDashboardData,
   PasswordChangeRequest,
-  OnboardingAnswers,
   RefreshTokenResponse,
   SignupRequest,
   SignupResponse,
@@ -45,8 +44,6 @@ type RawAuthUser = {
   favorite_genres?: number[];
   favoriteTitles?: string[];
   favorite_titles?: string[];
-  onboardingAnswers?: OnboardingAnswers;
-  onboarding_answers?: OnboardingAnswers;
   onboardingCompleted?: boolean;
   onboarding_completed?: boolean;
   favoriteCountries?: string[];
@@ -235,7 +232,6 @@ const normalizeUser = (user: RawAuthUser): AuthUser => ({
   bio: user.bio,
   favoriteGenres: user.favoriteGenres ?? user.favorite_genres,
   favoriteTitles: user.favoriteTitles ?? user.favorite_titles,
-  onboardingAnswers: user.onboardingAnswers ?? user.onboarding_answers,
   onboardingCompleted: user.onboardingCompleted ?? user.onboarding_completed,
   favoriteCountries: user.favoriteCountries ?? user.favorite_countries,
   isStaff: user.isStaff ?? user.is_staff,

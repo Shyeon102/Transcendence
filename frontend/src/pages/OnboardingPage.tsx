@@ -1,23 +1,107 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import type { RootState } from "../store";
 import { updateProfile } from "../store/slices/authSlice";
 import { useUpdateMeMutation } from "../store/api/authApi";
-import type { OnboardingAnswers } from "../types";
+import {
+  useLazySearchMediaQuery,
+  type MediaSearchResult,
+} from "../store/slices/apiSlice";
 
 const QUESTION_IDS = [
   "allTimeFavorite",
   "recentFavorite",
   "friendRecommendation",
-] as const satisfies readonly (keyof OnboardingAnswers)[];
+] as const;
 
-const EMPTY_ANSWERS: OnboardingAnswers = {
+type QuestionId = (typeof QUESTION_IDS)[number];
+type SearchAnswers = Record<QuestionId, string>;
+
+const EMPTY_ANSWERS: SearchAnswers = {
   allTimeFavorite: "",
   recentFavorite: "",
   friendRecommendation: "",
 };
+
+type OnboardingSearchInputProps = {
+  value: string;
+  onChange: (value: string) => void;
+  onSelect: (media: MediaSearchResult) => void;
+  placeholder: string;
+  searchingLabel: string;
+  noResultsLabel: string;
+};
+
+function OnboardingSearchInput({
+  value,
+  onChange,
+  onSelect,
+  placeholder,
+  searchingLabel,
+  noResultsLabel,
+}: OnboardingSearchInputProps) {
+  const [triggerSearch, { data: results = [], isFetching }] = useLazySearchMediaQuery();
+  const [isOpen, setIsOpen] = useState(false);
+  const query = value.trim();
+
+  useEffect(() => {
+    if (query.length < 2) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      triggerSearch(query);
+    }, 250);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [query, triggerSearch]);
+
+  const showResults = isOpen && query.length >= 2;
+
+  return (
+    <div className="relative">
+      <input
+        type="search"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        onFocus={() => setIsOpen(true)}
+        placeholder={placeholder}
+        className="w-full border border-[#f0ead0]/10 bg-[#141412] px-3 py-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
+      />
+
+      {showResults ? (
+        <div className="absolute z-10 mt-1 max-h-56 w-full overflow-y-auto border border-[#f0ead0]/15 bg-[#141412] shadow-xl">
+          {isFetching ? (
+            <p className="px-3 py-3 text-xs text-[#8a8474]">{searchingLabel}</p>
+          ) : results.length > 0 ? (
+            results.map((media) => (
+              <button
+                key={media.id}
+                type="button"
+                onClick={() => {
+                  onSelect(media);
+                  setIsOpen(false);
+                }}
+                className="block w-full border-b border-[#f0ead0]/10 px-3 py-3 text-left transition last:border-b-0 hover:bg-[#1c1c19]"
+              >
+                <span className="block text-sm text-[#f0ead0]">{media.title}</span>
+                <span className="mt-1 block text-[10px] uppercase tracking-[0.12em] text-[#8a8474]">
+                  {[media.media_type, media.release_date?.slice(0, 4)]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              </button>
+            ))
+          ) : (
+            <p className="px-3 py-3 text-xs text-[#8a8474]">{noResultsLabel}</p>
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 export default function OnboardingPage() {
   const dispatch = useDispatch();
@@ -25,9 +109,7 @@ export default function OnboardingPage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateMe, { isLoading: isSaving }] = useUpdateMeMutation();
-  const [answers, setAnswers] = useState<OnboardingAnswers>(
-    user?.onboardingAnswers ?? EMPTY_ANSWERS,
-  );
+  const [answers, setAnswers] = useState<SearchAnswers>(EMPTY_ANSWERS);
   const [errorMsg, setErrorMsg] = useState("");
 
   const areAnswersValid = QUESTION_IDS.every(
@@ -35,7 +117,7 @@ export default function OnboardingPage() {
   );
 
   const handleAnswerChange = (
-    questionId: keyof OnboardingAnswers,
+    questionId: QuestionId,
     value: string,
   ) => {
     if (errorMsg) {
@@ -48,11 +130,8 @@ export default function OnboardingPage() {
     }));
   };
 
-  const persistOnboarding = async (payloadAnswers: OnboardingAnswers) => {
-    const payload = {
-      onboardingCompleted: true,
-      onboardingAnswers: payloadAnswers,
-    };
+  const persistOnboarding = async () => {
+    const payload = { onboardingCompleted: true };
 
     try {
       const updatedUser = await updateMe(payload).unwrap();
@@ -85,7 +164,7 @@ export default function OnboardingPage() {
       return;
     }
 
-    await persistOnboarding(answers);
+    await persistOnboarding();
   };
 
   const handleSkip = async () => {
@@ -93,7 +172,7 @@ export default function OnboardingPage() {
       return;
     }
 
-    await persistOnboarding(EMPTY_ANSWERS);
+    await persistOnboarding();
   };
 
   return (
@@ -171,26 +250,17 @@ export default function OnboardingPage() {
                         <label className="mb-2 block text-[10px] uppercase tracking-[0.12em] text-[#c8c2a8]">
                           {t(`onboarding.questions.${questionId}`)}
                         </label>
-                        <input
-                          type="search"
+                        <OnboardingSearchInput
                           value={answers[questionId]}
-                          onChange={(e) =>
-                            handleAnswerChange(questionId, e.target.value)
-                          }
+                          onChange={(value) => handleAnswerChange(questionId, value)}
+                          onSelect={(media) => handleAnswerChange(questionId, media.title)}
                           placeholder={t("onboarding.questionPlaceholder")}
-                          className="w-full border border-[#f0ead0]/10 bg-[#141412] px-3 py-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
+                          searchingLabel={t("onboarding.searching")}
+                          noResultsLabel={t("onboarding.noResults")}
                         />
                       </div>
                     ))}
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={handleSkipAnswers}
-                    className="mt-4 border border-[#f0ead0]/10 bg-transparent px-4 py-2.5 text-[9px] uppercase tracking-[0.14em] text-[#8a8474] transition hover:border-[#f0ead0]/25 hover:text-[#f0ead0]"
-                  >
-                    {t('onboarding.skipQuestions')}
-                  </button>
                 </section>
               </div>
 
