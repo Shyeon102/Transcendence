@@ -116,7 +116,7 @@
     "confirmNewPassword": "Confirm New Password",
     "changePassword": "Change Password",
     "passwordChanging": "Changing...",
-    "passwordChangeSuccess": "Password change form validation passed. Only the API hookup remains.",
+    "passwordChangeSuccess": "Password changed successfully.",
     "passwordSameAsCurrent": "The new password must be different from the current password.",
     "deleteAccount": "Delete Account",
     "deleteAccountTitle": "Delete this account?",
@@ -319,6 +319,7 @@
     "required": "Please fill in every field.",
     "invalidEmail": "Please enter a valid email address.",
     "passwordTooShort": "Password must be at least 8 characters.",
+    "passwordWeak": "Password must include at least one uppercase letter, one lowercase letter, and one number.",
     "passwordMismatch": "Passwords do not match.",
     "usernameInvalid": "Username must be 3+ chars using letters, numbers, or underscores."
   },
@@ -331,5 +332,33 @@
     "callbackContinue": "Continue",
     "callbackRetry": "Back to login",
     "startUrlMissing": "42 OAuth backend URL is not configured yet."
+  },
+  "footer": {
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "credits": "Credits",
+    "rights": "© 2026 Project. All Rights Reserved"
+  },
+  "main": {
+    "search": "Search...",
+    "myFav": "MY FAV",
+    "random": "RANDOM",
+    "filter": "FILTER",
+    "noData": "No media data yet.",
+    "loading": "Loading...",
+    "loadError": "Failed to load media."
+  },
+  "detail": {
+    "movie": "Movie",
+    "series": "Series",
+    "animation": "Animation",
+    "myRating": "MY RATING",
+    "myReview": "My review",
+    "story": "The Story",
+    "cast": "Cast:",
+    "reviews": "Reviews",
+    "readMore": "Read More",
+    "noData": "No media detail data yet.",
+    "loading": "Loading..."
   }
 }

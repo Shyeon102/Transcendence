@@ -116,7 +116,7 @@
     "confirmNewPassword": "새 비밀번호 확인",
     "changePassword": "비밀번호 변경",
     "passwordChanging": "변경 중...",
-    "passwordChangeSuccess": "비밀번호 변경 폼 검증이 완료되었습니다. API 연결만 남았습니다.",
+    "passwordChangeSuccess": "비밀번호가 변경되었습니다.",
     "passwordSameAsCurrent": "새 비밀번호는 현재 비밀번호와 달라야 합니다.",
     "deleteAccount": "계정 삭제",
     "deleteAccountTitle": "계정을 삭제할까요?",
@@ -320,6 +320,7 @@
     "required": "모든 필드를 입력해주세요.",
     "invalidEmail": "올바른 이메일 형식이 아닙니다.",
     "passwordTooShort": "비밀번호는 8자 이상이어야 합니다.",
+    "passwordWeak": "비밀번호는 대문자, 소문자, 숫자를 각각 1개 이상 포함해야 합니다.",
     "passwordMismatch": "비밀번호가 일치하지 않습니다.",
     "usernameInvalid": "사용자명은 3자 이상이며 영문자, 숫자, 밑줄만 사용할 수 있습니다."
   },
@@ -332,5 +333,33 @@
     "callbackContinue": "다음으로 이동",
     "callbackRetry": "로그인으로 돌아가기",
     "startUrlMissing": "42 OAuth 백엔드 URL이 아직 설정되지 않았습니다."
+  },
+  "footer": {
+    "privacyPolicy": "개인정보처리방침",
+    "termsOfService": "이용약관",
+    "credits": "크레딧",
+    "rights": "© 2026 Project. All Rights Reserved"
+  },
+  "main": {
+    "search": "검색...",
+    "noData": "아직 미디어가 없어요.",
+    "loading": "불러오는 중...",
+    "loadError": "미디어를 불러오지 못했어요.",
+    "myFav": "내 최애",
+    "random": "랜덤",
+    "filter": "필터"
+  },
+  "detail": {
+    "movie": "영화",
+    "series": "시리즈",
+    "animation": "애니메이션",
+    "myRating": "내 평점",
+    "myReview": "내 리뷰",
+    "story": "줄거리",
+    "cast": "출연:",
+    "reviews": "리뷰",
+    "readMore": "더 보기",
+    "noData": "미디어 정보가 아직 없어요.",
+    "loading": "불러오는 중..."
   }
 }

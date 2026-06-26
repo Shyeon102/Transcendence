@@ -10,6 +10,7 @@ urlpatterns = [
     path('test-error/', test_error),
     path("onboarding/", OnboardingView.as_view()),
     path("profile/", UserView.as_view()),
+    path("profile/update/", UserView.as_view()),
     path("profile/<int:user_id>/", UserProfileView.as_view()),
     path("profile/avatar/", AvatarUpdateView.as_view()),
     path("me/activity/", UserActivityView.as_view()),

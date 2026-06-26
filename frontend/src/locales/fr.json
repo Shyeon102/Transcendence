@@ -116,7 +116,7 @@
     "confirmNewPassword": "Confirmer le nouveau mot de passe",
     "changePassword": "Changer le mot de passe",
     "passwordChanging": "Changement...",
-    "passwordChangeSuccess": "La validation du formulaire de mot de passe est terminee. Il reste seulement le branchement API.",
+    "passwordChangeSuccess": "Le mot de passe a ete modifie.",
     "passwordSameAsCurrent": "Le nouveau mot de passe doit etre different du mot de passe actuel.",
     "deleteAccount": "Supprimer le compte",
     "deleteAccountTitle": "Supprimer ce compte ?",
@@ -319,6 +319,7 @@
     "required": "Veuillez remplir tous les champs.",
     "invalidEmail": "Veuillez saisir une adresse email valide.",
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caracteres.",
+    "passwordWeak": "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.",
     "passwordMismatch": "Les mots de passe ne correspondent pas.",
     "usernameInvalid": "Le nom d'utilisateur doit contenir au moins 3 caracteres et utiliser lettres, chiffres ou tirets bas."
   },
@@ -331,5 +332,33 @@
     "callbackContinue": "Continuer",
     "callbackRetry": "Retour a la connexion",
     "startUrlMissing": "L'URL backend 42 OAuth n'est pas encore configuree."
+  },
+  "footer": {
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "credits": "Crédits",
+    "rights": "© 2026 Project. Tous droits réservés"
+  },
+  "main": {
+    "search": "Rechercher...",
+    "noData": "Aucun média pour le moment.",
+    "loading": "Chargement...",
+    "loadError": "Échec du chargement des médias.",
+    "myFav": "MES FAVORIS",
+    "random": "ALÉATOIRE",
+    "filter": "FILTRER"
+  },
+  "detail": {
+    "movie": "Film",
+    "series": "Série",
+    "animation": "Animation",
+    "myRating": "MA NOTE",
+    "myReview": "Mon avis",
+    "story": "L'Histoire",
+    "cast": "Distribution :",
+    "reviews": "Avis",
+    "readMore": "Voir plus",
+    "noData": "Aucune info média pour le moment.",
+    "loading": "Chargement..."
   }
 }
