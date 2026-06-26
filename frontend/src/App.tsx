@@ -62,9 +62,6 @@ export default function App() {
                 </PrivateRoute>
               }
             />
-            {import.meta.env.DEV ? (
-              <Route path="/admin-preview" element={<AdminPage />} />
-            ) : null}
             <Route path="/media/:id" element={<MediaDetailPage />} />
           </Route>
           <Route path="/chat/rooms" element={<ChatRoomListPage />} />

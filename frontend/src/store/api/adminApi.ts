@@ -44,8 +44,8 @@ export const adminApi = apiSlice.injectEndpoints({
       { id: number; status: AdminReportStatus; hidden?: boolean }
     >({
       query: ({ id, ...body }) => ({
-        url: `/admin/reports/${id}/process/`,
-        method: "POST",
+        url: `/admin/reports/${id}/`,
+        method: "PATCH",
         body,
       }),
       invalidatesTags: ["AdminReports"],
@@ -59,10 +59,10 @@ export const adminApi = apiSlice.injectEndpoints({
       AdminUser,
       { id: number; status: AdminAccountStatus }
     >({
-      query: ({ id, ...body }) => ({
-        url: `/admin/users/${id}/status/`,
-        method: "POST",
-        body,
+      query: ({ id, status }) => ({
+        url: `/admin/users/${id}/ban/`,
+        method: "PATCH",
+        body: { status },
       }),
       invalidatesTags: ["AdminUsers"],
     }),

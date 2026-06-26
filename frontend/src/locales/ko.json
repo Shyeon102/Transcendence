@@ -166,7 +166,6 @@
     "eyebrow": "운영 관리",
     "title": "관리자 콘솔",
     "description": "신고된 콘텐츠를 검토하고 사용자 계정 상태를 관리합니다.",
-    "previewNotice": "UI 초안입니다. 동작은 화면 상태만 변경하며 서버에 저장되지 않습니다.",
     "connectedNotice": "관리자 API에 연결되었습니다. 동작은 서버로 전송됩니다.",
     "reportsEyebrow": "콘텐츠 관리",
     "reportsTitle": "신고 목록",

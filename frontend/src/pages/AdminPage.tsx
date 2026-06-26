@@ -9,51 +9,10 @@ import {
   useProcessAdminReportMutation,
   useUpdateAdminUserStatusMutation,
   type AdminAccountStatus,
-  type AdminReport,
   type AdminReportStatus,
-  type AdminUser,
 } from "../store/api/adminApi";
 
 type TabKey = "reports" | "users";
-
-const previewReports: AdminReport[] = [
-  {
-    id: 104,
-    reporter: "cinephile42",
-    target: "Post #88 · Weekend recommendations",
-    type: "Spam",
-    reason: "Repeated promotional links.",
-    createdAt: "2026-06-23",
-    status: "pending",
-    hidden: false,
-  },
-  {
-    id: 103,
-    reporter: "minji",
-    target: "Comment #314 · Dune review",
-    type: "Abuse",
-    reason: "Contains personal attacks.",
-    createdAt: "2026-06-22",
-    status: "pending",
-    hidden: false,
-  },
-  {
-    id: 102,
-    reporter: "alex",
-    target: "Post #74 · Film still collection",
-    type: "Copyright",
-    reason: "Uncredited copyrighted images.",
-    createdAt: "2026-06-21",
-    status: "rejected",
-    hidden: false,
-  },
-];
-
-const previewUsers: AdminUser[] = [
-  { id: 17, username: "cinephile42", email: "cinephile42@example.com", status: "active", reportCount: 3 },
-  { id: 28, username: "screenwriter", email: "screenwriter@example.com", status: "suspended", reportCount: 2 },
-  { id: 35, username: "posterbot", email: "posterbot@example.com", status: "banned", reportCount: 8 },
-];
 
 const reportTypeColor: Record<string, string> = {
   Spam: "border-[#f2b84b]/30 bg-[#f2b84b]/10 text-[#f2b84b]",
@@ -91,8 +50,6 @@ export default function AdminPage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
-  const [previewReportState, setPreviewReportState] = useState(previewReports);
-  const [previewUserState, setPreviewUserState] = useState(previewUsers);
   const [activeTab, setActiveTab] = useState<TabKey>("reports");
   const [reportFilter, setReportFilter] = useState<AdminReportStatus | "all">("all");
   const [userFilter, setUserFilter] = useState<AdminAccountStatus | "all">("all");
@@ -106,51 +63,19 @@ export default function AdminPage() {
     return <Navigate to="/home" replace />;
   }
 
-  const isReportPreview = !reportsQuery.isSuccess;
-  const isUserPreview = !usersQuery.isSuccess;
-  const reports = reportsQuery.data ?? previewReportState;
-  const users = usersQuery.data ?? previewUserState;
-
-  const updatePreviewReport = (id: number, updates: Partial<AdminReport>) => {
-    setPreviewReportState((current) =>
-      current.map((report) => (report.id === id ? { ...report, ...updates } : report)),
-    );
-  };
-
-  const updatePreviewUserStatus = (id: number, status: AdminAccountStatus) => {
-    setPreviewUserState((current) =>
-      current.map((managedUser) =>
-        managedUser.id === id ? { ...managedUser, status } : managedUser,
-      ),
-    );
-  };
+  const reports = reportsQuery.data ?? [];
+  const users = usersQuery.data ?? [];
 
   const handleReportStatus = async (id: number, status: AdminReportStatus) => {
-    if (isReportPreview) {
-      updatePreviewReport(id, { status });
-      return;
-    }
-
     await processReport({ id, status });
   };
 
-  const handleContentVisibility = async (report: AdminReport) => {
+  const handleContentVisibility = async (report: NonNullable<typeof reports[number]>) => {
     const hidden = !report.hidden;
-
-    if (isReportPreview) {
-      updatePreviewReport(report.id, { hidden });
-      return;
-    }
-
     await processReport({ id: report.id, status: report.status, hidden });
   };
 
   const handleUserStatus = async (id: number, status: AdminAccountStatus) => {
-    if (isUserPreview) {
-      updatePreviewUserStatus(id, status);
-      return;
-    }
-
     await updateAccountStatus({ id, status });
   };
 
@@ -179,7 +104,7 @@ export default function AdminPage() {
             {t("admin.description")}
           </p>
           <p className="mt-4 border-l-2 border-[#d4a847]/60 pl-3 text-[10px] leading-5 text-[#c8c2a8]">
-            {isReportPreview || isUserPreview ? t("admin.previewNotice") : t("admin.connectedNotice")}
+            {t("admin.connectedNotice")}
           </p>
         </div>
 
