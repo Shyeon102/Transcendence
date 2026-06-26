@@ -24,7 +24,6 @@ import type {
   MediaReviewRequest,
   MyPageDashboardData,
   PasswordChangeRequest,
-  OnboardingAnswers,
   RefreshTokenResponse,
   SignupRequest,
   SignupResponse,
@@ -45,8 +44,6 @@ type RawAuthUser = {
   favorite_genres?: number[];
   favoriteTitles?: string[];
   favorite_titles?: string[];
-  onboardingAnswers?: OnboardingAnswers;
-  onboarding_answers?: OnboardingAnswers;
   onboardingCompleted?: boolean;
   onboarding_completed?: boolean;
   favoriteCountries?: string[];
@@ -235,7 +232,6 @@ const normalizeUser = (user: RawAuthUser): AuthUser => ({
   bio: user.bio,
   favoriteGenres: user.favoriteGenres ?? user.favorite_genres,
   favoriteTitles: user.favoriteTitles ?? user.favorite_titles,
-  onboardingAnswers: user.onboardingAnswers ?? user.onboarding_answers,
   onboardingCompleted: user.onboardingCompleted ?? user.onboarding_completed,
   favoriteCountries: user.favoriteCountries ?? user.favorite_countries,
   isStaff: user.isStaff ?? user.is_staff,
@@ -602,27 +598,23 @@ export const authApi = createApi({
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
-        const isOnboardingUpdate =
-          payload.onboardingCompleted !== undefined ||
-          payload.onboardingAnswers !== undefined ||
-          payload.favoriteGenres !== undefined ||
-          payload.favoriteTitles !== undefined;
+        const isOnboardingUpdate = payload.onboardingCompleted !== undefined;
         const result = await rawBaseQuery(
           {
             url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/',
             method: 'PATCH',
-            body: {
-              username: payload.username,
-              email: payload.email,
-              first_name: payload.firstName,
-              last_name: payload.lastName,
-              avatar_url: payload.avatarUrl,
-              bio: payload.bio,
-              onboarding_completed: payload.onboardingCompleted,
-              favorite_genres: payload.favoriteGenres,
-              favorite_titles: (payload as unknown as { favoriteTitles?: string[] }).favoriteTitles,
-              onboarding_answers: (payload as unknown as { onboardingAnswers?: OnboardingAnswers }).onboardingAnswers,
-            },
+            body: isOnboardingUpdate
+              ? {
+                  onboarding_completed: payload.onboardingCompleted,
+                }
+              : {
+                  username: payload.username,
+                  email: payload.email,
+                  first_name: payload.firstName,
+                  last_name: payload.lastName,
+                  avatar_url: payload.avatarUrl,
+                  bio: payload.bio,
+                },
           },
           api,
           {}

@@ -1,9 +1,3 @@
-export interface OnboardingAnswers {
-  allTimeFavorite: string;
-  recentFavorite: string;
-  friendRecommendation: string;
-}
-
 export interface AuthUser {
   id: number;
   email: string;
@@ -14,7 +8,6 @@ export interface AuthUser {
   bio?: string;
   favoriteGenres?: number[];
   favoriteTitles?: string[];
-  onboardingAnswers?: OnboardingAnswers;
   onboardingCompleted?: boolean;
   favoriteCountries?: string[];
   isStaff?: boolean;
@@ -44,7 +37,6 @@ export interface SignupRequest {
   passwordConfirm: string;
   favoriteGenres?: number[];
   favoriteTitles?: string[];
-  onboardingAnswers?: OnboardingAnswers;
 }
 
 export interface SignupResponse {
