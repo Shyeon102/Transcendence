@@ -333,5 +333,33 @@
     "callbackContinue": "다음으로 이동",
     "callbackRetry": "로그인으로 돌아가기",
     "startUrlMissing": "42 OAuth 백엔드 URL이 아직 설정되지 않았습니다."
+  },
+  "footer": {
+    "privacyPolicy": "개인정보처리방침",
+    "termsOfService": "이용약관",
+    "credits": "크레딧",
+    "rights": "© 2026 Project. All Rights Reserved"
+  },
+  "main": {
+    "search": "검색...",
+    "noData": "아직 미디어가 없어요.",
+    "loading": "불러오는 중...",
+    "loadError": "미디어를 불러오지 못했어요.",
+    "myFav": "내 최애",
+    "random": "랜덤",
+    "filter": "필터"
+  },
+  "detail": {
+    "movie": "영화",
+    "series": "시리즈",
+    "animation": "애니메이션",
+    "myRating": "내 평점",
+    "myReview": "내 리뷰",
+    "story": "줄거리",
+    "cast": "출연:",
+    "reviews": "리뷰",
+    "readMore": "더 보기",
+    "noData": "미디어 정보가 아직 없어요.",
+    "loading": "불러오는 중..."
   }
 }
