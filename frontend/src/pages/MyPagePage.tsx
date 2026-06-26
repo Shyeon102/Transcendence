@@ -1,5 +1,6 @@
 import { useSelector } from 'react-redux';
 import MyPageDashboard from '../components/MyPageDashboard';
+import LoadingSkeleton from '../components/ui/LoadingSkeleton';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
 import { useGetMyPageDashboardQuery } from '../store/api/authApi';
@@ -7,7 +8,7 @@ import { useGetMyPageDashboardQuery } from '../store/api/authApi';
 export default function MyPagePage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
-  const { data: dashboard } = useGetMyPageDashboardQuery(undefined, {
+  const { data: dashboard, isLoading } = useGetMyPageDashboardQuery(undefined, {
     skip: !user,
   });
 
@@ -35,16 +36,29 @@ export default function MyPagePage() {
           </p>
         </div>
 
-        <MyPageDashboard
-          activities={dashboard?.activities}
-          emptyLabel={t('mypage.empty')}
-          isDemo={isDemo}
-          recentActivityLabel={t('mypage.recentActivity')}
-          reviews={dashboard?.reviews}
-          reviewSectionLabel={t('mypage.reviewSection')}
-          watchlist={dashboard?.watchlist}
-          watchlistLabel={t('mypage.watchlistSection')}
-        />
+        {isLoading ? (
+          <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+            <LoadingSkeleton className="h-72" />
+            <div className="space-y-6">
+              <LoadingSkeleton className="h-36" />
+              <LoadingSkeleton className="h-36" />
+            </div>
+          </div>
+        ) : (
+          <MyPageDashboard
+            activities={dashboard?.activities}
+            emptyLabel={t('mypage.empty')}
+            entriesLabel={t('mypage.entries')}
+            isDemo={isDemo}
+            logLabel={t('mypage.log')}
+            queueLabel={t('mypage.queue')}
+            recentActivityLabel={t('mypage.recentActivity')}
+            reviews={dashboard?.reviews}
+            reviewSectionLabel={t('mypage.reviewSection')}
+            watchlist={dashboard?.watchlist}
+            watchlistLabel={t('mypage.watchlistSection')}
+          />
+        )}
       </div>
     </section>
   );

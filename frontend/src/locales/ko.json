@@ -9,6 +9,71 @@
     "mypage": "마이페이지",
     "info": "소개"
   },
+  "admin": {
+    "eyebrow": "관리자 모드",
+    "title": "ADMIN DASHBOARD",
+    "forbiddenTitle": "관리자 권한이 필요합니다.",
+    "forbiddenDescription": "이 페이지는 staff 권한이 있는 사용자만 접근할 수 있습니다.",
+    "tabs": {
+      "reports": "신고 처리",
+      "users": "유저 관리"
+    },
+    "stats": {
+      "pending": "대기 중 신고",
+      "approved": "승인된 신고",
+      "activeUsers": "활성 유저",
+      "bannedUsers": "정지 유저"
+    },
+    "reportStatus": {
+      "all": "전체",
+      "pending": "대기",
+      "approved": "승인",
+      "rejected": "반려"
+    },
+    "reportTypes": {
+      "spam": "스팸",
+      "abuse": "욕설/괴롭힘",
+      "nsfw": "부적절한 콘텐츠",
+      "copyright": "저작권"
+    },
+    "targets": {
+      "post": "게시글",
+      "comment": "댓글"
+    },
+    "actions": {
+      "approve": "승인",
+      "reject": "반려",
+      "ban": "정지",
+      "cancel": "취소",
+      "confirmBan": "정지 확인"
+    },
+    "reports": {
+      "title": "신고 목록",
+      "error": "신고 목록을 불러오지 못했습니다.",
+      "empty": "표시할 신고가 없습니다.",
+      "emptyDescription": "선택한 상태에 해당하는 신고가 없습니다.",
+      "untitledTarget": "제목 없는 신고 대상",
+      "noReason": "신고 사유가 없습니다.",
+      "reporter": "신고자",
+      "processed": "처리 완료",
+      "processedBy": "처리자"
+    },
+    "users": {
+      "title": "유저 목록",
+      "error": "유저 목록을 불러오지 못했습니다.",
+      "empty": "표시할 유저가 없습니다.",
+      "emptyDescription": "관리 대상 유저 데이터가 없습니다.",
+      "username": "사용자명",
+      "email": "이메일",
+      "status": "상태",
+      "joined": "가입일",
+      "actions": "작업",
+      "active": "활성",
+      "banned": "정지",
+      "banTitle": "이 유저를 정지할까요?",
+      "banDescription": "정지 대상:"
+    }
+  },
   "infoPage": {
     "eyebrow": "ft_transcendence",
     "title": "Transcendence 프런트엔드를 위한 인증/프로필 MVP입니다.",
@@ -34,6 +99,7 @@
     "communityPosts": "커뮤니티 게시글",
     "watchlist": "워치리스트",
     "followers": "팔로워",
+    "defaultDisplayName": "사용자",
     "editPanelTitle": "프로필 수정",
     "displayName": "표시 이름",
     "username": "사용자명",
@@ -53,6 +119,12 @@
     "passwordChangeSuccess": "비밀번호 변경 폼 검증이 완료되었습니다. API 연결만 남았습니다.",
     "passwordSameAsCurrent": "새 비밀번호는 현재 비밀번호와 달라야 합니다.",
     "deleteAccount": "계정 삭제",
+    "deleteAccountTitle": "계정을 삭제할까요?",
+    "deleteAccountDescription": "이 작업은 되돌릴 수 없습니다. 실제 삭제는 백엔드 API가 확정된 뒤 연결됩니다.",
+    "deleteAccountCancel": "취소",
+    "deleteAccountConfirm": "삭제 확인",
+    "deleteAccountPending": "계정 삭제 API 연결 전 확인 흐름만 준비되어 있습니다.",
+    "publicProfilePlaceholder": "공개 프로필 조회 API가 연결되면 이 영역에 유저별 리뷰와 프로필 정보가 표시됩니다.",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - 슬로우 시네마와 A24 작품에 빠져 있습니다."
   },
   "login": {
@@ -117,9 +189,11 @@
     "description": "영화, 애니, 드라마 취향을 검색하듯 입력해주세요. 바로 추천 흐름의 첫 기준으로 사용됩니다.",
     "questionEyebrow": "STEP 01",
     "questionTitle": "질문에 답하세요",
+    "questionOptional": "선택 사항입니다. 건너뛰어도 온보딩을 완료할 수 있습니다.",
     "questionCounter": "answers ready",
     "questionPlaceholder": "작품명을 검색하듯 입력해주세요.",
     "questionValidation": "온보딩 질문 3개에 모두 답변해야 합니다.",
+    "skipQuestions": "질문 건너뛰기",
     "saveError": "서버 저장에는 실패했습니다. 백엔드 endpoint를 확인해야 합니다.",
     "saving": "저장 중...",
     "skip": "건너뛰기",
@@ -168,6 +242,9 @@
     "reviewSection": "내 리뷰",
     "watchlistSection": "찜 목록",
     "recentActivity": "최근 활동",
+    "entries": "개",
+    "queue": "대기열",
+    "log": "로그",
     "empty": "아직 표시할 데이터가 없습니다."
   },
   "review": {
@@ -177,7 +254,21 @@
     "typePlaceholder": "movie / anime / drama",
     "textPlaceholder": "짧은 감상이나 추천 포인트를 적어주세요.",
     "submit": "리뷰 추가",
-    "validation": "제목, 타입, 별점, 내용을 모두 입력해주세요."
+    "validation": "제목, 타입, 별점, 내용을 모두 입력해주세요.",
+    "visibilityLabel": "공개 범위",
+    "visibility": {
+      "public": "전체 공개",
+      "followers": "팔로워 공개",
+      "private": "비공개"
+    },
+    "edit": "수정",
+    "delete": "삭제",
+    "sortLabel": "정렬",
+    "sort": {
+      "latest": "최신순",
+      "rating": "평점순"
+    },
+    "editDraftSuffix": "(수정 UI 연결 대기)"
   },
   "validation": {
     "required": "모든 필드를 입력해주세요.",
@@ -193,6 +284,7 @@
     "callbackErrorTitle": "AUTH FAILED",
     "callbackErrorDescription": "42 OAuth 처리 중 문제가 발생했습니다. 설정된 callback URL과 백엔드 응답을 확인해야 합니다.",
     "callbackContinue": "다음으로 이동",
-    "callbackRetry": "로그인으로 돌아가기"
+    "callbackRetry": "로그인으로 돌아가기",
+    "startUrlMissing": "42 OAuth 백엔드 URL이 아직 설정되지 않았습니다."
   }
 }
