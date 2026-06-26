@@ -1,10 +1,11 @@
 import { Outlet } from 'react-router-dom';
-import Header from './Header';
+//import Header from './Header';
+import SiteHeader from "./SiteHeader";
 
 export default function Layout() {
   return (
     <div className="min-h-screen">
-      <Header />
+      <SiteHeader />
       <main>
         <Outlet />
       </main>

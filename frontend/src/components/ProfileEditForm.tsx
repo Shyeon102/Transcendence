@@ -1,5 +1,7 @@
-import type { Dispatch, SetStateAction } from 'react';
+import { useState, type Dispatch, type SetStateAction } from 'react';
+import { useI18n } from '../lib/i18n';
 import PasswordChangeForm from './PasswordChangeForm';
+import Button from './ui/Button';
 import FieldLabel from './ui/FieldLabel';
 import SectionCard from './ui/SectionCard';
 import TextAreaField from './ui/TextAreaField';
@@ -34,8 +36,6 @@ type ProfileEditFormProps = {
   saveLabel: string;
   sectionTitle: string;
   settingsTitle: string;
-  twoFactorLabel: string;
-  twoFactorDescription: string;
   usernameLabel: string;
   bioLabel: string;
   passwordSectionLabel: string;
@@ -62,6 +62,15 @@ export default function ProfileEditForm({
   toggles,
   usernameLabel,
 }: ProfileEditFormProps) {
+  const { t } = useI18n();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteStatus, setDeleteStatus] = useState('');
+
+  const handleDeleteConfirm = () => {
+    setDeleteStatus(t('home.deleteAccountPending'));
+    setIsDeleteModalOpen(false);
+  };
+
   return (
     <aside>
       {isEditing ? (
@@ -104,13 +113,9 @@ export default function ProfileEditForm({
             />
           </div>
 
-          <button
-            type="button"
-            onClick={onSave}
-            className="w-full border border-[#f0ead0]/25 bg-[#1c1c19] px-4 py-3 text-[10px] uppercase tracking-[0.15em] text-[#f0ead0] transition hover:border-[#d63e2a] hover:bg-[#d63e2a]"
-          >
+          <Button onClick={onSave} className="w-full">
             {saveLabel}
-          </button>
+          </Button>
         </SectionCard>
       ) : null}
 
@@ -160,14 +165,62 @@ export default function ProfileEditForm({
         </div>
 
         <div className="mt-7 border-t border-[#f0ead0]/10 pt-7">
-          <button
-            type="button"
-            className="w-full border border-[#d63e2a]/30 bg-transparent px-4 py-2.5 text-[9px] uppercase tracking-[0.12em] text-[#d63e2a]/70 transition hover:border-[#d63e2a] hover:text-[#ff4f38]"
+          <Button
+            variant="danger"
+            size="sm"
+            className="w-full"
+            onClick={() => {
+              setDeleteStatus('');
+              setIsDeleteModalOpen(true);
+            }}
           >
             ⚠ {deleteAccountLabel}
-          </button>
+          </Button>
+          {deleteStatus ? (
+            <p className="mt-3 text-[10px] leading-5 tracking-[0.06em] text-[#8a8474]">
+              {deleteStatus}
+            </p>
+          ) : null}
         </div>
       </div>
+
+      {isDeleteModalOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0c0b]/80 px-5"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-account-title"
+        >
+          <SectionCard className="w-full max-w-sm p-6 shadow-2xl shadow-black/40">
+            <p className="mb-2 text-[9px] uppercase tracking-[0.18em] text-[#d63e2a]">
+              {deleteAccountLabel}
+            </p>
+            <h2
+              id="delete-account-title"
+              className="font-['Bebas_Neue'] text-4xl tracking-[0.04em] text-[#f0ead0]"
+            >
+              {t('home.deleteAccountTitle')}
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-[#8a8474]">
+              {t('home.deleteAccountDescription')}
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <Button
+                variant="secondary"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                {t('home.deleteAccountCancel')}
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleDeleteConfirm}
+              >
+                {t('home.deleteAccountConfirm')}
+              </Button>
+            </div>
+          </SectionCard>
+        </div>
+      ) : null}
     </aside>
   );
 }

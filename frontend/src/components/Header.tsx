@@ -1,7 +1,11 @@
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
 
 const Header = () => {
   const navigate = useNavigate();
+  const user = useSelector((state: RootState) => state.auth.user);
+  const canAccessAdmin = Boolean(user?.isStaff) || import.meta.env.DEV;
 
   return (
     <div className="flex justify-between px-[4.72vw] pt-[3.2vh]">
@@ -25,6 +29,11 @@ const Header = () => {
         <button type="button" onClick={() => navigate("/community")} className="text-[0.90vw] text-white">
           FORUM
         </button>
+        {canAccessAdmin ? (
+          <button type="button" onClick={() => navigate("/admin")} className="text-[0.90vw] text-white">
+            ADMIN
+          </button>
+        ) : null}
         <button type="button" onClick={() => navigate("/profile")}>
           <img
             src="/profile.png"
