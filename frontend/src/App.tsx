@@ -1,5 +1,4 @@
-import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import PrivateRoute from './components/PrivateRoute'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -16,13 +15,8 @@ import { OAUTH_42_CALLBACK_PATH } from './lib/oauth';
 import MyPagePage from './pages/MyPagePage';
 import OnboardingPage from './pages/OnboardingPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
-import type { RootState } from './store';
-
-function ProfileRedirect() {
-  const user = useSelector((state: RootState) => state.auth.user);
-  const profileKey = user?.id ? String(user.id) : user?.username ?? 'me';
-  return <Navigate to={`/profile/${profileKey}`} replace />;
-}
+import CommunityPage from './pages/CommunityPage';
+import PostDetailPage from './pages/PostDetailPage';
 
 export default function App() {
   return (
@@ -33,7 +27,10 @@ export default function App() {
             <Route path="/" element={<InfoPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path={OAUTH_42_CALLBACK_PATH} element={<OAuthCallbackPage />} />
+            <Route
+              path={OAUTH_42_CALLBACK_PATH}
+              element={<OAuthCallbackPage />}
+            />
             <Route
               path="/onboarding"
               element={
@@ -42,15 +39,12 @@ export default function App() {
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/home"
-              element={<HomePage />}
-            />
+
             <Route
               path="/profile"
               element={
                 <PrivateRoute>
-                  <ProfileRedirect />
+                  <ProfilePage />
                 </PrivateRoute>
               }
             />
@@ -79,7 +73,11 @@ export default function App() {
               }
             />
             <Route path="/media/:id" element={<MediaDetailPage />} />
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/community/:id" element={<PostDetailPage />} />
           </Route>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/media/:id" element={<MediaDetailPage />} />
           <Route path="/chat/rooms" element={<ChatRoomListPage />} />
           <Route path="/chat/rooms/:id" element={<ChatRoomPage />} />
         </Routes>

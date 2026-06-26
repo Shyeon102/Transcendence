@@ -37,7 +37,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health/', timeout=2)\" || exit 1"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live/', timeout=2)\" || exit 1"]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -66,19 +66,6 @@ services:
         redis:
           condition: service_healthy
       command: celery -A project beat --loglevel=info --schedule=/tmp/celerybeat-schedule
-
-  # worker:
-  #   build: ./ai
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ./ai:/app
-  #   env_file: .env
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   command: celery -A project worker --loglevel=info
 
   frontend:
     build: ./frontend

@@ -22,6 +22,7 @@ query ($page: Int, $perPage: Int, $season: MediaSeason, $seasonYear:
       genres
       countryOfOrigin
       coverImage { large medium }
+      bannerImage
       tags { name rank }
       averageScore
       meanScore
@@ -32,6 +33,7 @@ query ($page: Int, $perPage: Int, $season: MediaSeason, $seasonYear:
       source
       startDate { year month day }
       endDate { year month day }
+      isAdult
     }
   }
 }

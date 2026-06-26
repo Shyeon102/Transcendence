@@ -1,13 +1,22 @@
+from apps.media.models import Review
+from apps.community.models import Follow
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSerializer
+from rest_framework.permissions import IsAdminUser
+from rest_framework_simplejwt.token_blacklist.models import (
+    OutstandingToken,
+    BlacklistedToken
+)
+from .serializers import UserSerializer, PublicUserProfileSerializer
+from apps.media.serializers import ReviewSerializer
 from django.shortcuts import get_object_or_404
-from .models import User
+from apps.users.models import User
+from django.utils import timezone
 
 
 class UserView(APIView):
-    Permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         serializer = UserSerializer(request.user)
@@ -23,6 +32,29 @@ class UserView(APIView):
             serializer.save()
             return Response({"success": True, "user": serializer.data})
         return Response(serializer.errors, status=400)
+
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        user = get_object_or_404(User, pk=user_id)
+
+        serializer = PublicUserProfileSerializer(
+            user,
+            context={"request": request}
+        )
+
+        return Response(serializer.data)
+
+
+class AvatarUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        request.user.avatar_url = request.data.get("avatar_url")
+        request.user.save()
+        return Response({"avatar_url": request.user.avatar_url})
 
 
 def test_error(request):

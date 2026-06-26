@@ -26,6 +26,11 @@ class Media(models.Model):
     cast = models.TextField(blank=True)
     release_date = models.DateField(blank=True, null=True)
     image_url = models.URLField()
+    side_poster_url = models.URLField(blank=True, default="")
+
+    age_rating = models.CharField(max_length=20, blank=True, default="")
+    language = models.CharField(max_length=20, blank=True, default="")
+    runtime = models.PositiveIntegerField(blank=True, null=True)
 
     avg_rating = models.FloatField(default=0)
     rating_count = models.IntegerField(default=0)
@@ -84,6 +89,7 @@ class MediaInteraction(models.Model):
         ('like', 'Likes'),
         ('dislike', 'Dislike'),
         ('watchlist', 'Watchlist'),
+        ('watched', 'Watched'),
     )
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -91,12 +97,13 @@ class MediaInteraction(models.Model):
                              related_name='interactions')
     media = models.ForeignKey(Media, on_delete=models.CASCADE,
                               related_name='interactions')
+
     action = models.CharField(max_length=20, choices=ACTIONS)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'media')
+        unique_together = ('user', 'media', 'action')
         indexes = [
             models.Index(fields=['user', 'action']),
             models.Index(fields=['media', 'action']),
