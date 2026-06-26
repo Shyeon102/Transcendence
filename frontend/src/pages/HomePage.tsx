@@ -1,3 +1,4 @@
+import Header from "../components/Header";
 import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
 import { useState } from "react";
@@ -5,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
 import type { RootState } from "../store";
+import { useGetMediaListQuery } from "../store/api/mediaApi";
 
 // 목업 데이터
 
@@ -138,9 +140,18 @@ const mockMediaList: Media[] = [
 // 컴포넌트
 
 const HomePage = () => {
+  const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
+
+  const toggleGenre = (genreId: number) => {
+  setSelectedGenres((prev) =>
+    prev.includes(genreId)
+      ? prev.filter((id) => id !== genreId) // remove if already selected
+      : [...prev, genreId] // add if not selected
+  );
+  const { data, isLoading, error } = useGetMediaListQuery(selectedGenres);
   const user = useSelector((state: RootState) => state.auth.user);
   const isDemo = user?.username === "demo";
-  const mediaList = isDemo ? mockMediaList : [];
+  const mediaList = isDemo ? mockMediaList : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
   // 필터 버튼 공통 스타일 (반복 방지용)
   const filterBtnClass =
     "border rounded-full px-[1.1vw] py-[0.4vw] text-[0.7vw] hover:bg-white/10 transition w-[4.7vw] h-[3vh] whitespace-nowrap flex items-center justify-center font-light";
@@ -150,6 +161,8 @@ const HomePage = () => {
 
   // 선택된 미디어 상태 (null = 아무것도 선택 안 됨)
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
+
+};
 
   // 슬라이드 시작 인덱스 (어떤 카드부터 보여줄지)
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -178,9 +191,18 @@ const HomePage = () => {
       setCurrentIndex((prev) => prev + 15);
   };
 
+  if (!isDemo && isLoading) {
+    return <div className="...">불러오는 중...</div>;
+  }
+
+  if (!isDemo && error) {
+    return <div className="...">미디어를 불러오지 못했어요.</div>;
+  }
+
   return (
     // 전체 페이지: 세로 쌓기 (헤더 -> 검색바 -> 필터 -> 카드 -> 화살표 -> 푸터)
     <div className="flex flex-col min-h-screen bg-[#0c0c0b] text-white overflow-x-hidden">
+      <Header />
       {/* 검색바 */}
       <div className="flex justify-center pt-[5vh] pb-[5vh]">
         <div className="flex items-center gap-2 bg-transparent border border-white/30 rounded-full px-[2vw] w-[43vw] h-[4.3vh]">
@@ -228,6 +250,23 @@ const HomePage = () => {
         >
           FILTER
         </button>
+        {activeFilter === "FILTER" && (
+        <div className="flex gap-2 px-[2vw] pb-[1vh]">
+          {[1, 2, 3, 4].map((id) => (
+            <button
+              key={id}
+              onClick={() => toggleGenre(id)}
+              className={
+                selectedGenres.includes(id)
+                  ? "px-3 py-1 rounded-full bg-cyan-400 text-black"
+                  : "px-3 py-1 rounded-full border border-white/30"
+              }
+            >
+              Genre {id}
+            </button>
+          ))}
+        </div>
+      )}
       </div>
 
       {/* 카드 슬라이드 */}

@@ -22,6 +22,8 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError
         ("Both email and password are required.")
 
+        if user.is_banned:
+            raise serializers.ValidationError("User is banned.")
         data["user"] = user
         return data
 

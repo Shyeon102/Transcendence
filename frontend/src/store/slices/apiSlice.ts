@@ -12,10 +12,23 @@ type RefreshResponse = {
   refresh: string;
 };
 
+export type MediaSearchResult = {
+  id: number;
+  title: string;
+  media_type?: string;
+  release_date?: string | null;
+};
+
+type MediaSearchResponse = {
+  media?: MediaSearchResult[];
+};
+
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
   prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).auth.accessToken
+    const state = getState() as RootState
+    const token = state.auth.accessToken
+    headers.set('Accept-Language', state.ui.language)
     if (token) {
       headers.set('Authorization', `Bearer ${token}`)
     }
@@ -87,7 +100,7 @@ export const apiSlice = createApi({
     }),
     logout: builder.mutation({
       query: (refreshToken: string) => ({
-        url: 'auth/logout/',
+        url: '/auth/logout/',
         method: 'POST',
         body: { refresh: refreshToken },
       }),
@@ -106,6 +119,13 @@ export const apiSlice = createApi({
         body: credentials,
       }),
     }),
+    searchMedia: builder.query<MediaSearchResult[], string>({
+      query: (query) => ({
+        url: '/media/search/',
+        params: { q: query },
+      }),
+      transformResponse: (response: MediaSearchResponse) => response.media ?? [],
+    }),
     // 토큰 갱신 엔드포인트
     refreshToken: builder.mutation({
       query: (refreshToken: string) => ({
@@ -117,4 +137,4 @@ export const apiSlice = createApi({
   }),
 })
 
-export const { useLoginMutation, useRefreshTokenMutation } = apiSlice
+export const { useLazySearchMediaQuery, useLoginMutation, useRefreshTokenMutation } = apiSlice

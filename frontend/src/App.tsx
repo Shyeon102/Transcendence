@@ -10,10 +10,13 @@ import ProfilePage from './pages/ProfilePage'
 import MediaDetailPage from './pages/MediaDetailPage'
 import ChatRoomListPage from './pages/ChatRoomListPage'
 import ChatRoomPage from './pages/ChatRoomPage'
+import AdminPage from './pages/AdminPage';
 import { OAUTH_42_CALLBACK_PATH } from './lib/oauth';
 import MyPagePage from './pages/MyPagePage';
 import OnboardingPage from './pages/OnboardingPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
+import CommunityPage from './pages/CommunityPage';
+import PostDetailPage from './pages/PostDetailPage';
 
 export default function App() {
   return (
@@ -24,7 +27,10 @@ export default function App() {
             <Route path="/" element={<InfoPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path={OAUTH_42_CALLBACK_PATH} element={<OAuthCallbackPage />} />
+            <Route
+              path={OAUTH_42_CALLBACK_PATH}
+              element={<OAuthCallbackPage />}
+            />
             <Route
               path="/onboarding"
               element={
@@ -33,12 +39,17 @@ export default function App() {
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/home"
-              element={<HomePage />}
-            />
+
             <Route
               path="/profile"
+              element={
+                <PrivateRoute>
+                  <ProfilePage />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile/:id"
               element={
                 <PrivateRoute>
                   <ProfilePage />
@@ -53,8 +64,20 @@ export default function App() {
                 </PrivateRoute>
               }
             />
+            <Route
+              path="/admin"
+              element={
+                <PrivateRoute>
+                  <AdminPage />
+                </PrivateRoute>
+              }
+            />
             <Route path="/media/:id" element={<MediaDetailPage />} />
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/community/:id" element={<PostDetailPage />} />
           </Route>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/media/:id" element={<MediaDetailPage />} />
           <Route path="/chat/rooms" element={<ChatRoomListPage />} />
           <Route path="/chat/rooms/:id" element={<ChatRoomPage />} />
         </Routes>

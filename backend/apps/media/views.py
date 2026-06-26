@@ -3,18 +3,40 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
+from django.db.models import Count
+from django.db import models
+
 
 from apps.media.models import Media, MediaInteraction
 from apps.media.serializers import (
-    MediaInteractionSerializer, MediaSerializer, ReviewSerializer
+    MediaSerializer, ReviewSerializer, MediaInteractionSerializer
 )
+
+
+class ReviewQuerySet(models.QuerySet):
+    def visible_to(self, user):
+        return self.filter(
+            models.Q(visibility="public") |
+            models.Q(visibility="followers", user__followers__follower=user) |
+            models.Q(visibility="private", user=user)
+        )
 
 
 class MediaView(APIView):
     def get(self, request):
-        queryset = Media.objects.prefetch_related('genres').all()
+        genres = request.query_params.getlist("genre")
+
+        queryset = Media.objects.prefetch_related("genres")
+
+        if genres:
+            queryset = (
+                queryset
+                .filter(genres__name__in=genres)
+                .distinct()
+            )
+
         serializer = MediaSerializer(queryset, many=True)
-        return Response({'media': serializer.data})
+        return Response({"media": serializer.data})
 
 
 class MediaDetailView(APIView):
@@ -44,7 +66,7 @@ class MediaSearchView(APIView):
 class ReviewCreateView(APIView):
     def get(self, request, media_id):
         media = get_object_or_404(Media, pk=media_id)
-        reviews = media.reviews.all()
+        reviews = media.reviews.visible_to(request.user)
         serializer = ReviewSerializer(reviews, many=True)
         return Response({'reviews': serializer.data},
                         status=status.HTTP_200_OK)
@@ -101,13 +123,14 @@ class ReviewCreateView(APIView):
 
 class MediaInteractionView(APIView):
     def post(self, request, media_id):
+
         serializer = MediaInteractionSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({'errors': serializer.errors},
                             status=status.HTTP_400_BAD_REQUEST)
+        action = serializer.validated_data['action']
 
         media = get_object_or_404(Media, pk=media_id)
-        action = serializer.validated_data['action']
 
         if action == "like":
             MediaInteraction.objects.filter(
@@ -183,6 +206,24 @@ class MediaInteractionView(APIView):
             return Response(status=204)
 
         return Response(
-            {"error": "Interaction not found"},
-            status=404
+            {'error': 'Interaction not found.'}, status=status.
+            HTTP_404_NOT_FOUND)
+
+
+class RandomMediaView(APIView):
+    def get(self, request):
+        queryset = Media.objects.order_by("?")[:20]
+        serializer = MediaSerializer(queryset, many=True)
+        return Response({"media": serializer.data}, status=status.HTTP_200_OK)
+
+
+class TrendingMediaView(APIView):
+    def get(self, request):
+        queryset = (
+            Media.objects
+            .annotate(interaction_count=Count("interactions"))
+            .order_by("-interaction_count")[:20]
         )
+
+        serializer = MediaSerializer(queryset, many=True)
+        return Response({"media": serializer.data}, status=status.HTTP_200_OK)

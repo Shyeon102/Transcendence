@@ -7,6 +7,16 @@ import fr from '../locales/fr.json';
 const messages = { ko, en, fr };
 
 export type Language = keyof typeof messages;
+export const LANGUAGE_STORAGE_KEY = 'language';
+
+export const getStoredLanguage = (): Language => {
+  const language = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  return language && language in messages ? language as Language : 'ko';
+};
+
+export const storeLanguage = (language: Language) => {
+  localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+};
 
 const getNestedValue = (source: unknown, key: string): string => {
   const value = key.split('.').reduce<unknown>((current, part) => {

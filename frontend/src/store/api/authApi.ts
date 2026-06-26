@@ -11,15 +11,17 @@ import type { RootState } from '../index';
 import type {
   AuthErrorResponse,
   AuthSession,
+  AdminReport,
+  AdminReportStatus,
+  AdminReportTargetType,
+  AdminReportType,
+  AdminUser,
   AuthUser,
-  DashboardReview,
   LoginRequest,
   LoginResponse,
   MediaReview,
   MediaReviewRequest,
-  MyPageDashboardData,
   PasswordChangeRequest,
-  OnboardingAnswers,
   RefreshTokenResponse,
   SignupRequest,
   SignupResponse,
@@ -40,8 +42,6 @@ type RawAuthUser = {
   favorite_genres?: number[];
   favoriteTitles?: string[];
   favorite_titles?: string[];
-  onboardingAnswers?: OnboardingAnswers;
-  onboarding_answers?: OnboardingAnswers;
   onboardingCompleted?: boolean;
   onboarding_completed?: boolean;
   favoriteCountries?: string[];
@@ -75,28 +75,16 @@ type RawTokenResponse = {
   refresh?: string;
 };
 
-type RawDashboardReview = {
-  id: number;
-  title: string;
-  note: string;
-  when: string;
-  rating: number;
-};
-
-type RawDashboard = {
-  reviews?: RawDashboardReview[];
-  watchlist?: string[];
-  activities?: string[];
-};
-
 type RawReview = {
   id: number;
+  user?: RawAuthUser;
   user_id?: number;
   username?: string;
   media_id?: number;
   media_title?: string;
   rating: number;
-  content: string;
+  comment?: string;
+  content?: string;
   visibility?: 'public' | 'followers' | 'private';
   created_at?: string;
   updated_at?: string;
@@ -105,6 +93,55 @@ type RawReview = {
 type RawReviewPayload = RawReview | {
   review?: RawReview;
   reviews?: RawReview[];
+};
+
+type RawAdminReportTarget = {
+  id?: number;
+  title?: string;
+  content?: string;
+  body?: string;
+};
+
+type RawAdminReport = {
+  id: number;
+  report_type?: AdminReportType;
+  type?: AdminReportType;
+  reason?: string;
+  status?: AdminReportStatus;
+  post?: number | RawAdminReportTarget | null;
+  comment?: number | RawAdminReportTarget | null;
+  post_id?: number;
+  comment_id?: number;
+  target_type?: AdminReportTargetType;
+  target_id?: number;
+  target_title?: string;
+  target_preview?: string;
+  user?: number | RawAuthUser;
+  user_id?: number;
+  reporter?: number | RawAuthUser;
+  reporter_id?: number;
+  username?: string;
+  reporter_username?: string;
+  processed_by?: RawAuthUser | string | null;
+  processed_at?: string | null;
+  created_at?: string;
+};
+
+type RawAdminReportsPayload = RawAdminReport[] | {
+  reports?: RawAdminReport[];
+  results?: RawAdminReport[];
+};
+
+type RawAdminUser = RawAuthUser & {
+  is_active?: boolean;
+  isActive?: boolean;
+  date_joined?: string;
+  dateJoined?: string;
+};
+
+type RawAdminUsersPayload = RawAdminUser[] | {
+  users?: RawAdminUser[];
+  results?: RawAdminUser[];
 };
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api').replace(/\/+$/, '');
@@ -179,7 +216,6 @@ const normalizeUser = (user: RawAuthUser): AuthUser => ({
   bio: user.bio,
   favoriteGenres: user.favoriteGenres ?? user.favorite_genres,
   favoriteTitles: user.favoriteTitles ?? user.favorite_titles,
-  onboardingAnswers: user.onboardingAnswers ?? user.onboarding_answers,
   onboardingCompleted: user.onboardingCompleted ?? user.onboarding_completed,
   favoriteCountries: user.favoriteCountries ?? user.favorite_countries,
   isStaff: user.isStaff ?? user.is_staff,
@@ -232,28 +268,14 @@ const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse 
   };
 };
 
-const normalizeDashboardReview = (review: RawDashboardReview): DashboardReview => ({
-  id: review.id,
-  title: review.title,
-  note: review.note,
-  when: review.when,
-  rating: review.rating,
-});
-
-const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
-  reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
-  watchlist: payload.watchlist ?? [],
-  activities: payload.activities ?? [],
-});
-
 const normalizeReview = (review: RawReview): MediaReview => ({
   id: review.id,
-  userId: review.user_id ?? 0,
-  username: review.username ?? '',
+  userId: review.user_id ?? review.user?.id ?? 0,
+  username: review.username ?? review.user?.username ?? '',
   mediaId: review.media_id ?? 0,
   mediaTitle: review.media_title ?? '',
   rating: review.rating,
-  content: review.content,
+  content: review.content ?? review.comment ?? '',
   visibility: review.visibility ?? 'public',
   createdAt: review.created_at ?? '',
   updatedAt: review.updated_at ?? '',
@@ -276,6 +298,74 @@ const normalizeReviewList = (payload: RawReviewPayload): MediaReview[] => {
   return [];
 };
 
+const toReviewRequestBody = (review: MediaReviewRequest) => ({
+  rating: review.rating,
+  comment: review.content,
+});
+
+const getTargetData = (target: number | RawAdminReportTarget | null | undefined) => {
+  if (!target || typeof target === 'number') {
+    return {
+      id: typeof target === 'number' ? target : 0,
+      title: undefined,
+      preview: undefined,
+    };
+  }
+
+  return {
+    id: target.id ?? 0,
+    title: target.title,
+    preview: target.content ?? target.body,
+  };
+};
+
+const normalizeAdminReport = (report: RawAdminReport): AdminReport => {
+  const targetType = report.target_type ?? (report.post || report.post_id ? 'post' : 'comment');
+  const target = targetType === 'post'
+    ? getTargetData(report.post ?? report.post_id)
+    : getTargetData(report.comment ?? report.comment_id);
+  const reporter = typeof report.reporter === 'object'
+    ? report.reporter
+    : typeof report.user === 'object'
+      ? report.user
+      : undefined;
+
+  return {
+    id: report.id,
+    type: report.report_type ?? report.type ?? 'spam',
+    reason: report.reason ?? '',
+    status: report.status ?? 'pending',
+    targetType,
+    targetId: report.target_id ?? target.id,
+    targetTitle: report.target_title ?? target.title,
+    targetPreview: report.target_preview ?? target.preview,
+    reporterId: report.reporter_id ?? report.user_id ?? reporter?.id ?? 0,
+    reporterUsername: report.reporter_username ?? report.username ?? reporter?.username ?? '',
+    processedBy: typeof report.processed_by === 'string' ? report.processed_by : report.processed_by?.username,
+    processedAt: report.processed_at ?? undefined,
+    createdAt: report.created_at ?? '',
+  };
+};
+
+const normalizeAdminReports = (payload: RawAdminReportsPayload): AdminReport[] => {
+  const reports = Array.isArray(payload) ? payload : payload.results ?? payload.reports ?? [];
+  return reports.map(normalizeAdminReport);
+};
+
+const normalizeAdminUser = (user: RawAdminUser): AdminUser => ({
+  id: user.id ?? 0,
+  email: user.email ?? '',
+  username: user.username ?? '',
+  isActive: user.isActive ?? user.is_active ?? true,
+  isStaff: user.isStaff ?? user.is_staff ?? false,
+  dateJoined: user.dateJoined ?? user.date_joined ?? '',
+});
+
+const normalizeAdminUsers = (payload: RawAdminUsersPayload): AdminUser[] => {
+  const users = Array.isArray(payload) ? payload : payload.results ?? payload.users ?? [];
+  return users.map(normalizeAdminUser);
+};
+
 const getRequestUrl = (args: string | FetchArgs) => (typeof args === 'string' ? args : args.url);
 
 const isRefreshEligibleRequest = (args: string | FetchArgs) => {
@@ -286,7 +376,9 @@ const isRefreshEligibleRequest = (args: string | FetchArgs) => {
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).auth.accessToken;
+    const state = getState() as RootState;
+    const token = state.auth.accessToken;
+    headers.set('Accept-Language', state.ui.language);
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }
@@ -348,6 +440,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery,
+  tagTypes: ['AdminReports', 'AdminUsers'],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials, api) {
@@ -373,7 +466,7 @@ export const authApi = createApi({
 
           const userResult = await rawBaseQuery(
             {
-              url: '/users/',
+              url: '/users/profile/',
               headers: {
                 Authorization: `Bearer ${tokenPayload.access}`,
               },
@@ -455,9 +548,16 @@ export const authApi = createApi({
         dispatch(setCredentials(data));
       },
     }),
+    logout: builder.mutation<{ success: boolean }, string | null | undefined>({
+      query: (refreshToken) => ({
+        url: '/auth/logout/',
+        method: 'POST',
+        body: { refresh: refreshToken },
+      }),
+    }),
     getMe: builder.query<AuthUser, void>({
       async queryFn(_arg, api) {
-        const result = await rawBaseQuery('/users/', api, {});
+        const result = await rawBaseQuery('/users/profile/', api, {});
 
         if (result.data) {
           return { data: normalizeUserPayload(result.data as RawUserPayload) };
@@ -475,22 +575,24 @@ export const authApi = createApi({
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
-        const isOnboardingUpdate = Boolean(payload.favoriteGenres);
+        const isOnboardingUpdate =
+          payload.onboardingCompleted !== undefined;
         const result = await rawBaseQuery(
           {
-            url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/update/',
+            url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/',
             method: 'PATCH',
-            body: {
-              username: payload.username,
-              email: payload.email,
-              first_name: payload.firstName,
-              last_name: payload.lastName,
-              avatar_url: payload.avatarUrl,
-              bio: payload.bio,
-                favorite_genres: payload.favoriteGenres,
-                favorite_titles: (payload as unknown as { favoriteTitles?: string[] }).favoriteTitles,
-                onboarding_answers: (payload as unknown as { onboardingAnswers?: OnboardingAnswers }).onboardingAnswers,
-            },
+            body: isOnboardingUpdate
+              ? {
+                  onboarding_completed: payload.onboardingCompleted,
+                }
+              : {
+                  username: payload.username,
+                  email: payload.email,
+                  first_name: payload.firstName,
+                  last_name: payload.lastName,
+                  avatar_url: payload.avatarUrl,
+                  bio: payload.bio,
+                },
           },
           api,
           {}
@@ -531,8 +633,8 @@ export const authApi = createApi({
       async queryFn(avatarUrl, api) {
         const result = await rawBaseQuery(
           {
-            url: '/users/me/avatar/',
-            method: 'PUT',
+            url: '/users/profile/avatar/',
+            method: 'PATCH',
             body: { avatar_url: avatarUrl },
           },
           api,
@@ -555,31 +657,13 @@ export const authApi = createApi({
     }),
     changePassword: builder.mutation<{ success: boolean }, PasswordChangeRequest>({
       query: ({ currentPassword, newPassword }) => ({
-        url: '/users/me/password/',
+        url: '/auth/changePassword/',
         method: 'POST',
         body: {
-          current_password: currentPassword,
+          old_password: currentPassword,
           new_password: newPassword,
         },
       }),
-    }),
-    getMyPageDashboard: builder.query<MyPageDashboardData, void>({
-      async queryFn(_arg, api) {
-        const result = await rawBaseQuery('/users/me/dashboard/', api, {});
-
-        if (result.data) {
-          return { data: normalizeDashboard(result.data as RawDashboard) };
-        }
-
-        const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
-        return {
-          error: {
-            message: toMessage(data) ?? 'Dashboard request failed.',
-            fields: toFieldErrors(data),
-          },
-        };
-      },
     }),
     getMediaReviews: builder.query<MediaReview[], number>({
       async queryFn(mediaId, api) {
@@ -605,7 +689,7 @@ export const authApi = createApi({
           {
             url: `/media/${mediaId}/reviews/`,
             method: 'POST',
-            body: review,
+            body: toReviewRequestBody(review),
           },
           api,
           {}
@@ -630,8 +714,8 @@ export const authApi = createApi({
         const result = await rawBaseQuery(
           {
             url: `/media/${mediaId}/reviews/${reviewId}/`,
-            method: 'PUT',
-            body: review,
+            method: 'PATCH',
+            body: toReviewRequestBody(review),
           },
           api,
           {}
@@ -657,17 +741,94 @@ export const authApi = createApi({
         method: 'DELETE',
       }),
     }),
+    getAdminReports: builder.query<AdminReport[], AdminReportStatus | void>({
+      async queryFn(status, api) {
+        const query = status ? `?status=${status}` : '';
+        const result = await rawBaseQuery(`/admin/reports${query}`, api, {});
+
+        if (result.data) {
+          return { data: normalizeAdminReports(result.data as RawAdminReportsPayload) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Admin reports request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+      providesTags: ['AdminReports'],
+    }),
+    processAdminReport: builder.mutation<AdminReport, { reportId: number; status: Exclude<AdminReportStatus, 'pending'> }>({
+      async queryFn({ reportId, status }, api) {
+        const result = await rawBaseQuery(
+          {
+            url: `/admin/reports/${reportId}`,
+            method: 'PUT',
+            body: { status },
+          },
+          api,
+          {}
+        );
+
+        if (result.data) {
+          return { data: normalizeAdminReport(result.data as RawAdminReport) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Report update failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+      invalidatesTags: ['AdminReports'],
+    }),
+    getAdminUsers: builder.query<AdminUser[], void>({
+      async queryFn(_arg, api) {
+        const result = await rawBaseQuery('/admin/users', api, {});
+
+        if (result.data) {
+          return { data: normalizeAdminUsers(result.data as RawAdminUsersPayload) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Admin users request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+      providesTags: ['AdminUsers'],
+    }),
+    banAdminUser: builder.mutation<void, number>({
+      query: (userId) => ({
+        url: `/admin/users/${userId}/ban`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['AdminUsers'],
+    }),
   }),
 });
 
 export const {
+  useBanAdminUserMutation,
   useChangePasswordMutation,
   useCreateMediaReviewMutation,
   useDeleteMediaReviewMutation,
+  useGetAdminReportsQuery,
+  useGetAdminUsersQuery,
   useGetMeQuery,
   useGetMediaReviewsQuery,
-  useGetMyPageDashboardQuery,
   useLoginMutation,
+  useLogoutMutation,
+  useProcessAdminReportMutation,
   useSignupMutation,
   useUpdateAvatarMutation,
   useUpdateMeMutation,

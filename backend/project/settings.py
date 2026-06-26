@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from datetime import timedelta
+from celery.schedules import crontab
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,6 +29,7 @@ INSTALLED_APPS = [
     "apps.chat",
     "apps.community",
     "apps.media",
+    "apps.ai.apps.AiConfig",
     "corsheaders",
 ]
 
@@ -76,7 +78,13 @@ CELERY_ENABLE_UTC = True
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
-CELERY_BEAT_SCHEDULE = {}
+CELERY_BEAT_SCHEDULE = {
+    "run-svd-training-every-midnight": {
+        "task": "apps.ai.service.recommendation.cf.tasks.run_svd_training",
+        "schedule": crontab(hour=3, minute=0),
+        # "schedule": crontab(minute=0),
+    },
+}
 
 # send email, now to console, change later to actual email
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -89,7 +97,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated"
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication"
+        "apps.authentication.authentication.CustomJWTAuthentication"
     ],
 }
 
@@ -183,3 +191,17 @@ CHANNEL_LAYERS = {
 }
 
 ASGI_APPLICATION = 'project.asgi.application'
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG",
+    },
+}
