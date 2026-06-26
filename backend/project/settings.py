@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     "apps.chat",
     "apps.community",
     "apps.media",
-    "apps.ai",
+    "apps.ai.apps.AiConfig",
     "corsheaders",
 ]
 
@@ -97,7 +97,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated"
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication"
+        "apps.authentication.authentication.CustomJWTAuthentication"
     ],
 }
 
@@ -191,3 +191,17 @@ CHANNEL_LAYERS = {
 }
 
 ASGI_APPLICATION = 'project.asgi.application'
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG",
+    },
+}

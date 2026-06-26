@@ -40,7 +40,6 @@ const ChatRoomPage = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* 입력창 영역: TODO */}
         <div>
           <input
             value={input} // state값을 화면에 표시

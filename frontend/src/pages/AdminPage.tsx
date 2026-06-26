@@ -41,14 +41,9 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function StatCard({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
-  return (
-    <div className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-4">
-      <p className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">{label}</p>
-      <p className={`mt-1 font-['Bebas_Neue'] text-3xl tracking-[0.04em] ${accent ?? "text-[#f0ead0]"}`}>{value}</p>
-    </div>
-  );
-}
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
+};
 
 export default function AdminPage() {
   const { t } = useI18n();
@@ -91,15 +86,17 @@ export default function AdminPage() {
   const pendingCount = reports.filter((r) => r.status === "pending").length;
   const bannedCount = users.filter((u) => u.status === "banned").length;
 
-  const filteredReports = reportFilter === "all" ? reports : reports.filter((r) => r.status === reportFilter);
-  const filteredUsers = userFilter === "all" ? users : users.filter((u) => u.status === userFilter);
+  const handleConfirmBan = async () => {
+    if (!selectedUser) {
+      return;
+    }
 
   const reportFilterOptions: (AdminReportStatus | "all")[] = ["all", "pending", "approved", "rejected"];
   const userFilterOptions: (AdminAccountStatus | "all")[] = ["all", "active", "banned"];
   const isUpdatingUser = isBanningUser || isUnbanningUser;
 
   return (
-    <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
+    <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-12 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-10 max-w-3xl">
@@ -125,44 +122,43 @@ export default function AdminPage() {
           <StatCard label={t("admin.status.banned")} value={bannedCount} accent={bannedCount > 0 ? "text-[#ff9c8e]" : "text-[#f0ead0]"} />
         </div>
 
-        {/* Tabs */}
-        <div className="mb-6 flex border-b border-[#f0ead0]/10">
-          {([
-            ["reports", t("admin.reportsTitle"), String(reports.length)],
-            ["users", t("admin.usersTitle"), String(users.length)],
-          ] as const).map(([key, label, count]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveTab(key)}
-              className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
-                activeTab === key ? "border-[#d63e2a] text-[#f0ead0]" : "border-transparent text-[#8a8474] hover:text-[#c8c2a8]"
-              }`}
-            >
-              {label} <span className={activeTab === key ? "text-[#d63e2a]" : "text-[#8a8474]"}>{count}</span>
-            </button>
-          ))}
+        <div className="mb-8 grid gap-3 md:grid-cols-4">
+          <SectionCard className="p-5">
+            <p className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">{t('admin.stats.pending')}</p>
+            <p className="mt-3 text-3xl font-bold text-[#f0ead0]">{reportCounts.pending}</p>
+          </SectionCard>
+          <SectionCard className="p-5">
+            <p className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">{t('admin.stats.approved')}</p>
+            <p className="mt-3 text-3xl font-bold text-[#f0ead0]">{reportCounts.approved}</p>
+          </SectionCard>
+          <SectionCard className="p-5">
+            <p className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">{t('admin.stats.activeUsers')}</p>
+            <p className="mt-3 text-3xl font-bold text-[#f0ead0]">{activeUsers}</p>
+          </SectionCard>
+          <SectionCard className="p-5">
+            <p className="text-[9px] uppercase tracking-[0.16em] text-[#8a8474]">{t('admin.stats.bannedUsers')}</p>
+            <p className="mt-3 text-3xl font-bold text-[#f0ead0]">{bannedUsers}</p>
+          </SectionCard>
         </div>
 
-        {/* Reports tab */}
-        {activeTab === "reports" ? (
+        {activeTab === 'reports' ? (
           <div>
-            {/* Report filters */}
-            <div className="mb-5 flex flex-wrap gap-2">
-              {reportFilterOptions.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setReportFilter(option)}
-                  className={`border px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] transition ${
-                    reportFilter === option
-                      ? "border-[#d63e2a]/60 bg-[#d63e2a]/10 text-[#f0ead0]"
-                      : "border-[#f0ead0]/10 text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]"
-                  }`}
-                >
-                  {option === "all" ? "All" : t(`admin.status.${option}`)}
-                </button>
-              ))}
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-sm font-bold uppercase tracking-[0.12em]">
+                {t('admin.reports.title')}
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {reportFilters.map((filter) => (
+                  <Button
+                    key={filter}
+                    size="sm"
+                    variant={reportFilter === filter ? 'primary' : 'ghost'}
+                    onClick={() => setReportFilter(filter)}
+                  >
+                    {t(`admin.reportStatus.${filter}`)} {reportCounts[filter]}
+                  </Button>
+                ))}
+              </div>
             </div>
 
             {reportsQuery.isLoading ? (
@@ -189,11 +185,19 @@ export default function AdminPage() {
                           </span>
                           <StatusBadge status={report.status} />
                         </div>
-                        <h3 className="mt-2.5 text-[13px] font-bold leading-6 tracking-[0.04em] text-[#f0ead0]">
-                          {report.target}
+                        <h3 className="text-sm font-bold tracking-[0.04em]">
+                          {report.targetTitle || t('admin.reports.untitledTarget')}
                         </h3>
-                        <p className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-[#8a8474]">
-                          #{report.id} · {report.createdAt} · {t("admin.reportedBy")} {report.reporter}
+                        {report.targetPreview ? (
+                          <p className="mt-2 max-w-3xl text-xs leading-6 text-[#8a8474]">
+                            {report.targetPreview}
+                          </p>
+                        ) : null}
+                        <p className="mt-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#c8c2a8]">
+                          {report.reason || t('admin.reports.noReason')}
+                        </p>
+                        <p className="mt-3 text-[9px] uppercase tracking-[0.1em] text-[#8a8474]">
+                          {t('admin.reports.reporter')}: {report.reporterUsername || report.reporterId} · {formatDate(report.createdAt)}
                         </p>
                       </div>
                     </div>
@@ -229,26 +233,11 @@ export default function AdminPage() {
           </div>
         ) : null}
 
-        {/* Users tab */}
-        {activeTab === "users" ? (
+        {activeTab === 'users' ? (
           <div>
-            {/* User filters */}
-            <div className="mb-5 flex flex-wrap gap-2">
-              {userFilterOptions.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setUserFilter(option)}
-                  className={`border px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] transition ${
-                    userFilter === option
-                      ? "border-[#d63e2a]/60 bg-[#d63e2a]/10 text-[#f0ead0]"
-                      : "border-[#f0ead0]/10 text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]"
-                  }`}
-                >
-                  {option === "all" ? "All" : t(`admin.status.${option}`)}
-                </button>
-              ))}
-            </div>
+            <h2 className="mb-5 text-sm font-bold uppercase tracking-[0.12em]">
+              {t('admin.users.title')}
+            </h2>
 
             {usersQuery.isLoading ? (
               <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
@@ -321,6 +310,45 @@ export default function AdminPage() {
           </div>
         ) : null}
       </div>
+
+      {selectedUser ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0c0b]/80 px-5"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ban-user-title"
+        >
+          <SectionCard className="w-full max-w-sm p-6 shadow-2xl shadow-black/40">
+            <p className="mb-2 text-[9px] uppercase tracking-[0.18em] text-[#d63e2a]">
+              {t('admin.actions.ban')}
+            </p>
+            <h2
+              id="ban-user-title"
+              className="font-['Bebas_Neue'] text-4xl tracking-[0.04em] text-[#f0ead0]"
+            >
+              {t('admin.users.banTitle')}
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-[#8a8474]">
+              {t('admin.users.banDescription')} {selectedUser.username}
+            </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <Button
+                variant="secondary"
+                onClick={() => setSelectedUser(null)}
+              >
+                {t('admin.actions.cancel')}
+              </Button>
+              <Button
+                variant="danger"
+                disabled={isBanningUser}
+                onClick={handleConfirmBan}
+              >
+                {t('admin.actions.confirmBan')}
+              </Button>
+            </div>
+          </SectionCard>
+        </div>
+      ) : null}
     </section>
   );
 }

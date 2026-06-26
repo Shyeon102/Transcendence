@@ -1,19 +1,21 @@
 SHELL := /bin/bash
-COMPOSE := docker compose
+COMPOSE := podman compose
 
-.PHONY: help up start migrate seed_media load_media stop fclean logs
+.PHONY: help up start migrate seed_media load_media stop fclean logs backup restore
 
 help:
 	@echo "Available targets:"
-	@echo "  make up           - build and start services, then migrate and seed media"
-	@echo "  make start        - alias for make up"
-	@echo "  make migrate      - run Django migrations in the backend container"
-	@echo "  make seed_media   - seed example media data in the backend container"
-	@echo "  make seed_reviews - seed example reviews in the backend container"
-	@echo "  make load_media   - load external media data in the backend container"
-	@echo "  make stop         - stop containers"
-	@echo "  make fclean       - stop containers, remove volumes, and prune Docker resources"
-	@echo "  make logs         - follow compose logs"
+	@echo "  make up               - build and start services, then migrate and seed media"
+	@echo "  make start            - alias for make up"
+	@echo "  make migrate          - run Django migrations in the backend container"
+	@echo "  make seed_media       - seed example media data in the backend container"
+	@echo "  make seed_reviews     - seed example reviews in the backend container"
+	@echo "  make load_media       - load external media data in the backend container"
+	@echo "  make backup           - create PostgreSQL backup""
+	@echo "  make restore FILE=... - restore PostgreSQL backup""
+	@echo "  make stop             - stop containers"
+	@echo "  make fclean           - stop containers, remove volumes, and prune Docker resources"
+	@echo "  make logs              - follow compose logs"
 
 up: start
 
@@ -23,7 +25,7 @@ start:
 	$(MAKE) seed_media
 	$(MAKE) seed_reviews
 	$(MAKE) load_media
-	$(MAKE) media_embedding
+# 	$(MAKE) media_embedding
 
 migrate:
 	$(COMPOSE) exec backend python manage.py migrate
@@ -40,12 +42,19 @@ load_media:
 media_embedding:
 	$(COMPOSE) exec backend python manage.py media_embedding
 
+backup:
+	./scripts/backup_postgres.sh
+
+restore:
+	@test -n "$(FILE)" || (echo "Usage: make restore FILE=backups/postgres_xxx.dump" && exit 1)
+	CONFIRM_RESTORE=YES ./scripts/restore_postgres.sh "$(FILE)"
+
 stop:
 	$(COMPOSE) down
 
 fclean:
 	$(COMPOSE) down -v --remove-orphans
-	docker system prune -af --volumes
+	podman system prune -af --volumes
 
 logs:
 	$(COMPOSE) logs -f

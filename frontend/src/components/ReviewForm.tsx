@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useI18n } from '../lib/i18n';
 import StarRating from './StarRating';
-import type { ReviewItem } from './ReviewCard';
+import type { ReviewItem, ReviewVisibility } from './ReviewCard';
+import Button from './ui/Button';
 import SectionCard from './ui/SectionCard';
 import StatusMessage from './ui/StatusMessage';
 import TextAreaField from './ui/TextAreaField';
@@ -11,6 +12,8 @@ type ReviewFormProps = {
   onSubmit: (review: ReviewItem) => void;
 };
 
+const visibilityOptions: ReviewVisibility[] = ['public', 'followers', 'private'];
+
 export default function ReviewForm({ onSubmit }: ReviewFormProps) {
   const { t } = useI18n();
   const [form, setForm] = useState({
@@ -18,10 +21,11 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
     type: '',
     text: '',
     rating: 0,
+    visibility: 'public' as ReviewVisibility,
   });
   const [errorMsg, setErrorMsg] = useState('');
 
-  const handleChange = (field: keyof typeof form, value: string | number) => {
+  const handleChange = (field: keyof typeof form, value: boolean | string | number) => {
     if (errorMsg) {
       setErrorMsg('');
     }
@@ -45,6 +49,8 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
       text: form.text,
       rating: form.rating,
       poster: '🎬',
+      visibility: form.visibility,
+      isOwn: true,
       date: new Date().toISOString().slice(0, 10).replace(/-/g, '.'),
     });
 
@@ -53,6 +59,7 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
       type: '',
       text: '',
       rating: 0,
+      visibility: 'public',
     });
   };
 
@@ -94,17 +101,35 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
         className="mt-4 min-h-28 px-4 py-3 font-['IBM_Plex_Serif'] text-[13px] italic leading-6"
       />
 
+      <div className="mt-4">
+        <p className="mb-2 text-[10px] uppercase tracking-[0.12em] text-[#8a8474]">
+          {t('review.visibilityLabel')}
+        </p>
+        <div className="grid gap-2 sm:grid-cols-3">
+          {visibilityOptions.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => handleChange('visibility', option)}
+              className={`border px-3 py-2 text-[10px] uppercase tracking-[0.12em] transition ${
+                form.visibility === option
+                  ? 'border-[#d63e2a] bg-[#d63e2a]/10 text-[#f0ead0]'
+                  : 'border-[#f0ead0]/10 bg-[#1c1c19] text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]'
+              }`}
+            >
+              {t(`review.visibility.${option}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {errorMsg ? (
         <StatusMessage className="mt-4">{errorMsg}</StatusMessage>
       ) : null}
 
-      <button
-        type="button"
-        onClick={handleSubmit}
-        className="mt-4 bg-[#d63e2a] px-4 py-3 text-[10px] uppercase tracking-[0.15em] text-[#f0ead0] transition hover:bg-[#ff4f38]"
-      >
+      <Button onClick={handleSubmit} variant="primary" className="mt-4">
         {t('review.submit')}
-      </button>
+      </Button>
     </SectionCard>
   );
 }

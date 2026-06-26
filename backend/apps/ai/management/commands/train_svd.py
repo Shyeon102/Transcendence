@@ -1,6 +1,6 @@
-import sys
-from django.core.management.base import BaseCommand
-from apps.ai.service.recommendation.cf.svd_model import train_svd_model
+from django.core.management.base import BaseCommand, CommandError
+from apps.ai.recommendation.cf.svd_model import train_svd_model
+from apps.ai.recommendation.cf.cf import cache_cf_scores
 
 
 class Command(BaseCommand):
@@ -20,25 +20,25 @@ class Command(BaseCommand):
         self.stdout.write(self.style.WARNING(
             f"Preparing training with latent dimension {latent_dim}..")
             )
-        self.stdout.write(self.style.NOTICE(
-            "Gathering ratings data and training the SVD model...")
+        self.stdout.write(
+            "Gathering ratings data and training the SVD model..."
             )
-
         try:
             new_model = train_svd_model(latent_dim=latent_dim)
 
             if new_model is None:
-                self.stdout.write(
-                    self.style.ERROR("Train failed: Not enough data.")
-                )
-                sys.exit(1)
+                raise CommandError("Train failed: Not enough data.")
 
             self.stdout.write(self.style.SUCCESS(
                 f"SVD_{new_model.version} training completed successfully!")
             )
+            self.stdout.write("Caching CF scores for all users...")
+            cache_cf_scores(new_model)
+            self.stdout.write(self.style.SUCCESS(
+                    "CF scores cached successfully.")
+                )
 
+        except CommandError:
+            raise
         except Exception as e:
-            self.stdout.write(self.style.ERROR(
-                f"SVD manual training failed: {str(e)}")
-            )
-            sys.exit(1)
+            raise CommandError(f"SVD manual training failed: {e}")

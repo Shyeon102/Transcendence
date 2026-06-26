@@ -13,6 +13,9 @@ class User(AbstractUser):
     bio = models.TextField(blank=True, max_length=500)
     onboarding_completed = models.BooleanField(default=False)
 
+    is_banned = models.BooleanField(default=False)
+    banned_at = models.DateTimeField(null=True, blank=True)
+    ban_reason = models.TextField(blank=True)
     # Preference info
     favorite_genres = models.ManyToManyField('media.Genre', blank=True,
                                              related_name='interested_users')
