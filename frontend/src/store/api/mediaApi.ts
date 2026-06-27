@@ -162,6 +162,40 @@ export const mediaApi = createApi({
         });
       },
     }),
+    // /ai/rag/?q= (RAG 검색)
+    ragMedia: builder.query<
+      Media[],
+      string
+    >({
+      query: (q) => `/ai/rag/?q=${encodeURIComponent(q)}`,
+      transformResponse: (response: BackendMediaListResponse) => {
+        return response.media.map((movie) => {
+          const runtimeMinutes = movie.runtime ?? 0;
+          const hours = Math.floor(runtimeMinutes / 60);
+          const minutes = runtimeMinutes % 60;
+
+          return {
+            id: movie.id,
+            title: movie.title,
+            director: movie.director ?? "",
+            genre: movie.genres,
+            releaseDate: movie.release_date,
+            country: movie.country,
+            language: movie.language ?? "",
+            cast: movie.cast.split(", "),
+            story: movie.description,
+            ageRating: movie.age_rating ?? "",
+            starRating: movie.avg_rating,
+            runtime: `${hours}h ${minutes}m`,
+            type: movie.media_type,
+            frontPosterUrl: movie.image_url,
+            sidePosterUrl: movie.side_poster_url ?? "",
+            reviews: [],
+          };
+        });
+      },
+    }),
+
   }),
 });
 
@@ -169,4 +203,5 @@ export const {
   useGetMediaListQuery,
   useGetMediaDetailQuery,
   useLazySearchMediaQuery,
+  useLazyRagMediaQuery,
 } = mediaApi;
