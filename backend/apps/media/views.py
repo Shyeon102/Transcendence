@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
-from django.db.models import Count
 from django.db import models
 
 
@@ -201,19 +200,29 @@ class MediaInteractionView(APIView):
 
 
 class RandomMediaView(APIView):
+    # from rest_framework.permissions import AllowAny
+    # permission_classes = [AllowAny]
     def get(self, request):
-        queryset = Media.objects.order_by("?")[:20]
+        media_type = request.query_params.get("type")
+        queryset = Media.objects.all().order_by("?")
+        if media_type:
+            queryset = queryset.filter(media_type=media_type)
         serializer = MediaSerializer(queryset, many=True)
         return Response({"media": serializer.data}, status=status.HTTP_200_OK)
 
 
 class TrendingMediaView(APIView):
+    # from rest_framework.permissions import AllowAny
+    # permission_classes = [AllowAny]
     def get(self, request):
+        media_type = request.query_params.get("type")
+
         queryset = (
             Media.objects
-            .annotate(interaction_count=Count("interactions"))
-            .order_by("-interaction_count")[:20]
+            .prefetch_related("genres")
+            .order_by("-avg_rating")
         )
-
+        if media_type:
+            queryset = queryset.filter(media_type=media_type)
         serializer = MediaSerializer(queryset, many=True)
         return Response({"media": serializer.data}, status=status.HTTP_200_OK)
