@@ -10,68 +10,38 @@
     "info": "Info"
   },
   "admin": {
-    "eyebrow": "Admin Mode",
-    "title": "ADMIN DASHBOARD",
-    "forbiddenTitle": "Admin permission required.",
-    "forbiddenDescription": "Only staff users can access this page.",
-    "tabs": {
-      "reports": "Reports",
-      "users": "Users"
-    },
-    "stats": {
-      "pending": "Pending Reports",
-      "approved": "Approved Reports",
-      "activeUsers": "Active Users",
-      "bannedUsers": "Banned Users"
-    },
-    "reportStatus": {
+    "eyebrow": "Moderation workspace",
+    "title": "Admin console",
+    "description": "Review reported content and manage user account status.",
+    "connectedNotice": "Connected to admin API. Actions are sent to the server.",
+    "loading": "Loading admin data...",
+    "reportsLoadError": "Could not load reports from the server.",
+    "usersLoadError": "Could not load users from the server.",
+    "emptyReports": "No reports match this filter.",
+    "emptyUsers": "No users match this filter.",
+    "reportsEyebrow": "Content moderation",
+    "reportsTitle": "Reports",
+    "usersEyebrow": "Account moderation",
+    "usersTitle": "Users",
+    "reportedBy": "Reported by",
+    "reportCount": "Reports: {{count}}",
+    "approve": "Approve",
+    "reject": "Reject",
+    "ban": "Ban",
+    "reactivate": "Reactivate",
+    "status": {
       "all": "All",
       "pending": "Pending",
       "approved": "Approved",
-      "rejected": "Rejected"
+      "rejected": "Rejected",
+      "active": "Active",
+      "banned": "Banned"
     },
     "reportTypes": {
       "spam": "Spam",
       "abuse": "Abuse",
       "nsfw": "Inappropriate",
       "copyright": "Copyright"
-    },
-    "targets": {
-      "post": "Post",
-      "comment": "Comment"
-    },
-    "actions": {
-      "approve": "Approve",
-      "reject": "Reject",
-      "ban": "Ban",
-      "cancel": "Cancel",
-      "confirmBan": "Confirm Ban"
-    },
-    "reports": {
-      "title": "Report List",
-      "error": "Failed to load reports.",
-      "empty": "No reports to show.",
-      "emptyDescription": "There are no reports for the selected status.",
-      "untitledTarget": "Untitled target",
-      "noReason": "No report reason was provided.",
-      "reporter": "Reporter",
-      "processed": "Processed",
-      "processedBy": "Processed by"
-    },
-    "users": {
-      "title": "User List",
-      "error": "Failed to load users.",
-      "empty": "No users to show.",
-      "emptyDescription": "There is no user data to manage.",
-      "username": "Username",
-      "email": "Email",
-      "status": "Status",
-      "joined": "Joined",
-      "actions": "Actions",
-      "active": "Active",
-      "banned": "Banned",
-      "banTitle": "Ban this user?",
-      "banDescription": "Target user:"
     }
   },
   "infoPage": {
@@ -253,34 +223,6 @@
       "copyright": "Copyright infringement"
     }
   },
-  "admin": {
-    "eyebrow": "Moderation workspace",
-    "title": "Admin console",
-    "description": "Review reported content and manage user account status.",
-    "connectedNotice": "Connected to admin API. Actions are sent to the server.",
-    "loading": "Loading admin data...",
-    "reportsLoadError": "Could not load reports from the server.",
-    "usersLoadError": "Could not load users from the server.",
-    "emptyReports": "No reports match this filter.",
-    "emptyUsers": "No users match this filter.",
-    "reportsEyebrow": "Content moderation",
-    "reportsTitle": "Reports",
-    "usersEyebrow": "Account moderation",
-    "usersTitle": "Users",
-    "reportedBy": "Reported by",
-    "reportCount": "Reports: {{count}}",
-    "approve": "Approve",
-    "reject": "Reject",
-    "ban": "Ban",
-    "reactivate": "Reactivate",
-    "status": {
-      "pending": "Pending",
-      "approved": "Approved",
-      "rejected": "Rejected",
-      "active": "Active",
-      "banned": "Banned"
-    }
-  },
   "mypage": {
     "eyebrow": "Personal Space",
     "title": "MY PAGE",
@@ -291,7 +233,8 @@
     "entries": "entries",
     "queue": "queue",
     "log": "log",
-    "empty": "There is no data to show yet."
+    "empty": "There is no data to show yet.",
+    "userSpace": "{{name}}'S SPACE"
   },
   "review": {
     "formEyebrow": "Review Draft",

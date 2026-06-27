@@ -10,68 +10,38 @@
     "info": "Info"
   },
   "admin": {
-    "eyebrow": "Mode admin",
-    "title": "ADMIN DASHBOARD",
-    "forbiddenTitle": "Permission admin requise.",
-    "forbiddenDescription": "Seuls les utilisateurs staff peuvent acceder a cette page.",
-    "tabs": {
-      "reports": "Signalements",
-      "users": "Utilisateurs"
-    },
-    "stats": {
-      "pending": "Signalements en attente",
-      "approved": "Signalements approuves",
-      "activeUsers": "Utilisateurs actifs",
-      "bannedUsers": "Utilisateurs bannis"
-    },
-    "reportStatus": {
+    "eyebrow": "Espace de moderation",
+    "title": "Console admin",
+    "description": "Examinez les contenus signales et gerez le statut des comptes.",
+    "connectedNotice": "Connecte a l'API admin. Les actions sont envoyees au serveur.",
+    "loading": "Chargement des donnees admin...",
+    "reportsLoadError": "Impossible de charger les signalements depuis le serveur.",
+    "usersLoadError": "Impossible de charger les utilisateurs depuis le serveur.",
+    "emptyReports": "Aucun signalement ne correspond a ce filtre.",
+    "emptyUsers": "Aucun utilisateur ne correspond a ce filtre.",
+    "reportsEyebrow": "Moderation du contenu",
+    "reportsTitle": "Signalements",
+    "usersEyebrow": "Moderation des comptes",
+    "usersTitle": "Utilisateurs",
+    "reportedBy": "Signale par",
+    "reportCount": "Signalements : {{count}}",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "ban": "Bannir",
+    "reactivate": "Reactiver",
+    "status": {
       "all": "Tous",
       "pending": "En attente",
       "approved": "Approuve",
-      "rejected": "Rejete"
+      "rejected": "Rejete",
+      "active": "Actif",
+      "banned": "Banni"
     },
     "reportTypes": {
       "spam": "Spam",
       "abuse": "Abus",
-      "nsfw": "Inapproprie",
+      "nsfw": "Inapproprié",
       "copyright": "Copyright"
-    },
-    "targets": {
-      "post": "Post",
-      "comment": "Commentaire"
-    },
-    "actions": {
-      "approve": "Approuver",
-      "reject": "Rejeter",
-      "ban": "Bannir",
-      "cancel": "Annuler",
-      "confirmBan": "Confirmer"
-    },
-    "reports": {
-      "title": "Liste des signalements",
-      "error": "Impossible de charger les signalements.",
-      "empty": "Aucun signalement a afficher.",
-      "emptyDescription": "Aucun signalement ne correspond au statut choisi.",
-      "untitledTarget": "Cible sans titre",
-      "noReason": "Aucune raison fournie.",
-      "reporter": "Auteur",
-      "processed": "Traite",
-      "processedBy": "Traite par"
-    },
-    "users": {
-      "title": "Liste des utilisateurs",
-      "error": "Impossible de charger les utilisateurs.",
-      "empty": "Aucun utilisateur a afficher.",
-      "emptyDescription": "Aucune donnee utilisateur a gerer.",
-      "username": "Pseudo",
-      "email": "Email",
-      "status": "Statut",
-      "joined": "Inscrit",
-      "actions": "Actions",
-      "active": "Actif",
-      "banned": "Banni",
-      "banTitle": "Bannir cet utilisateur ?",
-      "banDescription": "Utilisateur cible :"
     }
   },
   "infoPage": {
@@ -253,34 +223,6 @@
       "copyright": "Atteinte aux droits d'auteur"
     }
   },
-  "admin": {
-    "eyebrow": "Espace de moderation",
-    "title": "Console admin",
-    "description": "Examinez les contenus signales et gerez le statut des comptes.",
-    "connectedNotice": "Connecte a l'API admin. Les actions sont envoyees au serveur.",
-    "loading": "Chargement des donnees admin...",
-    "reportsLoadError": "Impossible de charger les signalements depuis le serveur.",
-    "usersLoadError": "Impossible de charger les utilisateurs depuis le serveur.",
-    "emptyReports": "Aucun signalement ne correspond a ce filtre.",
-    "emptyUsers": "Aucun utilisateur ne correspond a ce filtre.",
-    "reportsEyebrow": "Moderation du contenu",
-    "reportsTitle": "Signalements",
-    "usersEyebrow": "Moderation des comptes",
-    "usersTitle": "Utilisateurs",
-    "reportedBy": "Signale par",
-    "reportCount": "Signalements : {{count}}",
-    "approve": "Approuver",
-    "reject": "Rejeter",
-    "ban": "Bannir",
-    "reactivate": "Reactiver",
-    "status": {
-      "pending": "En attente",
-      "approved": "Approuve",
-      "rejected": "Rejete",
-      "active": "Actif",
-      "banned": "Banni"
-    }
-  },
   "mypage": {
     "eyebrow": "Espace personnel",
     "title": "MY PAGE",
@@ -291,7 +233,8 @@
     "entries": "entrees",
     "queue": "file",
     "log": "journal",
-    "empty": "Aucune donnee a afficher pour le moment."
+    "empty": "Aucune donnee a afficher pour le moment.",
+    "userSpace": "Espace de {{name}}"
   },
   "review": {
     "formEyebrow": "Brouillon de critique",
@@ -311,7 +254,7 @@
     "delete": "Supprimer",
     "sortLabel": "Tri",
     "sort": {
-      "latest": "Recent",
+      "latest": "Récent",
       "rating": "Note"
     },
     "editDraftSuffix": "(UI de modification en attente)"

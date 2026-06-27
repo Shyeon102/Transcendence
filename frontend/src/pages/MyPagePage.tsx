@@ -12,7 +12,7 @@ export default function MyPagePage() {
   }
 
   const heading = user.firstName
-    ? `${user.firstName.toUpperCase()}'S SPACE`
+    ? t('mypage.userSpace').replace('{{name}}', user.firstName.toUpperCase())
     : t('mypage.title');
   const isDemo = user.username === 'demo';
 

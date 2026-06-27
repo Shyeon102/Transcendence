@@ -164,7 +164,7 @@ export default function AdminPage() {
                       : "border-[#f0ead0]/10 text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]"
                   }`}
                 >
-                  {option === "all" ? "All" : t(`admin.status.${option}`)}
+                  {t(`admin.status.${option}`)}
                 </button>
               ))}
             </div>
@@ -183,13 +183,16 @@ export default function AdminPage() {
 
             <div className="space-y-3">
               {reportsQuery.isLoading ? null : filteredReports.length ? (
-                filteredReports.map((report) => (
+                filteredReports.map((report) => {
+                  const reportTypeLabel = t(`admin.reportTypes.${report.type}`);
+
+                  return (
                   <article key={report.id} className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/20">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className={`inline-block border px-2 py-0.5 text-[8px] uppercase tracking-[0.14em] ${reportTypeColor[report.type] ?? "border-[#f0ead0]/10 text-[#8a8474]"}`}>
-                            {report.type}
+                            {reportTypeLabel === `admin.reportTypes.${report.type}` ? report.type : reportTypeLabel}
                           </span>
                           <StatusBadge status={report.status} />
                         </div>
@@ -223,7 +226,8 @@ export default function AdminPage() {
                       </button>
                     </div>
                   </article>
-                ))
+                  );
+                })
               ) : (
                 <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
                   {t("admin.emptyReports")}
@@ -247,7 +251,7 @@ export default function AdminPage() {
                       : "border-[#f0ead0]/10 text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]"
                   }`}
                 >
-                  {option === "all" ? "All" : t(`admin.status.${option}`)}
+                  {t(`admin.status.${option}`)}
                 </button>
               ))}
             </div>
