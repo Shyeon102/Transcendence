@@ -1,11 +1,9 @@
 import { useI18n } from "../lib/i18n";
-import Header from "../components/Header";
 import { useGetMediaReviewsQuery } from "../store/api/authApi";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetMediaDetailQuery } from "../store/api/mediaApi";
 import { useSelector } from "react-redux";
-import Footer from "../components/Footer";
 import type { Media, Genre } from "../types/media";
 import type { RootState } from "../store";
 
@@ -107,7 +105,6 @@ const MediaDetailPage = () => {
             {t("detail.loading")}
           </p>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -120,14 +117,12 @@ const MediaDetailPage = () => {
             {t("detail.noData")}
           </p>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white flex flex-col">
-      <Header />
       {/* 레이아웃: 가로로 3등분 */}
       <div className="flex mt-[7vh]">
         {/* 미디어 변환 탭: 제일 왼쪽 */}
@@ -348,8 +343,6 @@ const MediaDetailPage = () => {
         </div>
       </div>
 
-      {/* 푸터 */}
-      <Footer />
     </div>
   );
 };
