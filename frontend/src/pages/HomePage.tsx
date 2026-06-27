@@ -305,9 +305,9 @@ const HomePage = () => {
           {t("main.random")}
         </button>
         <button
-          onClick={() => setSource("TREDING")}
+          onClick={() => setSource("TRENDING")}
           className={
-            source === "TREDING"
+            source === "TRENDING"
               ? filterBtnClass +
                 " shadow-[0_0_28px_1px_#00ffff] border-[#00ffff] text-[#00ffff]"
               : filterBtnClass + " border-white/30 text-white"
