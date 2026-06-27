@@ -607,8 +607,6 @@ export const authApi = createApi({
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
-        const isOnboardingUpdate =
-          payload.onboardingCompleted !== undefined;
         const result = await rawBaseQuery(
           {
             url: '/users/profile/',
