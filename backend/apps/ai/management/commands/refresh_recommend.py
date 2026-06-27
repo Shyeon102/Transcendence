@@ -22,16 +22,16 @@ class Command(BaseCommand):
             user_id = options["user_id"]
             self.stdout.write(f"[*] user {user_id} 임베딩 갱신 시작...")
             chain(
-                refresh_user_embedding_task.s(user_id),
-                compute_cbf_score_task.s(),
+                refresh_user_embedding_task.si(user_id),
+                compute_cbf_score_task.si(user_id),
             ).delay()
             self.stdout.write(self.style.SUCCESS(f"[+] user {user_id} 태스크 enqueue 완료"))
 
         if options["svd"]:
             self.stdout.write("[*] SVD 재학습 시작...")
             chain(
-                train_svd_task.s(),
-                compute_cf_scores_all_task.s(),
+                train_svd_task.si(),
+                compute_cf_scores_all_task.si(),
             ).delay()
             self.stdout.write(self.style.SUCCESS("[+] SVD 태스크 enqueue 완료"))
 
@@ -40,8 +40,8 @@ class Command(BaseCommand):
             user_ids = User.objects.values_list("id", flat=True)
             for uid in user_ids:
                 chain(
-                    refresh_user_embedding_task.s(uid),
-                    compute_cbf_score_task.s(),
+                    refresh_user_embedding_task.si(uid),
+                    compute_cbf_score_task.si(uid),
                 ).delay()
             self.stdout.write(self.style.SUCCESS(f"[+] {len(user_ids)}명 태스크 enqueue 완료"))
 
@@ -50,14 +50,14 @@ class Command(BaseCommand):
 
 """
 # 특정 유저 CBF 갱신
-python manage.py refresh_recommen --user-id 42
+python manage.py refresh_recommend --user-id 42
 
 # SVD 재학습
-python manage.py refresh_recommen --svd
+python manage.py refresh_recommend --svd
 
 # 전체 유저 임베딩
-python manage.py refresh_recommen --all-users
+python manage.py refresh_recommend --all-users
 
 # 복합 실행도 가능
-python manage.py refresh_recommen --user-id 42 --svd
+python manage.py refresh_recommend --user-id 42 --svd
 """

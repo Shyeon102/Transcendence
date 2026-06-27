@@ -33,7 +33,8 @@ def build_user_embedding(user: User) -> UserEmbedding:
 
     weighted_signals = gather_weighted_signals(user)
     if not weighted_signals:
-        raise ValueError(f"User {user.pk} has no ratings or interactions yet.")
+        logger.info(f"User {user.pk} has no ratings or interactions yet.")
+        return None
 
     media_ids = [mid for mid, _ in weighted_signals]
     weights = {mid: w for mid, w in weighted_signals}
@@ -44,6 +45,13 @@ def build_user_embedding(user: User) -> UserEmbedding:
         .filter(media_id__in=media_ids)
         .values_list('media_id', 'embedding')
     )
+    logger.info("💚embeddings_qs count: %d", embeddings_qs.count())
+    if not embeddings_qs.exists():
+        logger.info(
+            f"User {user.pk}: "
+            "no MediaEmbedding found for given media_ids"
+        )
+        return None
 
     profile_vec = np.zeros(EMB_DIM, dtype=np.float32)
     used_media: list[int] = []

@@ -14,53 +14,70 @@ const MediaCard = ({
   onDetailClick,
 }: MediaCardProps) => {
   return (
-    // 바깥 div: 카드(왼쪽) + 정보패널(오른쪽) 가로 나열
-    // isSelected일 때만 gap 적용
+    // // 바깥 div: 카드(왼쪽) + 정보패널(오른쪽) 가로 나열
+    // // isSelected일 때만 gap 적용
+    // <div className={`flex items-start ${isSelected ? "gap-[1.5vw]" : ""}`}>
+    //   {/* 왼쪽: 카드 이미지 + 아래 텍스트 세로로 쌓기 */}
+    //   <div className="flex flex-col items-center">
+    //     {/* 카드 이미지 영역 */}
+    //     {/* isSelected: 앞면 포스터 크기로 확대 + overflow-visible로 포스터 잘림 방지 */}
+    //     {/* 기본: VHS 옆면 크기 + overflow-hidden으로 이미지 영역 안에 가둠 */}
+    //     <div
+    //       onClick={() => onSelect(media)}
+    //       className={`relative ${
+    //         isSelected
+    //           ? "w-[15vw] h-[55vh] mx-[3vw] z-10 overflow-visible"
+    //           : "w-[3.67vw] h-[55vh] overflow-hidden"
+    //       } cursor-pointer flex-shrink-0`}
+    //     >
+    //       {isSelected ? (
+    //         <>
+    //           {/* 1. VHS 테이프 목업 (배경) - 회전 없음 */}
+    //           <img
+    //             src="/vhs-front.png"
+    //             alt="vhs"
+    //             className="absolute inset-0 w-[90%] h-[90%] object-fill translate-x-[45%] translate-y-[4%]"
+    //           />
+    //           {/* 2. 포스터 (중간) - 살짝 회전 */}
+    //           <img
+    //             src={media.frontPosterUrl}
+    //             alt={media.title}
+    //             className="absolute inset-0 w-full h-full object-fill -rotate-6"
+    //           />
+    //           {/* 3. 낡은 질감 커버 (맨 위) - 포스터랑 같이 회전 */}
+    //           <img
+    //             src="/vhs-cover.png"
+    //             alt="cover"
+    //             className="absolute inset-0 w-full h-full object-fill -rotate-6"
+    //           />
+    //         </>
+    //       ) : (
+    //         // 기본 상태: VHS 옆면 이미지
+    //         <img
+    //           src={media.sidePosterUrl}
+    //           alt={media.title}
+    //           className="absolute inset-0 w-full h-full object-fill"
+    //         />
+    //       )}
+    //     </div>
     <div className={`flex items-start ${isSelected ? "gap-[1.5vw]" : ""}`}>
-      {/* 왼쪽: 카드 이미지 + 아래 텍스트 세로로 쌓기 */}
+
+      {/* LEFT: poster + text */}
       <div className="flex flex-col items-center">
-        {/* 카드 이미지 영역 */}
-        {/* isSelected: 앞면 포스터 크기로 확대 + overflow-visible로 포스터 잘림 방지 */}
-        {/* 기본: VHS 옆면 크기 + overflow-hidden으로 이미지 영역 안에 가둠 */}
         <div
           onClick={() => onSelect(media)}
-          className={`relative ${
-            isSelected
-              ? "w-[15vw] h-[55vh] mx-[3vw] z-10 overflow-visible"
-              : "w-[3.67vw] h-[55vh] overflow-hidden"
-          } cursor-pointer flex-shrink-0`}
+          className={`relative cursor-pointer flex-shrink-0 transition-all duration-300
+            ${isSelected
+              ? "w-[15vw] h-[55vh] mx-[3vw] z-10"
+              : "w-[8vw] h-[55vh]"
+            }`}
         >
-          {isSelected ? (
-            <>
-              {/* 1. VHS 테이프 목업 (배경) - 회전 없음 */}
-              <img
-                src="/vhs-front.png"
-                alt="vhs"
-                className="absolute inset-0 w-[90%] h-[90%] object-fill translate-x-[45%] translate-y-[4%]"
-              />
-              {/* 2. 포스터 (중간) - 살짝 회전 */}
-              <img
-                src={media.frontPosterUrl}
-                alt={media.title}
-                className="absolute inset-0 w-full h-full object-fill -rotate-6"
-              />
-              {/* 3. 낡은 질감 커버 (맨 위) - 포스터랑 같이 회전 */}
-              <img
-                src="/vhs-cover.png"
-                alt="cover"
-                className="absolute inset-0 w-full h-full object-fill -rotate-6"
-              />
-            </>
-          ) : (
-            // 기본 상태: VHS 옆면 이미지
-            <img
-              src={media.sidePosterUrl}
-              alt={media.title}
-              className="absolute inset-0 w-full h-full object-fill"
-            />
-          )}
+          <img
+            src={media.frontPosterUrl}
+            alt={media.title}
+            className="w-full h-full object-cover rounded-md shadow-lg"
+          />
         </div>
-
         {/* 카드 아래 텍스트: 선택됐을 때만 표시 */}
         {isSelected && (
           <div className="text-center mt-[2vh]">

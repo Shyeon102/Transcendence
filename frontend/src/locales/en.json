@@ -272,9 +272,6 @@
     "reportCount": "Reports: {{count}}",
     "approve": "Approve",
     "reject": "Reject",
-    "hide": "Hide content",
-    "unhide": "Unhide content",
-    "suspend": "Suspend",
     "ban": "Ban",
     "reactivate": "Reactivate",
     "status": {
@@ -283,7 +280,6 @@
       "approved": "Approved",
       "rejected": "Rejected",
       "active": "Active",
-      "suspended": "Suspended",
       "banned": "Banned"
     }
   },
@@ -350,6 +346,9 @@
     "search": "Search...",
     "myFav": "MY FAV",
     "random": "RANDOM",
+    "movie": "Movie",
+    "drama": "Series",
+    "anime": "Anime",
     "filter": "FILTER",
     "noData": "No media data yet.",
     "loading": "Loading...",

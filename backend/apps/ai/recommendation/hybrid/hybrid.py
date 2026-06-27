@@ -3,8 +3,7 @@ import math
 from apps.ai.recommendation.hybrid.score_cache import (
     get_cbf_scores_cached, get_cf_scores_cached
 )
-from apps.media.models import Review, MediaInteraction, Media
-from django.db.models import F
+from apps.media.models import Review, MediaInteraction
 import logging
 
 logger = logging.getLogger(__name__)
@@ -117,14 +116,3 @@ def get_hybrid_scores(
         final_scores = final_scores.drop(exclude_media_ids, errors="ignore")
 
     return final_scores.sort_values(ascending=False)
-
-
-def get_popular_series() -> pd.Series:
-    qs = Media.objects.annotate(
-        calculated_score=(F('avg_rating') * 10) + F('rating_count')
-    ).values_list('id', 'calculated_score')
-
-    return pd.Series(
-        {mid: float(score) for mid, score in qs},
-        name="popularity_score"
-    )

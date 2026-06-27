@@ -273,9 +273,6 @@
     "reportCount": "신고 {{count}}건",
     "approve": "승인",
     "reject": "반려",
-    "hide": "콘텐츠 숨김",
-    "unhide": "콘텐츠 표시",
-    "suspend": "정지",
     "ban": "차단",
     "reactivate": "정지 해제",
     "status": {
@@ -284,7 +281,6 @@
       "approved": "승인",
       "rejected": "반려",
       "active": "활성",
-      "suspended": "정지",
       "banned": "차단"
     }
   },
@@ -354,6 +350,9 @@
     "loadError": "미디어를 불러오지 못했어요.",
     "myFav": "내 최애",
     "random": "랜덤",
+    "movie": "영화",
+    "drama": "드라마",
+    "anime": "애니",
     "filter": "필터"
   },
   "detail": {

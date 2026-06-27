@@ -54,10 +54,29 @@ export const mediaApi = createApi({
   }),
   // 실제 API 호출들
   endpoints: (builder) => ({
-    // /media/ (전체)
-    getMediaList: builder.query<Media[], void>({
+    getMediaList: builder.query<
+      Media[],
+      {
+        source: "RANDOM" | "MY FAV";
+        type: string | null;
+        userId: number
+      }
+    >({
       // TODO) getMediaDetail (단일 mock, 백엔드 detail endpoint 머지되면 query로 교체)
-      query: () => "/media/", // 어떤 주소를 부를지: 이게 baseUrl 뒤에 붙어서 http://localhost:8000/api/media/가 됨
+      query: ({source, type, userId }) => {
+        const params = new URLSearchParams();
+
+        if (type) {
+          params.append("type", type);
+        }
+        const queryString = params.toString();
+        const qs = queryString ? `?${queryString}` : "";
+
+        if (source === "RANDOM") return `/media/random/${qs}`;
+        if (source === "MY FAV") return `/ai/recommend/${userId}${qs}`;
+
+        return `/media/random/${qs}`;
+      },
       transformResponse: (response: BackendMediaListResponse) => {
         return response.media.map((movie) => {
           const runtimeMinutes = movie.runtime ?? 0;

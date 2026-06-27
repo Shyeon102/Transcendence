@@ -113,6 +113,7 @@ export default function AdminPage() {
     }),
     [reports],
   );
+}
 
   const suspendedCount = users.filter((managedUser) => managedUser.status === "suspended").length;
   const bannedCount = users.filter((managedUser) => managedUser.status === "banned").length;
@@ -136,8 +137,18 @@ export default function AdminPage() {
     await updateAccountStatus({ id, status });
   };
 
+  const pendingCount = reports.filter((report) => report.status === "pending").length;
+  const bannedCount = users.filter((managedUser) => managedUser.status === "banned").length;
+  const filteredReports =
+    reportFilter === "all" ? reports : reports.filter((report) => report.status === reportFilter);
+  const filteredUsers =
+    userFilter === "all" ? users : users.filter((managedUser) => managedUser.status === userFilter);
+  const reportFilterOptions: (AdminReportStatus | "all")[] = ["all", "pending", "approved", "rejected"];
+  const userFilterOptions: (AdminAccountStatus | "all")[] = ["all", "active", "banned"];
+  const isUpdatingUser = isBanningUser || isUnbanningUser;
+
   return (
-    <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-12 text-[#f0ead0]">
+    <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 max-w-3xl">
           <p className="mb-3 text-[10px] uppercase tracking-[0.22em] text-[#d63e2a]">
