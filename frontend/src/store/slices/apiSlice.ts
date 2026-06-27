@@ -128,6 +128,14 @@ export const apiSlice = createApi({
       }),
       transformResponse: (response: MediaSearchResponse) => response.media ?? [],
     }),
+    //rag search
+    ragMedia: builder.query<MediaSearchResult[], string>({
+      query: (query) => ({
+        url: '/ai/rag/',
+        params: { q: query },
+      }),
+      transformResponse: (response: MediaSearchResponse) => response.media ?? [],
+    }),
     // 토큰 갱신 엔드포인트
     refreshToken: builder.mutation({
       query: (refreshToken: string) => ({
@@ -139,4 +147,4 @@ export const apiSlice = createApi({
   }),
 })
 
-export const { useLazySearchMediaQuery, useLoginMutation, useRefreshTokenMutation } = apiSlice
+export const { useLazySearchMediaQuery, useLazyRagMediaQuery, useLoginMutation, useRefreshTokenMutation } = apiSlice

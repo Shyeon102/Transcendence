@@ -223,6 +223,36 @@
       "copyright": "Copyright infringement"
     }
   },
+  "admin": {
+    "eyebrow": "Moderation workspace",
+    "title": "Admin console",
+    "description": "Review reported content and manage user account status.",
+    "connectedNotice": "Connected to admin API. Actions are sent to the server.",
+    "loading": "Loading...",
+    "reportsLoadError": "Failed to load reports.",
+    "usersLoadError": "Failed to load users.",
+    "emptyReports": "No reports match this filter.",
+    "emptyUsers": "No users match this filter.",
+    "noReason": "No report reason was provided.",
+    "reportsEyebrow": "Content moderation",
+    "reportsTitle": "Reports",
+    "usersEyebrow": "Account moderation",
+    "usersTitle": "Users",
+    "reportedBy": "Reported by",
+    "reportCount": "Reports: {{count}}",
+    "approve": "Approve",
+    "reject": "Reject",
+    "ban": "Ban",
+    "reactivate": "Reactivate",
+    "status": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "active": "Active",
+      "banned": "Banned"
+    }
+  },
   "mypage": {
     "eyebrow": "Personal Space",
     "title": "My Activity",
@@ -287,6 +317,7 @@
     "search": "Search...",
     "myFav": "MY FAV",
     "random": "RANDOM",
+    "trending": "TRENDING",
     "movie": "Movie",
     "drama": "Series",
     "anime": "Anime",

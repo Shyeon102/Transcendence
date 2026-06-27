@@ -1,15 +1,15 @@
-import Header from "../components/Header";
+
 import { useI18n } from "../lib/i18n";
 import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import Footer from "../components/Footer";
 import type { RootState } from "../store";
 import {
   useGetMediaListQuery,
   useLazySearchMediaQuery,
+  useLazyRagMediaQuery,
 } from "../store/api/mediaApi";
 
 // 목업 데이터
@@ -148,6 +148,7 @@ const HomePage = () => {
   const [type, setType ] = useState<string | null>(null);
   const { t } = useI18n();
   const [triggerSearch, searchResult] = useLazySearchMediaQuery();
+  const [triggerRag, ragResult] = useLazyRagMediaQuery();
   const user = useSelector((state: RootState) => state.auth.user);
   const userId = user?.id;
   const shouldSkipMediaList = source === "MY FAV" && !userId;
@@ -158,6 +159,8 @@ const HomePage = () => {
       userId,
     }, { skip: shouldSkipMediaList });
 
+
+
   const isDemo = user?.username === "demo";
 
   // AI 검색 기능
@@ -166,9 +169,11 @@ const HomePage = () => {
 
   const mediaList = isDemo
     ? mockMediaList
-    : searchQuery.trim() && searchResult.data
-      ? searchResult.data.slice(0, 10)
-      : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
+    : isAiMode
+      ? ragResult.data ?? []
+      : searchQuery.trim() && searchResult.data
+        ? searchResult.data.slice(0, 10)
+        : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
 
   // 필터 버튼 공통 스타일 (반복 방지용)
   const filterBtnClass =
@@ -180,11 +185,30 @@ const HomePage = () => {
   // 선택된 미디어 상태 (null = 아무것도 선택 안 됨)
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
 
-  // 슬라이드 시작 인덱스 (어떤 카드부터 보여줄지)
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   // 페이지 이동 함수 (React Router)
   const navigate = useNavigate();
+
+  useLayoutEffect(() => {
+    if (!selectedMedia) return;
+
+    const container = scrollRef.current;
+    const card = cardRefs.current[selectedMedia.id];
+
+    if (!container || !card) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const targetLeft =
+      container.scrollLeft +
+      (cardRect.left - containerRect.left) -
+      container.clientWidth / 2 +
+      cardRect.width / 2;
+
+    container.scrollTo({ left: targetLeft, behavior: "smooth" });
+  }, [selectedMedia]);
 
   // 미디어 클릭시 정보 표시 함수
   // 같은 카드 다시 클릭 -> null (닫기), 새 카드 클릭 -> 선택
@@ -196,11 +220,14 @@ const HomePage = () => {
     }
   };
 
-  const handleSearch = () => {
+
+  const handleSearch = async () => {
     if (!searchQuery.trim()) return; // 빈 검색어면 아무것도 안 함
 
     if (isAiMode) {
       // AI(RAG) 검색 — 백엔드 머지되면 연결
+      // RAG 검색 결과 처리 (예: mediaList 업데이트)
+      triggerRag(searchQuery);
       console.log("RAG 검색:", searchQuery);
     } else {
       // 일반 검색
@@ -208,15 +235,18 @@ const HomePage = () => {
     }
   };
 
-  // 왼쪽 화살표: 첫 번째 카드일 때는 이동 안 함, 15는 한 페이지당 보이는 vhs 개수
   const handlePrev = () => {
-    if (currentIndex > 0) setCurrentIndex((prev) => prev - 15);
+    scrollRef.current?.scrollBy({
+      left: -(scrollRef.current.clientWidth * 0.8),
+      behavior: "smooth",
+    });
   };
 
-  // 오른쪽 화살표: 마지막 카드일 때는 이동 안 함
   const handleNext = () => {
-    if (currentIndex < mediaList.length - 1)
-      setCurrentIndex((prev) => prev + 15);
+    scrollRef.current?.scrollBy({
+      left: scrollRef.current.clientWidth * 0.8,
+      behavior: "smooth",
+    });
   };
 
   if (!isDemo && isLoading) {
@@ -233,8 +263,7 @@ const HomePage = () => {
 
   return (
     // 전체 페이지: 세로 쌓기 (헤더 -> 검색바 -> 필터 -> 카드 -> 화살표 -> 푸터)
-    <div className="flex flex-col min-h-screen bg-[#0c0c0b] text-white overflow-x-hidden">
-      <Header />
+    <div className="flex flex-col h-screen bg-[#0c0c0b] text-white overflow-x-hidden">
       {/* 검색바 */}
       <div className="flex justify-center pt-[5vh] pb-[5vh]">
         <div className="flex items-center gap-2 bg-transparent border border-white/30 rounded-full px-[2vw] w-[43vw] h-[4.3vh]">
@@ -276,6 +305,17 @@ const HomePage = () => {
           {t("main.random")}
         </button>
         <button
+          onClick={() => setSource("TRENDING")}
+          className={
+            source === "TRENDING"
+              ? filterBtnClass +
+                " shadow-[0_0_28px_1px_#00ffff] border-[#00ffff] text-[#00ffff]"
+              : filterBtnClass + " border-white/30 text-white"
+          }
+        >
+          {t("main.trending")}
+        </button>
+        <button
           onClick={() => setSource("MY FAV")}
           className={
             source === "MY FAV"
@@ -286,43 +326,71 @@ const HomePage = () => {
         >
           {t("main.myFav")}
         </button>
-
-        <button onClick={() => setType("movie")}>{t("main.movie")}</button>
-        <button onClick={() => setType("drama")}>{t("main.drama")}</button>
-        <button onClick={() => setType("anime")}>{t("main.anime")}</button>
-
+        
+        <button
+          onClick={() => setType(type === "movie" ? "" : "movie")}
+          className={
+            type === "movie"
+              ? filterBtnClass +
+                " shadow-[0_0_28px_1px_#a855f7] border-[#a855f7] text-[#a855f7]"
+              : filterBtnClass + " border-white/30 text-white"
+          }
+        >
+          {t("main.movie")}
+        </button>
+                <button
+          onClick={() => setType(type === "drama" ? "" : "drama")}
+          className={
+            type === "drama"
+              ? filterBtnClass +
+                " shadow-[0_0_28px_1px_#a855f7] border-[#a855f7] text-[#a855f7]"
+              : filterBtnClass + " border-white/30 text-white"
+          }
+        >
+          {t("main.drama")}
+        </button>
+                <button
+          onClick={() => setType(type === "anime" ? "" : "anime")}
+          className={
+            type === "anime"
+              ? filterBtnClass +
+                " shadow-[0_0_28px_1px_#a855f7] border-[#a855f7] text-[#a855f7]"
+              : filterBtnClass + " border-white/30 text-white"
+          }
+        >
+          {t("main.anime")}
+        </button>
       </div>
-
       {/* 카드 슬라이드 */}
       {/* relative: 기준점 역할 */}
-      {/* selectedMedia가 있을 때는 overflow-visible로 포스터 잘림 방지 */}
-      {/* selectedMedia가 없을 때는 overflow-hidden으로 창문 역할 */}
       <div
-        className={`relative w-full ${selectedMedia ? "overflow-visible" : "overflow-hidden"}`}
+        ref={scrollRef}
+        className="relative w-full overflow-x-auto overflow-y-visible scroll-smooth"
       >
-        {/* 기차 div: 카드 전체가 담겨있고 translateX로 좌우 이동 */}
-        <div
-          className="flex gap-[3.4vw]"
-          style={{
-            transform: `translateX(-${currentIndex * 5.97}vw)`,
-            transition: "transform 0.3s ease",
-          }}
-        >
+        <div className="flex gap-[3.4vw] px-[2.5vw]">
           {mediaList.length ? (
             mediaList.map((media) => (
-              <MediaCard
+              <div
                 key={media.id}
-                media={media}
-                onSelect={handleSelect}
-                isSelected={selectedMedia?.id === media.id}
-                onDetailClick={(id) => navigate(`/media/${id}`)}
-              />
+                ref={(node) => {
+                  cardRefs.current[media.id] = node;
+                }}
+                className="shrink-0"
+              >
+                <MediaCard
+                  media={media}
+                  onSelect={handleSelect}
+                  isSelected={selectedMedia?.id === media.id}
+                  onDetailClick={(id) => navigate(`/media/${id}`)}
+                />
+              </div>
             ))
           ) : (
             <div className="flex min-h-[42vh] w-full items-center justify-center text-[1vw] italic tracking-[0.08em] text-white/50">
               {t("main.noData")}
             </div>
           )}
+          <div className="shrink-0 w-[0.05vw]" />
         </div>
       </div>
 
@@ -332,7 +400,7 @@ const HomePage = () => {
         {/* 왼쪽 화살표: 첫 번째면 흐리게 */}
         <button
           onClick={handlePrev}
-          disabled={currentIndex === 0}
+          disabled={!mediaList.length}
           className="text-white text-[1.7vw] px-[0.5vw] disabled:opacity-30 transition"
         >
           «
@@ -340,15 +408,12 @@ const HomePage = () => {
         {/* 오른쪽 화살표: 마지막이면 흐리게 */}
         <button
           onClick={handleNext}
-          disabled={!mediaList.length || currentIndex >= mediaList.length - 1}
+          disabled={!mediaList.length}
           className="text-white text-[1.7vw] px-[0.5vw] disabled:opacity-30 transition"
         >
           »
         </button>
       </div>
-
-      {/* footer */}
-      <Footer />
     </div>
   );
 };
