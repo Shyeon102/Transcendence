@@ -18,8 +18,6 @@ class HybridRecommendationView(APIView):
     # from rest_framework.permissions import AllowAny
     # permission_classes = [AllowAny]
 
-    permission_classes = [IsAuthenticated]
-
     # def get(self, request):
     def get(self, request, user_id):
         try:

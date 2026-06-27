@@ -1,4 +1,5 @@
 import type { Media } from "../types/media";
+import defaultPoster from '/src/assets/images/defaultposter.png';
 
 interface MediaCardProps {
   media: Media;
@@ -74,6 +75,9 @@ const MediaCard = ({
         >
           <img
             src={media.frontPosterUrl}
+            onError={(e) => { 
+              e.currentTarget.src = defaultPoster;
+            }}
             alt={media.title}
             className="w-full h-full object-cover rounded-md shadow-lg"
           />
@@ -130,15 +134,7 @@ const MediaCard = ({
           </div>
 
           {/* 줄거리 */}
-          <p className="mt-[2vh] max-w-full whitespace-normal break-words text-[0.9vw] leading-[1.6] text-gray-300">{media.story}</p>
-
-          {/* 인터랙션 아이콘 (봤어요 / 좋아요 / 싫어요 / 위시) */}
-          <div className="flex gap-[1.5vw] mt-[2vh]">
-            <span>👁</span>
-            <span>🤍</span>
-            <span>💔</span>
-            <span>✅</span>
-          </div>
+          <p className="mt-[2vh] max-w-full whitespace-normal break-words text-[0.9vw] leading-[1.6] text-gray-300 line-clamp-10">{media.story.replace(/<br\s*\/?>/gi, "\n")}</p>
 
           {/* 상세 페이지 이동 버튼 */}
           <button

@@ -92,7 +92,7 @@ export default function SignupPage() {
 
     try {
       await signup(formData).unwrap();
-      navigate('/onboarding');
+      navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
       setErrorMsg(apiError.message ?? t('common.error'));
