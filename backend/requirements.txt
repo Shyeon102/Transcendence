@@ -8,14 +8,15 @@ redis
 numpy
 
 pgvector
-redis
+redis==5.0.8
 numpy
 hnswlib>=0.7.0,<0.8.0
 google-genai
 
 whitenoise
 daphne
-channels-redis
+channels==4.1.0
+channels-redis==4.1.0
 
 psycopg2-binary
 django-redis
