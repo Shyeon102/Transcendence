@@ -66,7 +66,7 @@ const MediaCard = ({
       <div className="flex flex-col items-center">
         <div
           onClick={() => onSelect(media)}
-          className={`relative cursor-pointer flex-shrink-0 transition-all duration-300
+          className={`relative cursor-pointer flex-shrink-0 transition-shadow duration-300
             ${isSelected
               ? "w-[15vw] h-[55vh] mx-[3vw] z-10"
               : "w-[8vw] h-[55vh]"
@@ -80,14 +80,14 @@ const MediaCard = ({
         </div>
         {/* 카드 아래 텍스트: 선택됐을 때만 표시 */}
         {isSelected && (
-          <div className="text-center mt-[2vh]">
-            <p className="font-playfair text-white text-[2.5vw] font-bold">
+          <div className="mt-[2vh] w-[15vw] max-w-[15vw] text-center">
+            <p className="line-clamp-2 break-words font-playfair text-[2.5vw] font-bold leading-tight text-white">
               {media.title}
             </p>
-            <p className="font-playfair text-red-500 text-[1vw]">
+            <p className="mt-[0.6vh] truncate font-playfair text-[1vw] text-red-500">
               {media.director}
             </p>
-            <p className="font-playfair text-white text-[1vw]">
+            <p className="font-playfair text-[1vw] text-white">
               {media.runtime}
             </p>
           </div>
@@ -96,10 +96,10 @@ const MediaCard = ({
 
       {/* 오른쪽: 정보 패널 - 선택됐을 때만 표시 */}
       {isSelected && (
-        <div className="text-white min-w-[20vw] pt-[1vh] ml-[2vw]">
+        <div className="media-detail-panel text-white w-[24vw] max-w-[24vw] shrink-0 pt-[1vh] ml-[2vw]">
           {/* 장르 + 연령등급 태그 */}
-          <div className="flex gap-[0.8vw] mb-[2vh]">
-            <span className="px-[0.8vw] py-[0.4vh] bg-gray-600 text-white rounded-full text-[0.9vw]">
+          <div className="flex flex-wrap gap-[0.8vw] mb-[2vh]">
+            <span className="max-w-full break-words px-[0.8vw] py-[0.4vh] bg-gray-600 text-white rounded-full text-[0.9vw]">
               {media.genre.map((g) => g.name).join("/")}
             </span>
             <span className="px-[0.8vw] py-[0.4vh] bg-gray-600 text-white rounded-full text-[0.9vw]">
@@ -113,24 +113,24 @@ const MediaCard = ({
               <span className="font-bold w-[7vw] text-[0.9vw]">
                 Release Date
               </span>
-              <span className="text-[0.9vw]">{media.releaseDate}</span>
+              <span className="min-w-0 flex-1 break-words text-[0.9vw]">{media.releaseDate}</span>
             </div>
             <div className="flex gap-[1.5vw]">
               <span className="font-bold w-[7vw] text-[0.9vw]">Country</span>
-              <span className="text-[0.9vw]">{media.country}</span>
+              <span className="min-w-0 flex-1 break-words text-[0.9vw]">{media.country}</span>
             </div>
             <div className="flex gap-[1.5vw]">
               <span className="font-bold w-[7vw] text-[0.9vw]">Language</span>
-              <span className="text-[0.9vw]">{media.language}</span>
+              <span className="min-w-0 flex-1 break-words text-[0.9vw]">{media.language}</span>
             </div>
             <div className="flex gap-[1.5vw]">
               <span className="font-bold w-[7vw] text-[0.9vw]">Cast</span>
-              <span className="text-[0.9vw]">{media.cast.join(", ")}</span>
+              <span className="min-w-0 flex-1 break-words text-[0.9vw]">{media.cast.join(", ")}</span>
             </div>
           </div>
 
           {/* 줄거리 */}
-          <p className="mt-[2vh] text-[0.9vw] text-gray-300">{media.story}</p>
+          <p className="mt-[2vh] max-w-full whitespace-normal break-words text-[0.9vw] leading-[1.6] text-gray-300">{media.story}</p>
 
           {/* 인터랙션 아이콘 (봤어요 / 좋아요 / 싫어요 / 위시) */}
           <div className="flex gap-[1.5vw] mt-[2vh]">

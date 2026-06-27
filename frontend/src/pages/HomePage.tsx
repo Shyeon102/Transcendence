@@ -2,7 +2,7 @@ import Header from "../components/Header";
 import { useI18n } from "../lib/i18n";
 import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
@@ -180,11 +180,30 @@ const HomePage = () => {
   // 선택된 미디어 상태 (null = 아무것도 선택 안 됨)
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
 
-  // 슬라이드 시작 인덱스 (어떤 카드부터 보여줄지)
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   // 페이지 이동 함수 (React Router)
   const navigate = useNavigate();
+
+  useLayoutEffect(() => {
+    if (!selectedMedia) return;
+
+    const container = scrollRef.current;
+    const card = cardRefs.current[selectedMedia.id];
+
+    if (!container || !card) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const targetLeft =
+      container.scrollLeft +
+      (cardRect.left - containerRect.left) -
+      container.clientWidth / 2 +
+      cardRect.width / 2;
+
+    container.scrollTo({ left: targetLeft, behavior: "smooth" });
+  }, [selectedMedia]);
 
   // 미디어 클릭시 정보 표시 함수
   // 같은 카드 다시 클릭 -> null (닫기), 새 카드 클릭 -> 선택
@@ -208,15 +227,18 @@ const HomePage = () => {
     }
   };
 
-  // 왼쪽 화살표: 첫 번째 카드일 때는 이동 안 함, 15는 한 페이지당 보이는 vhs 개수
   const handlePrev = () => {
-    if (currentIndex > 0) setCurrentIndex((prev) => prev - 15);
+    scrollRef.current?.scrollBy({
+      left: -(scrollRef.current.clientWidth * 0.8),
+      behavior: "smooth",
+    });
   };
 
-  // 오른쪽 화살표: 마지막 카드일 때는 이동 안 함
   const handleNext = () => {
-    if (currentIndex < mediaList.length - 1)
-      setCurrentIndex((prev) => prev + 15);
+    scrollRef.current?.scrollBy({
+      left: scrollRef.current.clientWidth * 0.8,
+      behavior: "smooth",
+    });
   };
 
   if (!isDemo && isLoading) {
@@ -295,28 +317,27 @@ const HomePage = () => {
 
       {/* 카드 슬라이드 */}
       {/* relative: 기준점 역할 */}
-      {/* selectedMedia가 있을 때는 overflow-visible로 포스터 잘림 방지 */}
-      {/* selectedMedia가 없을 때는 overflow-hidden으로 창문 역할 */}
       <div
-        className={`relative w-full ${selectedMedia ? "overflow-visible" : "overflow-hidden"}`}
+        ref={scrollRef}
+        className="relative w-full overflow-x-auto overflow-y-visible scroll-smooth"
       >
-        {/* 기차 div: 카드 전체가 담겨있고 translateX로 좌우 이동 */}
-        <div
-          className="flex gap-[3.4vw]"
-          style={{
-            transform: `translateX(-${currentIndex * 5.97}vw)`,
-            transition: "transform 0.3s ease",
-          }}
-        >
+        <div className="flex gap-[3.4vw] px-[42.5vw]">
           {mediaList.length ? (
             mediaList.map((media) => (
-              <MediaCard
+              <div
                 key={media.id}
-                media={media}
-                onSelect={handleSelect}
-                isSelected={selectedMedia?.id === media.id}
-                onDetailClick={(id) => navigate(`/media/${id}`)}
-              />
+                ref={(node) => {
+                  cardRefs.current[media.id] = node;
+                }}
+                className="shrink-0"
+              >
+                <MediaCard
+                  media={media}
+                  onSelect={handleSelect}
+                  isSelected={selectedMedia?.id === media.id}
+                  onDetailClick={(id) => navigate(`/media/${id}`)}
+                />
+              </div>
             ))
           ) : (
             <div className="flex min-h-[42vh] w-full items-center justify-center text-[1vw] italic tracking-[0.08em] text-white/50">
@@ -332,7 +353,7 @@ const HomePage = () => {
         {/* 왼쪽 화살표: 첫 번째면 흐리게 */}
         <button
           onClick={handlePrev}
-          disabled={currentIndex === 0}
+          disabled={!mediaList.length}
           className="text-white text-[1.7vw] px-[0.5vw] disabled:opacity-30 transition"
         >
           «
@@ -340,7 +361,7 @@ const HomePage = () => {
         {/* 오른쪽 화살표: 마지막이면 흐리게 */}
         <button
           onClick={handleNext}
-          disabled={!mediaList.length || currentIndex >= mediaList.length - 1}
+          disabled={!mediaList.length}
           className="text-white text-[1.7vw] px-[0.5vw] disabled:opacity-30 transition"
         >
           »
