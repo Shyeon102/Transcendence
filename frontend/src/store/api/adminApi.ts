@@ -1,7 +1,6 @@
 import { apiSlice } from "../slices/apiSlice";
 
 export type AdminReportStatus = "pending" | "approved" | "rejected";
-export type AdminReportAction = "approve" | "reject";
 export type AdminAccountStatus = "active" | "banned";
 
 export type AdminReport = {
@@ -67,7 +66,19 @@ const toList = <T>(response: ListResponse<T>): T[] => {
     return response;
   }
 
-  return response.results ?? response.reports ?? response.users ?? [];
+  if (Array.isArray(response.results)) {
+    return response.results;
+  }
+
+  if (Array.isArray(response.reports)) {
+    return response.reports;
+  }
+
+  if (Array.isArray(response.users)) {
+    return response.users;
+  }
+
+  return [];
 };
 
 const normalizeReport = (report: RawAdminReport): AdminReport => {
@@ -109,15 +120,10 @@ const normalizeUser = (user: RawAdminUser): AdminUser => {
   };
 };
 
-const actionByStatus: Record<Exclude<AdminReportStatus, "pending">, AdminReportAction> = {
-  approved: "approve",
-  rejected: "reject",
-};
-
 export const adminApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAdminReports: builder.query<AdminReport[], void>({
-      query: () => "/community/reports/",
+      query: () => "/admin/reports/",
       transformResponse: (response: ListResponse<RawAdminReport>) =>
         toList(response).map(normalizeReport),
       providesTags: ["AdminReports"],
@@ -127,15 +133,15 @@ export const adminApi = apiSlice.injectEndpoints({
       { id: number; status: Exclude<AdminReportStatus, "pending"> }
     >({
       query: ({ id, status }) => ({
-        url: `/community/reports/${id}/`,
+        url: `/admin/reports/${id}/`,
         method: "PATCH",
-        body: { action: actionByStatus[status] },
+        body: { status },
       }),
       transformResponse: (response: RawAdminReport) => normalizeReport(response),
       invalidatesTags: ["AdminReports"],
     }),
     getAdminUsers: builder.query<AdminUser[], void>({
-      query: () => "/users/",
+      query: () => "/admin/users/",
       transformResponse: (response: ListResponse<RawAdminUser>) =>
         toList(response).map(normalizeUser),
       providesTags: ["AdminUsers"],
