@@ -1,8 +1,7 @@
 import { apiSlice } from "../slices/apiSlice";
 
 export type AdminReportStatus = "pending" | "approved" | "rejected";
-export type AdminReportAction = "approve" | "reject";
-export type AdminAccountStatus = "active" | "banned";
+export type AdminAccountStatus = "active" | "suspended" | "banned";
 
 export type AdminReport = {
   id: number;
@@ -12,6 +11,7 @@ export type AdminReport = {
   reason: string;
   createdAt: string;
   status: AdminReportStatus;
+  hidden: boolean;
 };
 
 export type AdminUser = {
@@ -20,47 +20,9 @@ export type AdminUser = {
   email: string;
   status: AdminAccountStatus;
   reportCount: number;
-  isStaff: boolean;
 };
 
-type ListResponse<T> = T[] | { results?: T[]; reports?: T[]; users?: T[] };
-
-type RawAdminReport = {
-  id: number;
-  reporter?: string;
-  reporter_username?: string;
-  reporterUsername?: string;
-  reporter_id?: number;
-  user_id?: number;
-  target?: string;
-  target_title?: string;
-  targetTitle?: string;
-  target_type?: string;
-  targetType?: string;
-  target_id?: number;
-  targetId?: number;
-  report_type?: string;
-  type?: string;
-  reason?: string;
-  created_at?: string;
-  createdAt?: string;
-  status?: AdminReportStatus;
-};
-
-type RawAdminUser = {
-  id?: number;
-  username?: string;
-  email?: string;
-  status?: AdminAccountStatus;
-  report_count?: number;
-  reportCount?: number;
-  is_banned?: boolean;
-  isBanned?: boolean;
-  is_active?: boolean;
-  isActive?: boolean;
-  is_staff?: boolean;
-  isStaff?: boolean;
-};
+type ListResponse<T> = T[] | { results?: T[] };
 
 const toList = <T>(response: ListResponse<T>): T[] => {
   if (Array.isArray(response)) {
@@ -129,21 +91,19 @@ const actionByStatus: Record<Exclude<AdminReportStatus, "pending">, AdminReportA
 export const adminApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAdminReports: builder.query<AdminReport[], void>({
-      query: () => "/community/reports/",
-      transformResponse: (response: ListResponse<RawAdminReport>) =>
-        toList(response).map(normalizeReport),
+      query: () => "/admin/reports/",
+      transformResponse: (response: ListResponse<AdminReport>) => toList(response),
       providesTags: ["AdminReports"],
     }),
     processAdminReport: builder.mutation<
       AdminReport,
-      { id: number; status: Exclude<AdminReportStatus, "pending"> }
+      { id: number; status: AdminReportStatus; hidden?: boolean }
     >({
-      query: ({ id, status }) => ({
-        url: `/community/reports/${id}/`,
+      query: ({ id, ...body }) => ({
+        url: `/admin/reports/${id}/`,
         method: "PATCH",
-        body: { action: actionByStatus[status] },
+        body,
       }),
-      transformResponse: (response: RawAdminReport) => normalizeReport(response),
       invalidatesTags: ["AdminReports"],
     }),
     getAdminUsers: builder.query<AdminUser[], void>({
@@ -152,17 +112,14 @@ export const adminApi = apiSlice.injectEndpoints({
         toList(response).map(normalizeUser),
       providesTags: ["AdminUsers"],
     }),
-    banAdminUser: builder.mutation<void, number>({
-      query: (id) => ({
-        url: `/users/${id}/ban/`,
-        method: "PUT",
-      }),
-      invalidatesTags: ["AdminUsers"],
-    }),
-    unbanAdminUser: builder.mutation<void, number>({
-      query: (id) => ({
-        url: `/users/${id}/ban/`,
-        method: "DELETE",
+    updateAdminUserStatus: builder.mutation<
+      AdminUser,
+      { id: number; status: AdminAccountStatus }
+    >({
+      query: ({ id, status }) => ({
+        url: `/admin/users/${id}/ban/`,
+        method: "PATCH",
+        body: { status },
       }),
       invalidatesTags: ["AdminUsers"],
     }),
@@ -170,9 +127,8 @@ export const adminApi = apiSlice.injectEndpoints({
 });
 
 export const {
-  useBanAdminUserMutation,
   useGetAdminReportsQuery,
-  useGetAdminUsersQuery,
   useProcessAdminReportMutation,
-  useUnbanAdminUserMutation,
+  useGetAdminUsersQuery,
+  useUpdateAdminUserStatusMutation,
 } = adminApi;
