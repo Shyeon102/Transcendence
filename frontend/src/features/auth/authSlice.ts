@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { AuthSession, AuthUser, RefreshTokenResponse } from '../../types';
+import { loadAuthSession } from './authStorage';
 
 interface AuthState {
   user: AuthUser | null;
@@ -8,12 +9,21 @@ interface AuthState {
   isAuthenticated: boolean;
 }
 
-const initialState: AuthState = {
-  user: null,
-  accessToken: null,
-  refreshToken: null,
-  isAuthenticated: false,
-};
+const persistedSession = loadAuthSession();
+
+const initialState: AuthState = persistedSession
+  ? {
+      user: persistedSession.user,
+      accessToken: persistedSession.accessToken,
+      refreshToken: persistedSession.refreshToken,
+      isAuthenticated: true,
+    }
+  : {
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      isAuthenticated: false,
+    };
 
 const authSlice = createSlice({
   name: 'auth',
