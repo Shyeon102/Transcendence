@@ -123,7 +123,7 @@ const normalizeUser = (user: RawAdminUser): AdminUser => {
 export const adminApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAdminReports: builder.query<AdminReport[], void>({
-      query: () => "/community/report/",
+      query: () => "/community/reports/",
       transformResponse: (response: ListResponse<RawAdminReport>) =>
         toList(response).map(normalizeReport),
       providesTags: ["AdminReports"],
@@ -133,7 +133,7 @@ export const adminApi = apiSlice.injectEndpoints({
       { id: number; status: Exclude<AdminReportStatus, "pending"> }
     >({
       query: ({ id, status }) => ({
-        url: `/community/report/${id}/`,
+        url: `/community/reports/${id}/`,
         method: "PATCH",
         body: { status },
       }),
