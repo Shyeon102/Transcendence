@@ -2,7 +2,7 @@ import Header from "../components/Header";
 import { useI18n } from "../lib/i18n";
 import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import Footer from "../components/Footer";
@@ -145,19 +145,20 @@ const mockMediaList: Media[] = [
 // 컴포넌트
 
 const HomePage = () => {
-  const [source, setSource] = useState<"RANDOM" | "TRENDING">("TRENDING");
+  const [source, setSource] = useState<"RANDOM" | "TRENDING" | "MY FAV">("TRENDING");
   const [type, setType ] = useState<string | null>(null);
   const { t } = useI18n();
   const [triggerSearch, searchResult] = useLazySearchMediaQuery();
   const [triggerRag] = useLazyRagMediaQuery();
   const user = useSelector((state: RootState) => state.auth.user);
   const userId = user?.id;
+  const shouldSkipMediaList = source === "MY FAV" && !userId;
   const { data, isLoading, error } = 
     useGetMediaListQuery({
       source,
       type,
       userId,
-    });
+    }, { skip: shouldSkipMediaList });
 
 
 
@@ -183,9 +184,30 @@ const HomePage = () => {
   // 선택된 미디어 상태 (null = 아무것도 선택 안 됨)
   const [selectedMedia, setSelectedMedia] = useState<Media | null>(null);
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   // 페이지 이동 함수 (React Router)
   const navigate = useNavigate();
+
+  useLayoutEffect(() => {
+    if (!selectedMedia) return;
+
+    const container = scrollRef.current;
+    const card = cardRefs.current[selectedMedia.id];
+
+    if (!container || !card) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const targetLeft =
+      container.scrollLeft +
+      (cardRect.left - containerRect.left) -
+      container.clientWidth / 2 +
+      cardRect.width / 2;
+
+    container.scrollTo({ left: targetLeft, behavior: "smooth" });
+  }, [selectedMedia]);
 
   // 미디어 클릭시 정보 표시 함수
   // 같은 카드 다시 클릭 -> null (닫기), 새 카드 클릭 -> 선택
@@ -216,6 +238,20 @@ const HomePage = () => {
       // 일반 검색
       triggerSearch(searchQuery);
     }
+  };
+
+  const handlePrev = () => {
+    scrollRef.current?.scrollBy({
+      left: -(scrollRef.current.clientWidth * 0.8),
+      behavior: "smooth",
+    });
+  };
+
+  const handleNext = () => {
+    scrollRef.current?.scrollBy({
+      left: scrollRef.current.clientWidth * 0.8,
+      behavior: "smooth",
+    });
   };
 
   if (!isDemo && isLoading) {
@@ -322,20 +358,55 @@ const HomePage = () => {
       </div>
       {/* 카드 슬라이드 */}
       {/* relative: 기준점 역할 */}
-      {/* selectedMedia가 있을 때는 overflow-visible로 포스터 잘림 방지 */}
-      {/* selectedMedia가 없을 때는 overflow-hidden으로 창문 역할 */}
-      <div className="w-full overflow-x-auto overflow-y-visible">
-        <div className="flex gap-[3.4vw] w-max py-2">
-          {mediaList.map((media) => (
-            <MediaCard
-              key={media.id}
-              media={media}
-              onSelect={handleSelect}
-              isSelected={selectedMedia?.id === media.id}
-              onDetailClick={(id) => navigate(`/media/${id}`)}
-            />
-          ))}
+      <div
+        ref={scrollRef}
+        className="relative w-full overflow-x-auto overflow-y-visible scroll-smooth"
+      >
+        <div className="flex gap-[3.4vw] px-[42.5vw]">
+          {mediaList.length ? (
+            mediaList.map((media) => (
+              <div
+                key={media.id}
+                ref={(node) => {
+                  cardRefs.current[media.id] = node;
+                }}
+                className="shrink-0"
+              >
+                <MediaCard
+                  media={media}
+                  onSelect={handleSelect}
+                  isSelected={selectedMedia?.id === media.id}
+                  onDetailClick={(id) => navigate(`/media/${id}`)}
+                />
+              </div>
+            ))
+          ) : (
+            <div className="flex min-h-[42vh] w-full items-center justify-center text-[1vw] italic tracking-[0.08em] text-white/50">
+              {t("main.noData")}
+            </div>
+          )}
         </div>
+      </div>
+
+      {/* 화살표 영역 */}
+      {/* justify-between: 좌우 끝에 배치 */}
+      <div className="flex justify-between px-[1vw] pt-[0.5vh]">
+        {/* 왼쪽 화살표: 첫 번째면 흐리게 */}
+        <button
+          onClick={handlePrev}
+          disabled={!mediaList.length}
+          className="text-white text-[1.7vw] px-[0.5vw] disabled:opacity-30 transition"
+        >
+          «
+        </button>
+        {/* 오른쪽 화살표: 마지막이면 흐리게 */}
+        <button
+          onClick={handleNext}
+          disabled={!mediaList.length}
+          className="text-white text-[1.7vw] px-[0.5vw] disabled:opacity-30 transition"
+        >
+          »
+        </button>
       </div>
 
       {/* footer */}

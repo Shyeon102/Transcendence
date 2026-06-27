@@ -88,6 +88,8 @@ export const apiSlice = createApi({
     'User',
     'Reviews',
     'ChatRooms',
+    'AdminReports',
+    'AdminUsers',
   ],
   endpoints: (builder) => ({
     // 로그인 엔드포인트

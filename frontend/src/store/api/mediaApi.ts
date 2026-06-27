@@ -57,9 +57,9 @@ export const mediaApi = createApi({
     getMediaList: builder.query<
       Media[],
       {
-        source: "RANDOM" | "MY FAV";
+        source: "RANDOM" | "TRENDING" | "MY FAV";
         type: string | null;
-        userId: number
+        userId?: number;
       }
     >({
       // TODO) getMediaDetail (단일 mock, 백엔드 detail endpoint 머지되면 query로 교체)
@@ -73,9 +73,10 @@ export const mediaApi = createApi({
         const qs = queryString ? `?${queryString}` : "";
 
         if (source === "RANDOM") return `/media/random/${qs}`;
-        if (source === "MY FAV") return `/ai/recommend/${userId}${qs}`;
+        if (source === "TRENDING") return `/media/trending/${qs}`;
+        if (source === "MY FAV" && userId) return `/ai/recommend/${userId}${qs}`;
 
-        return `/media/random/${qs}`;
+        return `/media/trending/${qs}`;
       },
       transformResponse: (response: BackendMediaListResponse) => {
         return response.media.map((movie) => {
