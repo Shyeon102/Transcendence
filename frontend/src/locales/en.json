@@ -257,7 +257,12 @@
     "eyebrow": "Moderation workspace",
     "title": "Admin console",
     "description": "Review reported content and manage user account status.",
-    "previewNotice": "UI preview only. Actions update this screen locally and are not saved to the server.",
+    "connectedNotice": "Connected to admin API. Actions are sent to the server.",
+    "loading": "Loading admin data...",
+    "reportsLoadError": "Could not load reports from the server.",
+    "usersLoadError": "Could not load users from the server.",
+    "emptyReports": "No reports match this filter.",
+    "emptyUsers": "No users match this filter.",
     "reportsEyebrow": "Content moderation",
     "reportsTitle": "Reports",
     "usersEyebrow": "Account moderation",
@@ -266,9 +271,6 @@
     "reportCount": "Reports: {{count}}",
     "approve": "Approve",
     "reject": "Reject",
-    "hide": "Hide content",
-    "unhide": "Unhide content",
-    "suspend": "Suspend",
     "ban": "Ban",
     "reactivate": "Reactivate",
     "status": {
@@ -276,7 +278,6 @@
       "approved": "Approved",
       "rejected": "Rejected",
       "active": "Active",
-      "suspended": "Suspended",
       "banned": "Banned"
     }
   },

@@ -257,7 +257,12 @@
     "eyebrow": "Espace de moderation",
     "title": "Console admin",
     "description": "Examinez les contenus signales et gerez le statut des comptes.",
-    "previewNotice": "Aperçu de l'interface uniquement. Les actions ne sont pas enregistrees sur le serveur.",
+    "connectedNotice": "Connecte a l'API admin. Les actions sont envoyees au serveur.",
+    "loading": "Chargement des donnees admin...",
+    "reportsLoadError": "Impossible de charger les signalements depuis le serveur.",
+    "usersLoadError": "Impossible de charger les utilisateurs depuis le serveur.",
+    "emptyReports": "Aucun signalement ne correspond a ce filtre.",
+    "emptyUsers": "Aucun utilisateur ne correspond a ce filtre.",
     "reportsEyebrow": "Moderation du contenu",
     "reportsTitle": "Signalements",
     "usersEyebrow": "Moderation des comptes",
@@ -266,9 +271,6 @@
     "reportCount": "Signalements : {{count}}",
     "approve": "Approuver",
     "reject": "Rejeter",
-    "hide": "Masquer le contenu",
-    "unhide": "Afficher le contenu",
-    "suspend": "Suspendre",
     "ban": "Bannir",
     "reactivate": "Reactiver",
     "status": {
@@ -276,7 +278,6 @@
       "approved": "Approuve",
       "rejected": "Rejete",
       "active": "Actif",
-      "suspended": "Suspendu",
       "banned": "Banni"
     }
   },

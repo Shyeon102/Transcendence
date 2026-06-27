@@ -258,7 +258,12 @@
     "eyebrow": "운영 관리",
     "title": "관리자 콘솔",
     "description": "신고된 콘텐츠를 검토하고 사용자 계정 상태를 관리합니다.",
-    "previewNotice": "UI 초안입니다. 동작은 화면 상태만 변경하며 서버에 저장되지 않습니다.",
+    "connectedNotice": "관리자 API에 연결되었습니다. 동작은 서버로 전송됩니다.",
+    "loading": "관리자 데이터를 불러오는 중입니다...",
+    "reportsLoadError": "서버에서 신고 목록을 불러오지 못했습니다.",
+    "usersLoadError": "서버에서 사용자 목록을 불러오지 못했습니다.",
+    "emptyReports": "조건에 맞는 신고가 없습니다.",
+    "emptyUsers": "조건에 맞는 사용자가 없습니다.",
     "reportsEyebrow": "콘텐츠 관리",
     "reportsTitle": "신고 목록",
     "usersEyebrow": "계정 관리",
@@ -267,9 +272,6 @@
     "reportCount": "신고 {{count}}건",
     "approve": "승인",
     "reject": "반려",
-    "hide": "콘텐츠 숨김",
-    "unhide": "콘텐츠 표시",
-    "suspend": "정지",
     "ban": "차단",
     "reactivate": "정지 해제",
     "status": {
@@ -277,7 +279,6 @@
       "approved": "승인",
       "rejected": "반려",
       "active": "활성",
-      "suspended": "정지",
       "banned": "차단"
     }
   },
