@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthShell from '../components/AuthShell';
+import GoogleAuthButton from '../components/GoogleAuthButton';
 import Button from '../components/ui/Button';
 import StatusMessage from '../components/ui/StatusMessage';
 import { useI18n } from '../lib/i18n';
 import { beginOAuth42Login } from '../lib/oauth';
-import { useLoginMutation } from '../store/api/authApi';
+import { useGoogleLoginMutation, useLoginMutation } from '../store/api/authApi';
 import type { AuthErrorResponse } from '../store';
 
 export default function LoginPage() {
@@ -16,6 +17,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [login, { isLoading }] = useLoginMutation();
+  const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation();
 
   const validateForm = () => {
     if (!username.trim() || !password.trim()) {
@@ -38,6 +40,18 @@ export default function LoginPage() {
       const session = await login({ username, password }).unwrap();
       const isDemo = session.user.username === 'demo';
       navigate(isDemo || session.user.onboardingCompleted ? '/home' : '/onboarding');
+    } catch (err) {
+      const apiError = err as AuthErrorResponse;
+      setErrorMsg(apiError.message ?? t('common.error'));
+    }
+  };
+
+  const handleGoogleCredential = async (credential: string) => {
+    setErrorMsg('');
+
+    try {
+      const session = await googleLogin({ credential }).unwrap();
+      navigate(session.user.onboardingCompleted ? '/home' : '/onboarding');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
       setErrorMsg(apiError.message ?? t('common.error'));
@@ -116,6 +130,14 @@ export default function LoginPage() {
           <span className="font-['Bebas_Neue'] text-base tracking-[0.05em] text-[#f0ead0]">42</span>
           {t('login.oauth42')}
         </Button>
+
+        <GoogleAuthButton
+          disabled={isGoogleLoading}
+          missingConfigLabel={t('oauth.googleClientMissing')}
+          onCredential={(credential) => void handleGoogleCredential(credential)}
+          onError={setErrorMsg}
+          text="signin_with"
+        />
       </form>
 
       <p className="mt-7 text-center text-[11px] tracking-[0.05em] text-[#8a8474]">

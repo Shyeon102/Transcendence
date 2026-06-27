@@ -17,10 +17,12 @@ import type {
   AdminReportType,
   AdminUser,
   AuthUser,
+  DashboardReview,
   LoginRequest,
   LoginResponse,
   MediaReview,
   MediaReviewRequest,
+  MyPageDashboardData,
   PasswordChangeRequest,
   RefreshTokenResponse,
   SignupRequest,
@@ -73,6 +75,10 @@ type RawUserPayload = RawAuthUser | RawAuthResponse;
 type RawTokenResponse = {
   access?: string;
   refresh?: string;
+};
+
+type GoogleLoginRequest = {
+  credential: string;
 };
 
 type RawDashboardReview = {
@@ -161,6 +167,7 @@ type RawAdminUsersPayload = RawAdminUser[] | {
 };
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api').replace(/\/+$/, '');
+const GOOGLE_AUTH_ENDPOINT = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT ?? '/auth/google/';
 const SHOULD_FALLBACK_TO_MOCK = import.meta.env.VITE_USE_MOCK_AUTH !== 'false';
 const isDemoLogin = (credentials: LoginRequest) =>
   credentials.username === 'demo' || credentials.username === 'demo@demo.demo';
@@ -543,6 +550,36 @@ export const authApi = createApi({
         dispatch(setCredentials(data));
       },
     }),
+    googleLogin: builder.mutation<LoginResponse, GoogleLoginRequest>({
+      async queryFn(payload, api) {
+        const result = await rawBaseQuery(
+          {
+            url: GOOGLE_AUTH_ENDPOINT,
+            method: 'POST',
+            body: payload,
+          },
+          api,
+          {}
+        );
+
+        if (result.data) {
+          return { data: normalizeSession(result.data as RawAuthResponse) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Google authentication failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        dispatch(setCredentials(data));
+      },
+    }),
     signup: builder.mutation<SignupResponse, SignupRequest>({
       async queryFn({ passwordConfirm, firstName, lastName, ...payload }, api) {
         const result = await rawBaseQuery(
@@ -894,6 +931,7 @@ export const {
   useGetMediaReviewsQuery,
   useGetMyPageDashboardQuery,
   useGetUserActivityQuery,
+  useGoogleLoginMutation,
   useLoginMutation,
   useLogoutMutation,
   useProcessAdminReportMutation,
