@@ -17,6 +17,8 @@ import type {
   AdminReportType,
   AdminUser,
   AuthUser,
+  DashboardReview,
+  MyPageDashboardData,
   LoginRequest,
   LoginResponse,
   MediaReview,
