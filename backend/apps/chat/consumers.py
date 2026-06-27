@@ -24,7 +24,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """
         Called when websocket connects.
         """
-
+        print("USER:", self.scope["user"])
         self.room_id = self.scope["url_route"]["kwargs"]["room_id"]
         self.room_group_name = f"chat_{self.room_id}"
 
@@ -46,8 +46,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         ok = await self.get_socket_lock()
 
         if not ok:
-            await self.close(code=4007)
-            return
+            await self.release_socket_lock()
+            ok = await self.get_socket_lock()
 
         await self.set_online()
 
