@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyMzk2NDAyLCJpYXQiOjE3ODIzOTQ2MDIsImp0aSI6ImVjOTkwOTdkOTI5MTQ4NTRhYTUwOTNmMDg4NjNkOWJjIiwidXNlcl9pZCI6IjcifQ.QkpvgBE89vPdq_ut-eE5u5ppTyAvkr_ev1nNsLN4KA8
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNTYxNTQyLCJpYXQiOjE3ODI1NTk3NDIsImp0aSI6Ijk0OTlmNmFkNmNkYTQ0NzRiZjNmODI4OWYwZjczYTY4IiwidXNlcl9pZCI6IjIifQ.nyuVsMlB5-JBLH4SodyQ4j_juA0ywlCCyPXmj6EJG8E
 ###
 Curl -X POST http://localhost:8000/api/auth/register/ \
   -H "Content-Type: application/json" \
@@ -36,8 +36,8 @@ curl -X POST http://localhost:8000/api/community/posts/4/comments/ \
 curl -X POST http://localhost:8000/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "demo",
-    "password": "demo"
+    "username": "test",
+    "password": "12341234"
   }'
 
 ###
@@ -45,6 +45,14 @@ curl -X POST http://localhost:8000/api/auth/login/ \
 curl -X GET http://localhost:8000/api/community/posts/4/comments \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}"
+
+
+###
+
+curl -X GET http://localhost:8000/api/community/reports/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}"
+
 
 ###
 
