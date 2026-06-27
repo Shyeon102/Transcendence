@@ -61,8 +61,8 @@ class HybridRecommendationView(APIView):
 
 class RAGRecommendationView(APIView):
     # only for test
-    from rest_framework.permissions import AllowAny
-    permission_classes = [AllowAny]
+    # from rest_framework.permissions import AllowAny
+    # permission_classes = [AllowAny]
 
     def get(self, request):
 
