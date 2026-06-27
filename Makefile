@@ -1,20 +1,21 @@
 SHELL := /bin/bash
-COMPOSE := podman compose
+OS_ID := $(shell . /etc/os-release 2>/dev/null && echo $$ID)
+CONTAINER_ENGINE := $(if $(filter fedora,$(OS_ID)),podman,docker)
+COMPOSE := $(CONTAINER_ENGINE) compose
 
-.PHONY: help up start migrate seed_media load_media stop fclean logs backup restore
+.PHONY: help up start migrate load_media media_embedding stop fclean logs backup restore
 
 help:
 	@echo "Available targets:"
-	@echo "  make up               - build and start services, then migrate and seed media"
+	@echo "  Container engine: $(CONTAINER_ENGINE)"
+	@echo "  make up               - build and start services, then migrate and load media"
 	@echo "  make start            - alias for make up"
 	@echo "  make migrate          - run Django migrations in the backend container"
-	@echo "  make seed_media       - seed example media data in the backend container"
-	@echo "  make seed_reviews     - seed example reviews in the backend container"
 	@echo "  make load_media       - load external media data in the backend container"
-	@echo "  make backup           - create PostgreSQL backup""
-	@echo "  make restore FILE=... - restore PostgreSQL backup""
+	@echo "  make backup           - create PostgreSQL backup"
+	@echo "  make restore FILE=... - restore PostgreSQL backup"
 	@echo "  make stop             - stop containers"
-	@echo "  make fclean           - stop containers, remove volumes, and prune Docker resources"
+	@echo "  make fclean           - stop containers, remove volumes, and prune container resources"
 	@echo "  make logs              - follow compose logs"
 
 up: start
@@ -22,19 +23,11 @@ up: start
 start:
 	$(COMPOSE) up --build -d
 	$(MAKE) migrate
-	$(MAKE) seed_media
-	$(MAKE) seed_reviews
 	$(MAKE) load_media
 # 	$(MAKE) media_embedding
 
 migrate:
 	$(COMPOSE) exec backend python manage.py migrate
-
-seed_media:
-	$(COMPOSE) exec backend python manage.py seed_media
-
-seed_reviews:
-	$(COMPOSE) exec backend python manage.py seed_reviews
 
 load_media:
 	$(COMPOSE) exec backend python manage.py load_media
@@ -54,7 +47,7 @@ stop:
 
 fclean:
 	$(COMPOSE) down -v --remove-orphans
-	podman system prune -af --volumes
+	$(CONTAINER_ENGINE) system prune -af --volumes
 
 logs:
 	$(COMPOSE) logs -f

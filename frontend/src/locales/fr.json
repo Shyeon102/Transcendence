@@ -347,6 +347,9 @@
     "loadError": "Échec du chargement des médias.",
     "myFav": "MES FAVORIS",
     "random": "ALÉATOIRE",
+    "movie": "Film",
+    "drama": "Série",
+    "anime": "Animé",
     "filter": "FILTRER"
   },
   "detail": {
