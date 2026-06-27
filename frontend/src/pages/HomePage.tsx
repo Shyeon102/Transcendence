@@ -144,18 +144,19 @@ const mockMediaList: Media[] = [
 // 컴포넌트
 
 const HomePage = () => {
-  const [source, setSource] = useState<"RANDOM" | "TRENDING">("TRENDING");
+  const [source, setSource] = useState<"RANDOM" | "TRENDING" | "MY FAV">("TRENDING");
   const [type, setType ] = useState<string | null>(null);
   const { t } = useI18n();
   const [triggerSearch, searchResult] = useLazySearchMediaQuery();
   const user = useSelector((state: RootState) => state.auth.user);
   const userId = user?.id;
+  const shouldSkipMediaList = source === "MY FAV" && !userId;
   const { data, isLoading, error } = 
     useGetMediaListQuery({
       source,
       type,
       userId,
-    });
+    }, { skip: shouldSkipMediaList });
 
   const isDemo = user?.username === "demo";
 
