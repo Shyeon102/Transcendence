@@ -11,7 +11,6 @@ const ChatRoomListPage = () => {
 
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white">
-      <Header />
       {/* 본문 */}
       <div className="px-[4.72vw] pt-[3vh]">
         {/* 페이지 내부 헤더 */}

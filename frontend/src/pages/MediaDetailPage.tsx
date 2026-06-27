@@ -107,7 +107,6 @@ const MediaDetailPage = () => {
             {t("detail.loading")}
           </p>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -120,14 +119,12 @@ const MediaDetailPage = () => {
             {t("detail.noData")}
           </p>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white flex flex-col">
-      <Header />
       {/* 레이아웃: 가로로 3등분 */}
       <div className="flex mt-[7vh]">
         {/* 미디어 변환 탭: 제일 왼쪽 */}
@@ -348,8 +345,6 @@ const MediaDetailPage = () => {
         </div>
       </div>
 
-      {/* 푸터 */}
-      <Footer />
     </div>
   );
 };

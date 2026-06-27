@@ -185,6 +185,11 @@ def rag_recommendations(
     top_k: int = 10
 ) -> pd.Series:
     parsed_query = parse_query(query)
+    # query debug
+    logger.info("~~~~~~~~~~ 💚GEMINI RAW RESULT💚 ~~~~~~~~~~")
+    logger.info(parsed_query.json(indent=2, ensure_ascii=False))
+    logger.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
     query_embedded = embed_query(parsed_query.embedding_text)
     return retrieve_media(
         query_embedded,

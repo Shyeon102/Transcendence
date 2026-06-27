@@ -264,8 +264,7 @@ const HomePage = () => {
 
   return (
     // 전체 페이지: 세로 쌓기 (헤더 -> 검색바 -> 필터 -> 카드 -> 화살표 -> 푸터)
-    <div className="flex flex-col min-h-screen bg-[#0c0c0b] text-white overflow-x-hidden">
-      <Header />
+    <div className="flex flex-col h-screen bg-[#0c0c0b] text-white overflow-x-hidden">
       {/* 검색바 */}
       <div className="flex justify-center pt-[5vh] pb-[5vh]">
         <div className="flex items-center gap-2 bg-transparent border border-white/30 rounded-full px-[2vw] w-[43vw] h-[4.3vh]">
@@ -305,6 +304,17 @@ const HomePage = () => {
           }
         >
           {t("main.random")}
+        </button>
+        <button
+          onClick={() => setSource("TREDING")}
+          className={
+            source === "TREDING"
+              ? filterBtnClass +
+                " shadow-[0_0_28px_1px_#00ffff] border-[#00ffff] text-[#00ffff]"
+              : filterBtnClass + " border-white/30 text-white"
+          }
+        >
+          {t("main.trending")}
         </button>
         <button
           onClick={() => setSource("MY FAV")}
@@ -405,9 +415,6 @@ const HomePage = () => {
           »
         </button>
       </div>
-
-      {/* footer */}
-      <Footer />
     </div>
   );
 };
