@@ -10,6 +10,7 @@ import type { RootState } from "../store";
 import {
   useGetMediaListQuery,
   useLazySearchMediaQuery,
+  useLazyRagMediaQuery,
 } from "../store/api/mediaApi";
 
 // 목업 데이터
@@ -148,6 +149,7 @@ const HomePage = () => {
   const [type, setType ] = useState<string | null>(null);
   const { t } = useI18n();
   const [triggerSearch, searchResult] = useLazySearchMediaQuery();
+  const [triggerRag, ragResult] = useLazyRagMediaQuery();
   const user = useSelector((state: RootState) => state.auth.user);
   const userId = user?.id;
   const shouldSkipMediaList = source === "MY FAV" && !userId;
@@ -158,6 +160,8 @@ const HomePage = () => {
       userId,
     }, { skip: shouldSkipMediaList });
 
+
+
   const isDemo = user?.username === "demo";
 
   // AI 검색 기능
@@ -166,9 +170,11 @@ const HomePage = () => {
 
   const mediaList = isDemo
     ? mockMediaList
-    : searchQuery.trim() && searchResult.data
-      ? searchResult.data.slice(0, 10)
-      : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
+    : isAiMode
+      ? ragResult.data ?? []
+      : searchQuery.trim() && searchResult.data
+        ? searchResult.data.slice(0, 10)
+        : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
 
   // 필터 버튼 공통 스타일 (반복 방지용)
   const filterBtnClass =
@@ -215,11 +221,14 @@ const HomePage = () => {
     }
   };
 
-  const handleSearch = () => {
+
+  const handleSearch = async () => {
     if (!searchQuery.trim()) return; // 빈 검색어면 아무것도 안 함
 
     if (isAiMode) {
       // AI(RAG) 검색 — 백엔드 머지되면 연결
+      // RAG 검색 결과 처리 (예: mediaList 업데이트)
+      triggerRag(searchQuery);
       console.log("RAG 검색:", searchQuery);
     } else {
       // 일반 검색
@@ -308,20 +317,48 @@ const HomePage = () => {
         >
           {t("main.myFav")}
         </button>
-
-        <button onClick={() => setType("movie")}>{t("main.movie")}</button>
-        <button onClick={() => setType("drama")}>{t("main.drama")}</button>
-        <button onClick={() => setType("anime")}>{t("main.anime")}</button>
-
+        
+        <button
+          onClick={() => setType(type === "movie" ? "" : "movie")}
+          className={
+            type === "movie"
+              ? filterBtnClass +
+                " shadow-[0_0_28px_1px_#a855f7] border-[#a855f7] text-[#a855f7]"
+              : filterBtnClass + " border-white/30 text-white"
+          }
+        >
+          {t("main.movie")}
+        </button>
+                <button
+          onClick={() => setType(type === "drama" ? "" : "drama")}
+          className={
+            type === "drama"
+              ? filterBtnClass +
+                " shadow-[0_0_28px_1px_#a855f7] border-[#a855f7] text-[#a855f7]"
+              : filterBtnClass + " border-white/30 text-white"
+          }
+        >
+          {t("main.drama")}
+        </button>
+                <button
+          onClick={() => setType(type === "anime" ? "" : "anime")}
+          className={
+            type === "anime"
+              ? filterBtnClass +
+                " shadow-[0_0_28px_1px_#a855f7] border-[#a855f7] text-[#a855f7]"
+              : filterBtnClass + " border-white/30 text-white"
+          }
+        >
+          {t("main.anime")}
+        </button>
       </div>
-
       {/* 카드 슬라이드 */}
       {/* relative: 기준점 역할 */}
       <div
         ref={scrollRef}
         className="relative w-full overflow-x-auto overflow-y-visible scroll-smooth"
       >
-        <div className="flex gap-[3.4vw] px-[42.5vw]">
+        <div className="flex gap-[3.4vw] px-[2.5vw]">
           {mediaList.length ? (
             mediaList.map((media) => (
               <div
@@ -344,6 +381,7 @@ const HomePage = () => {
               {t("main.noData")}
             </div>
           )}
+          <div className="shrink-0 w-[0.05vw]" />
         </div>
       </div>
 
