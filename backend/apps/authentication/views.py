@@ -2,9 +2,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from django.contrib.auth import get_user_model
 from .services import login_user
 from .serializer import RegisterSerializer
 from apps.users.serializers import UserSerializer
+
+User = get_user_model()
 
 
 class LogoutView(APIView):
@@ -86,4 +91,49 @@ class ChangePasswordView(APIView):
         return Response({
             "success": True,
             "message": "Password changed successfully."
+        })
+
+
+def verify_google_token(token):
+    return id_token.verify_oauth2_token(
+        token,
+        requests.Request(),
+        audience="YOUR_GOOGLE_CLIENT_ID"
+    )
+
+
+def get_or_create_user_from_google(data):
+    email = data["email"]
+
+    user, created = User.objects.get_or_create(
+        email=email,
+        defaults={
+            "username": email.split("@")[0],
+            "google_id": data["sub"],
+            "auth_provider": "google",
+        }
+        )
+
+    if created:
+        user.set_unusable_password()
+        user.save()
+
+    return user
+
+
+class GoogleLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        id_token = request.data.get("id_token")
+
+        user_info = verify_google_token(id_token)
+
+        user = get_or_create_user_from_google(user_info)
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
         })
