@@ -1,11 +1,10 @@
-import Header from "../components/Header";
+
 import { useI18n } from "../lib/i18n";
 import MediaCard from "../components/MediaCard";
 import type { Media, Genre } from "../types/media";
 import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import Footer from "../components/Footer";
 import type { RootState } from "../store";
 import {
   useGetMediaListQuery,

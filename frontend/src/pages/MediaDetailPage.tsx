@@ -1,11 +1,9 @@
 import { useI18n } from "../lib/i18n";
-import Header from "../components/Header";
 import { useGetMediaReviewsQuery } from "../store/api/authApi";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetMediaDetailQuery } from "../store/api/mediaApi";
 import { useSelector } from "react-redux";
-import Footer from "../components/Footer";
 import type { Media, Genre } from "../types/media";
 import type { RootState } from "../store";
 

@@ -1,4 +1,3 @@
-import Header from "../components/Header";
 import { useGetChatRoomsQuery } from "../store/api/chatApi";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
