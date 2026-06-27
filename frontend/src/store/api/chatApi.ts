@@ -42,7 +42,14 @@ export const chatApi = createApi({
       }),
       invalidatesTags: ["ChatRoom"],
     }),
+    deleteChatRoom: builder.mutation<void, number>({
+      query: (roomId) => ({
+        url: `/chat/rooms/${roomId}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ChatRoom"],
+    }),
   }),
 });
 
-export const { useGetChatRoomsQuery, useCreateChatRoomMutation } = chatApi; // 훅 노출: 이 훅을 컴포넌트에서 호출하면 데이터/로딩/에러 다 받아짐
+export const { useGetChatRoomsQuery, useCreateChatRoomMutation, useDeleteChatRoomMutation, } = chatApi; // 훅 노출: 이 훅을 컴포넌트에서 호출하면 데이터/로딩/에러 다 받아짐
