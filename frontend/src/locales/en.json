@@ -225,8 +225,8 @@
   },
   "mypage": {
     "eyebrow": "Personal Space",
-    "title": "MY PAGE",
-    "description": "A first-pass personal dashboard for your reviews, saved titles, and recent activity.",
+    "title": "My Activity",
+    "description": "Review your activity, saved titles, and recent updates in one place.",
     "reviewSection": "My Reviews",
     "watchlistSection": "Watchlist",
     "recentActivity": "Recent Activity",

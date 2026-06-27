@@ -225,8 +225,8 @@
   },
   "mypage": {
     "eyebrow": "Espace personnel",
-    "title": "MY PAGE",
-    "description": "Une premiere version du tableau de bord personnel pour vos critiques, vos favoris et votre activite recente.",
+    "title": "Mon activite",
+    "description": "Retrouvez vos critiques, vos titres enregistres et votre activite recente au meme endroit.",
     "reviewSection": "Mes critiques",
     "watchlistSection": "Liste a voir",
     "recentActivity": "Activite recente",

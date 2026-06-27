@@ -225,8 +225,8 @@
   },
   "mypage": {
     "eyebrow": "내 공간",
-    "title": "MY PAGE",
-    "description": "내 리뷰, 찜한 작품, 최근 활동을 한 화면에서 정리하는 개인 대시보드 초안입니다.",
+    "title": "내 활동",
+    "description": "내 리뷰, 찜한 작품, 최근 활동을 한 화면에서 확인합니다.",
     "reviewSection": "내 리뷰",
     "watchlistSection": "찜 목록",
     "recentActivity": "최근 활동",
