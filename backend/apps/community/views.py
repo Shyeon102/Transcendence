@@ -336,3 +336,26 @@ class ReportDetailView(APIView):
         report.save()
 
         return Response({"status": report.status})
+
+
+class ReportView(APIView):
+    permission_classes = [isAdminUser]
+
+    def get(self, request):
+        reports = (
+            Report.objects
+            .select_related(
+                "user",
+                "post",
+                "comment",
+                "processed_by"
+            )
+            .order_by("-created_at")
+        )
+
+        serializer = ReportSerializer(reports, many=True)
+
+        return Response(
+            {"reports": serializer.data},
+            status=status.HTTP_200_OK
+        )

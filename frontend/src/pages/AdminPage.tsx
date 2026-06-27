@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { useI18n } from "../lib/i18n";
 import type { RootState } from "../store";
 import {
-  useBanAdminUserMutation,
   useGetAdminReportsQuery,
   useGetAdminUsersQuery,
   useProcessAdminReportMutation,
@@ -235,7 +234,27 @@ export default function AdminPage() {
               )}
             </div>
           </div>
-        ) : null}
+        </div>
+      ) : null}
+
+      {activeTab === "users" ? (
+        <div>
+          <div className="mb-5 flex flex-wrap gap-2">
+            {userFilterOptions.map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setUserFilter(option)}
+                className={`border px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] transition ${
+                  userFilter === option
+                    ? "border-[#d63e2a]/60 bg-[#d63e2a]/10 text-[#f0ead0]"
+                    : "border-[#f0ead0]/10 text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]"
+                }`}
+              >
+                {t(`admin.status.${option}`)}
+              </button>
+            ))}
+          </div>
 
         {activeTab === "users" ? (
           <div>

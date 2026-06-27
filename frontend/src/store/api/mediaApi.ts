@@ -57,9 +57,9 @@ export const mediaApi = createApi({
     getMediaList: builder.query<
       Media[],
       {
-        source: "RANDOM" | "MY FAV";
+        source: "RANDOM" | "TRENDING" | "MY FAV";
         type: string | null;
-        userId: number
+        userId?: number;
       }
     >({
       // TODO) getMediaDetail (단일 mock, 백엔드 detail endpoint 머지되면 query로 교체)
@@ -73,9 +73,10 @@ export const mediaApi = createApi({
         const qs = queryString ? `?${queryString}` : "";
 
         if (source === "RANDOM") return `/media/random/${qs}`;
-        if (source === "MY FAV") return `/ai/recommend/${userId}${qs}`;
+        if (source === "TRENDING") return `/media/trending/${qs}`;
+        if (source === "MY FAV" && userId) return `/ai/recommend/${userId}${qs}`;
 
-        return `/media/random/${qs}`;
+        return `/media/trending/${qs}`;
       },
       transformResponse: (response: BackendMediaListResponse) => {
         return response.media.map((movie) => {
@@ -162,6 +163,40 @@ export const mediaApi = createApi({
         });
       },
     }),
+    // /ai/rag/?q= (RAG 검색)
+    ragMedia: builder.query<
+      Media[],
+      string
+    >({
+      query: (q) => `/ai/rag/?q=${encodeURIComponent(q)}`,
+      transformResponse: (response: BackendMediaListResponse) => {
+        return response.media.map((movie) => {
+          const runtimeMinutes = movie.runtime ?? 0;
+          const hours = Math.floor(runtimeMinutes / 60);
+          const minutes = runtimeMinutes % 60;
+
+          return {
+            id: movie.id,
+            title: movie.title,
+            director: movie.director ?? "",
+            genre: movie.genres,
+            releaseDate: movie.release_date,
+            country: movie.country,
+            language: movie.language ?? "",
+            cast: movie.cast.split(", "),
+            story: movie.description,
+            ageRating: movie.age_rating ?? "",
+            starRating: movie.avg_rating,
+            runtime: `${hours}h ${minutes}m`,
+            type: movie.media_type,
+            frontPosterUrl: movie.image_url,
+            sidePosterUrl: movie.side_poster_url ?? "",
+            reviews: [],
+          };
+        });
+      },
+    }),
+
   }),
 });
 
@@ -169,4 +204,5 @@ export const {
   useGetMediaListQuery,
   useGetMediaDetailQuery,
   useLazySearchMediaQuery,
+  useLazyRagMediaQuery,
 } = mediaApi;
