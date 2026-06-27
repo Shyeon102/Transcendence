@@ -1,7 +1,7 @@
 import { apiSlice } from "../slices/apiSlice";
 
 export type AdminReportStatus = "pending" | "approved" | "rejected";
-export type AdminAccountStatus = "active" | "banned";
+export type AdminAccountStatus = "active" | "suspended" | "banned";
 
 export type AdminReport = {
   id: number;
@@ -20,9 +20,49 @@ export type AdminUser = {
   email: string;
   status: AdminAccountStatus;
   reportCount: number;
+  isStaff: boolean;
 };
 
-type ListResponse<T> = T[] | { results?: T[] };
+type ListResponse<T> = T[] | { results?: T[]; reports?: T[]; users?: T[] };
+
+type RawAdminReport = {
+  id: number;
+  reporter?: string;
+  reporter_username?: string;
+  reporterUsername?: string;
+  reporter_id?: number;
+  user_id?: number;
+  target?: string;
+  target_title?: string;
+  targetTitle?: string;
+  target_type?: string;
+  targetType?: string;
+  target_id?: number;
+  targetId?: number;
+  report_type?: string;
+  type?: string;
+  reason?: string;
+  created_at?: string;
+  createdAt?: string;
+  status?: AdminReportStatus;
+  hidden?: boolean;
+  is_hidden?: boolean;
+};
+
+type RawAdminUser = {
+  id?: number;
+  username?: string;
+  email?: string;
+  status?: AdminAccountStatus;
+  report_count?: number;
+  reportCount?: number;
+  is_banned?: boolean;
+  isBanned?: boolean;
+  is_active?: boolean;
+  isActive?: boolean;
+  is_staff?: boolean;
+  isStaff?: boolean;
+};
 
 const toList = <T>(response: ListResponse<T>): T[] => {
   if (Array.isArray(response)) {
@@ -61,6 +101,7 @@ const normalizeReport = (report: RawAdminReport): AdminReport => {
     reason: report.reason ?? "",
     createdAt: report.createdAt ?? report.created_at ?? "",
     status: report.status ?? "pending",
+    hidden: report.hidden ?? report.is_hidden ?? false,
   };
 };
 
@@ -95,10 +136,10 @@ export const adminApi = apiSlice.injectEndpoints({
       AdminReport,
       { id: number; status: AdminReportStatus; hidden?: boolean }
     >({
-      query: ({ id, status }) => ({
+      query: ({ id, status, hidden }) => ({
         url: `/admin/reports/${id}/`,
         method: "PATCH",
-        body: { status },
+        body: hidden === undefined ? { status } : { status, hidden },
       }),
       invalidatesTags: ["AdminReports"],
     }),
