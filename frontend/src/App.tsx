@@ -73,17 +73,17 @@ export default function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/home" element={<HomePage />} />
             <Route path="/media/:id" element={<MediaDetailPage />} />
             <Route path="/community" element={<CommunityPage />} />
             <Route path="/community/:id" element={<PostDetailPage />} />
             <Route path="/privacy" element={<LegalPage documentKey="privacy" />} />
             <Route path="/terms" element={<LegalPage documentKey="terms" />} />
             <Route path="/credits" element={<LegalPage documentKey="credits" />} />
+            <Route path="/chat/rooms" element={<ChatRoomListPage />} />
+            <Route path="/chat/rooms/:id" element={<ChatRoomPage />} />
           </Route>
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/media/:id" element={<MediaDetailPage />} />
-          <Route path="/chat/rooms" element={<ChatRoomListPage />} />
-          <Route path="/chat/rooms/:id" element={<ChatRoomPage />} />
+
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>
