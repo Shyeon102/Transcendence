@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { AuthSession, AuthUser, RefreshTokenResponse } from '../../types';
-import { loadAuthSession } from './authStorage';
+import { loadAuthSession, clearAuthSession, saveAuthSession } from './authStorage';
 
 interface AuthState {
   user: AuthUser | null;
@@ -34,6 +34,11 @@ const authSlice = createSlice({
       state.accessToken = action.payload.token;
       state.refreshToken = action.payload.refreshToken ?? null;
       state.isAuthenticated = true;
+      saveAuthSession({
+        user: action.payload.user,
+        accessToken: action.payload.token,
+        refreshToken: action.payload.refreshToken ?? null,
+      });
     },
     updateTokens: (state, action: PayloadAction<RefreshTokenResponse>) => {
       state.accessToken = action.payload.token;
@@ -41,12 +46,20 @@ const authSlice = createSlice({
         state.refreshToken = action.payload.refreshToken;
       }
       state.isAuthenticated = Boolean(state.user && state.accessToken);
+      if (state.user) {
+        saveAuthSession({
+          user: state.user,
+          accessToken: action.payload.token,
+          refreshToken: action.payload.refreshToken ?? state.refreshToken,
+        });
+      }
     },
     logout: (state) => {
       state.user = null;
       state.accessToken = null;
       state.refreshToken = null;
       state.isAuthenticated = false;
+      clearAuthSession();
     },
     updateProfile: (state, action: PayloadAction<Partial<AuthUser>>) => {
       if (state.user) {
