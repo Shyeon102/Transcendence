@@ -135,7 +135,7 @@
     "nicknameHintDefault": "3-20 characters, letters and numbers only",
     "nicknameHintShort": "Too short",
     "nicknameHintInvalid": "Letters, numbers, and underscores only",
-    "nicknameHintAvailable": "Available",
+    "nicknameHintFormatValid": "Format looks valid",
     "password": "Password",
     "passwordPlaceholder": "At least 8 characters",
     "passwordConfirm": "Confirm password",
