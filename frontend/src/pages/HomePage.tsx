@@ -149,7 +149,7 @@ const HomePage = () => {
   const [type, setType ] = useState<string | null>(null);
   const { t } = useI18n();
   const [triggerSearch, searchResult] = useLazySearchMediaQuery();
-  const [triggerRag] = useLazyRagMediaQuery();
+  const [triggerRag, ragResult] = useLazyRagMediaQuery();
   const user = useSelector((state: RootState) => state.auth.user);
   const userId = user?.id;
   const shouldSkipMediaList = source === "MY FAV" && !userId;
@@ -170,9 +170,11 @@ const HomePage = () => {
 
   const mediaList = isDemo
     ? mockMediaList
-    : searchQuery.trim() && searchResult.data
-      ? searchResult.data.slice(0, 10)
-      : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
+    : isAiMode
+      ? ragResult.data ?? []
+      : searchQuery.trim() && searchResult.data
+        ? searchResult.data.slice(0, 10)
+        : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
 
   // 필터 버튼 공통 스타일 (반복 방지용)
   const filterBtnClass =
@@ -219,20 +221,14 @@ const HomePage = () => {
     }
   };
 
-  const [ragMediaList, setRagMediaList] = useState<Media[]>([]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return; // 빈 검색어면 아무것도 안 함
 
     if (isAiMode) {
       // AI(RAG) 검색 — 백엔드 머지되면 연결
-      const response = await triggerRag(searchQuery).unwrap();
-      setRagMediaList(response.media); 
-      if (!response.ok) {
-        console.error("RAG 검색 실패:", response.statusText);
-        return;
-      }
       // RAG 검색 결과 처리 (예: mediaList 업데이트)
+      triggerRag(searchQuery);
       console.log("RAG 검색:", searchQuery);
     } else {
       // 일반 검색
@@ -362,7 +358,7 @@ const HomePage = () => {
         ref={scrollRef}
         className="relative w-full overflow-x-auto overflow-y-visible scroll-smooth"
       >
-        <div className="flex gap-[3.4vw] px-[42.5vw]">
+        <div className="flex gap-[3.4vw] px-[2.5vw]">
           {mediaList.length ? (
             mediaList.map((media) => (
               <div
@@ -385,6 +381,7 @@ const HomePage = () => {
               {t("main.noData")}
             </div>
           )}
+          <div className="shrink-0 w-[0.05vw]" />
         </div>
       </div>
 
