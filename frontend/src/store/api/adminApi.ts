@@ -1,6 +1,7 @@
 import { apiSlice } from "../slices/apiSlice";
 
 export type AdminReportStatus = "pending" | "approved" | "rejected";
+export type AdminReportAction = "approve" | "reject";
 export type AdminAccountStatus = "active" | "banned";
 
 export type AdminReport = {
@@ -120,6 +121,11 @@ const normalizeUser = (user: RawAdminUser): AdminUser => {
   };
 };
 
+const actionByStatus: Record<Exclude<AdminReportStatus, "pending">, AdminReportAction> = {
+  approved: "approve",
+  rejected: "reject",
+};
+
 export const adminApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAdminReports: builder.query<AdminReport[], void>({
@@ -135,7 +141,7 @@ export const adminApi = apiSlice.injectEndpoints({
       query: ({ id, status }) => ({
         url: `/community/reports/${id}/`,
         method: "PATCH",
-        body: { status },
+        body: { action: actionByStatus[status] },
       }),
       transformResponse: (response: RawAdminReport) => normalizeReport(response),
       invalidatesTags: ["AdminReports"],
