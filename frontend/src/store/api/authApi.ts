@@ -81,18 +81,28 @@ type GoogleLoginRequest = {
   id_token: string;
 };
 
-type RawDashboardReview = {
+type RawActivityInteraction = {
+  media_id: number;
+  media_title: string;
+};
+
+type RawActivityReview = {
   id: number;
-  title: string;
-  note: string;
-  when: string;
+  media_title?: string;
+  content?: string;
   rating: number;
+  created_at?: string;
 };
 
 type RawDashboard = {
-  activity?: string[];
-  recent_activity?: string[];
-  reviews?: RawDashboardReview[];
+  interactions?: {
+    like?: RawActivityInteraction[];
+    dislike?: RawActivityInteraction[];
+    watchlist?: RawActivityInteraction[];
+    watched?: RawActivityInteraction[];
+  };
+  reviews?: RawActivityReview[];
+  // demo/legacy 응답 호환
   watchlist?: string[];
   activities?: string[];
 };
@@ -290,19 +300,25 @@ const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse 
   };
 };
 
-const normalizeDashboardReview = (review: RawDashboardReview): DashboardReview => ({
+const normalizeDashboardReview = (review: RawActivityReview): DashboardReview => ({
   id: review.id,
-  title: review.title,
-  note: review.note,
-  when: review.when,
+  title: review.media_title ?? '',
+  note: review.content ?? '',
+  when: review.created_at ?? '',
   rating: review.rating,
 });
 
-const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
-  reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
-  watchlist: payload.watchlist ?? [],
-  activities: payload.activities ?? payload.activity ?? payload.recent_activity ?? [],
-});
+const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => {
+  const watchlistItems = payload.interactions?.watchlist ?? [];
+
+  return {
+    reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
+    watchlist: watchlistItems.length
+      ? watchlistItems.map((item) => item.media_title)
+      : payload.watchlist ?? [],
+    activities: payload.activities ?? [],
+  };
+};
 
 const normalizeReview = (review: RawReview): MediaReview => ({
   id: review.id,
