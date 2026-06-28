@@ -45,6 +45,10 @@ export default function LoginPage() {
       navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
+      if (apiError.status === 401) {
+        setErrorMsg(t('login.invalidCredentials'));
+        return;
+      }
       setErrorMsg(apiError.message ?? t('common.error'));
     }
   };

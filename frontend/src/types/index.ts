@@ -47,6 +47,7 @@ export interface SignupResponse {
 export interface AuthErrorResponse {
   message: string;
   fields?: Record<string, string[]>;
+  status?: number;
 }
 
 export interface AuthSession {

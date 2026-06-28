@@ -541,6 +541,7 @@ export const authApi = createApi({
           error: {
             message: toMessage(data) ?? 'Request failed.',
             fields: toFieldErrors(data),
+            status: typeof error.status === 'number' ? error.status : undefined,
           },
         };
       },
@@ -734,6 +735,12 @@ export const authApi = createApi({
           },
         };
       },
+    }),
+    deleteAccount: builder.mutation<void, void>({
+      query: () => ({
+        url: '/users/profile/',
+        method: 'DELETE',
+      }),
     }),
     changePassword: builder.mutation<{ success: boolean }, PasswordChangeRequest>({
       query: ({ currentPassword, newPassword }) => ({
@@ -973,6 +980,7 @@ export const {
   useBanAdminUserMutation,
   useChangePasswordMutation,
   useCreateMediaReviewMutation,
+  useDeleteAccountMutation,
   useDeleteMediaReviewMutation,
   useGetAdminReportsQuery,
   useGetAdminUsersQuery,
