@@ -135,7 +135,7 @@
     "nicknameHintDefault": "3-20 characters, letters and numbers only",
     "nicknameHintShort": "Too short",
     "nicknameHintInvalid": "Letters, numbers, and underscores only",
-    "nicknameHintAvailable": "Available",
+    "nicknameHintFormatValid": "Format looks valid",
     "password": "Password",
     "passwordPlaceholder": "At least 8 characters",
     "passwordConfirm": "Confirm password",
@@ -221,6 +221,36 @@
       "abuse": "Abuse or harassment",
       "nsfw": "Inappropriate content",
       "copyright": "Copyright infringement"
+    }
+  },
+  "admin": {
+    "eyebrow": "Moderation workspace",
+    "title": "Admin console",
+    "description": "Review reported content and manage user account status.",
+    "connectedNotice": "Connected to admin API. Actions are sent to the server.",
+    "loading": "Loading...",
+    "reportsLoadError": "Failed to load reports.",
+    "usersLoadError": "Failed to load users.",
+    "emptyReports": "No reports match this filter.",
+    "emptyUsers": "No users match this filter.",
+    "noReason": "No report reason was provided.",
+    "reportsEyebrow": "Content moderation",
+    "reportsTitle": "Reports",
+    "usersEyebrow": "Account moderation",
+    "usersTitle": "Users",
+    "reportedBy": "Reported by",
+    "reportCount": "Reports: {{count}}",
+    "approve": "Approve",
+    "reject": "Reject",
+    "ban": "Ban",
+    "reactivate": "Reactivate",
+    "status": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "active": "Active",
+      "banned": "Banned"
     }
   },
   "mypage": {
@@ -309,5 +339,18 @@
     "readMore": "Read More",
     "noData": "No media detail data yet.",
     "loading": "Loading..."
+  },
+  "chat": {
+    "eyebrow": "Chat Rooms",
+    "title": "Join a Room",
+    "nodescription" : "No description",
+    "description": "Connect with others in real-time. Create or join a chat room to start chatting.",
+    "createRoom": "Create Room",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this room?",
+    "deleteError": "Failed to delete the room. Only the creator can delete it.",
+    "loading": "Loading chat rooms...",
+    "loadError": "Failed to load chat rooms.",
+    "empty": "No chat rooms available. Create one to get started!"
   }
 }

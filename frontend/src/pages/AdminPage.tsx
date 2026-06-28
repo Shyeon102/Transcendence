@@ -207,24 +207,26 @@ export default function AdminPage() {
                     <p className="mt-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#c8c2a8]">
                       {report.reason}
                     </p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => void handleReportStatus(report.id, "approved")}
-                        disabled={report.status === "approved" || isProcessingReport}
-                        className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10 disabled:opacity-30 disabled:hover:bg-transparent"
-                      >
-                        {t("admin.approve")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void handleReportStatus(report.id, "rejected")}
-                        disabled={report.status === "rejected" || isProcessingReport}
-                        className="border border-[#f0ead0]/15 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#f0ead0]/30 disabled:opacity-30 disabled:hover:border-[#f0ead0]/15"
-                      >
-                        {t("admin.reject")}
-                      </button>
-                    </div>
+                    {report.status === "pending" ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void handleReportStatus(report.id, "approved")}
+                          disabled={isProcessingReport}
+                          className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                        >
+                          {t("admin.approve")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleReportStatus(report.id, "rejected")}
+                          disabled={isProcessingReport}
+                          className="border border-[#f0ead0]/15 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#f0ead0]/30 disabled:opacity-30 disabled:hover:border-[#f0ead0]/15"
+                        >
+                          {t("admin.reject")}
+                        </button>
+                      </div>
+                    ) : null}
                   </article>
                   );
                 })

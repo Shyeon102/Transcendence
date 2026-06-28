@@ -135,7 +135,7 @@
     "nicknameHintDefault": "3-20자, 영문자와 숫자만 사용",
     "nicknameHintShort": "너무 짧습니다",
     "nicknameHintInvalid": "영문자, 숫자, 밑줄만 사용할 수 있습니다",
-    "nicknameHintAvailable": "사용 가능합니다",
+    "nicknameHintFormatValid": "사용 가능한 형식입니다",
     "password": "비밀번호",
     "passwordPlaceholder": "8자 이상 입력",
     "passwordConfirm": "비밀번호 확인",
@@ -221,6 +221,36 @@
       "abuse": "욕설·괴롭힘",
       "nsfw": "부적절한 콘텐츠",
       "copyright": "저작권 침해"
+    }
+  },
+  "admin": {
+    "eyebrow": "운영 관리",
+    "title": "관리자 콘솔",
+    "description": "신고된 콘텐츠를 검토하고 사용자 계정 상태를 관리합니다.",
+    "connectedNotice": "관리자 API에 연결되었습니다. 동작은 서버로 전송됩니다.",
+    "loading": "불러오는 중...",
+    "reportsLoadError": "신고 목록을 불러오지 못했습니다.",
+    "usersLoadError": "사용자 목록을 불러오지 못했습니다.",
+    "emptyReports": "조건에 맞는 신고가 없습니다.",
+    "emptyUsers": "조건에 맞는 사용자가 없습니다.",
+    "noReason": "신고 사유가 없습니다.",
+    "reportsEyebrow": "콘텐츠 관리",
+    "reportsTitle": "신고 목록",
+    "usersEyebrow": "계정 관리",
+    "usersTitle": "사용자",
+    "reportedBy": "신고자",
+    "reportCount": "신고 {{count}}건",
+    "approve": "승인",
+    "reject": "반려",
+    "ban": "차단",
+    "reactivate": "정지 해제",
+    "status": {
+      "all": "전체",
+      "pending": "대기",
+      "approved": "승인",
+      "rejected": "반려",
+      "active": "활성",
+      "banned": "차단"
     }
   },
   "mypage": {
@@ -309,5 +339,24 @@
     "readMore": "더 보기",
     "noData": "미디어 정보가 아직 없어요.",
     "loading": "불러오는 중..."
+  },
+  "chat": {
+    "title": "채팅",
+    "nodescription" : "설명 없음",
+    "eyebrow": "실시간 대화",
+    "createRoom": "방 만들기",
+    "joinRoom": "방 참여",
+    "roomNamePlaceholder": "방 이름을 입력하세요.",
+    "roomPasswordPlaceholder": "비밀번호 (선택)",
+    "create": "생성",
+    "join": "참여",
+    "cancel": "취소",
+    "delete": "삭제",
+    "deleteRoomConfirm": "이 방을 삭제할까요?",
+    "deleteRoomError": "방을 삭제하지 못했습니다. 방장만 삭제할 수 있습니다.",
+    "loadingRooms": "방 목록 불러오는 중...",
+    "noRooms": "참여 가능한 방이 없습니다.",
+    "enterRoomPassword": "비밀번호를 입력하세요.",
+    "passwordIncorrect": "비밀번호가 틀렸습니다."
   }
 }

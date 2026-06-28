@@ -67,7 +67,19 @@ const toList = <T>(response: ListResponse<T>): T[] => {
     return response;
   }
 
-  return response.results ?? response.reports ?? response.users ?? [];
+  if (Array.isArray(response.results)) {
+    return response.results;
+  }
+
+  if (Array.isArray(response.reports)) {
+    return response.reports;
+  }
+
+  if (Array.isArray(response.users)) {
+    return response.users;
+  }
+
+  return [];
 };
 
 const normalizeReport = (report: RawAdminReport): AdminReport => {
