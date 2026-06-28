@@ -1,41 +1,21 @@
+import type { DashboardReview } from '../types';
 import EmptyState from './ui/EmptyState';
 import SectionCard from './ui/SectionCard';
 
-const reviewItems = [
-  {
-    title: 'The Substance',
-    note: 'Body horror, dark satire, and a finale that escalates without apology.',
-    when: '2 hours ago',
-  },
-  {
-    title: 'Frieren',
-    note: 'Quiet fantasy pacing done right. Episode arcs land with almost no wasted motion.',
-    when: 'Yesterday',
-  },
-];
-
-const watchlistItems = [
-  'Perfect Blue',
-  'Aftersun',
-  'Mob Psycho 100',
-  'Challengers',
-];
-
-const activityItems = [
-  'You liked 8 reviews this week.',
-  'Two followers reacted to your recommendation list.',
-  'Your watchlist grew by 4 titles.',
-];
+type DashboardReview = {
+  title: string;
+  note: string;
+  when: string;
+};
 
 type MyPageDashboardProps = {
   activities?: string[];
   entriesLabel: string;
   emptyLabel: string;
-  isDemo: boolean;
   logLabel: string;
   queueLabel: string;
   recentActivityLabel: string;
-  reviews?: typeof reviewItems;
+  reviews?: DashboardReview[];
   reviewSectionLabel: string;
   watchlist?: string[];
   watchlistLabel: string;
@@ -45,7 +25,6 @@ export default function MyPageDashboard({
   activities: actualActivities,
   entriesLabel,
   emptyLabel,
-  isDemo,
   logLabel,
   queueLabel,
   recentActivityLabel,
@@ -54,9 +33,9 @@ export default function MyPageDashboard({
   watchlist: actualWatchlist,
   watchlistLabel,
 }: MyPageDashboardProps) {
-  const reviews = actualReviews?.length ? actualReviews : isDemo ? reviewItems : [];
-  const watchlist = actualWatchlist?.length ? actualWatchlist : isDemo ? watchlistItems : [];
-  const activities = actualActivities?.length ? actualActivities : isDemo ? activityItems : [];
+  const reviews = actualReviews ?? [];
+  const watchlist = actualWatchlist ?? [];
+  const activities = actualActivities ?? [];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">

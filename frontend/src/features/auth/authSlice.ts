@@ -63,7 +63,15 @@ const authSlice = createSlice({
     },
     updateProfile: (state, action: PayloadAction<Partial<AuthUser>>) => {
       if (state.user) {
-        Object.assign(state.user, action.payload);
+        const updatedUser = { ...state.user, ...action.payload };
+        state.user = updatedUser;
+        if (state.accessToken) {
+          saveAuthSession({
+            user: updatedUser,
+            accessToken: state.accessToken,
+            refreshToken: state.refreshToken,
+          });
+        }
       }
     },
   },
