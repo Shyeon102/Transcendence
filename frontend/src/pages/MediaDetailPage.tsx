@@ -119,6 +119,7 @@ const MediaDetailPage = () => {
       eye: interactions.some(i => i.action === 'watched'),
       like: interactions.some(i => i.action === 'like'),
       dislike: interactions.some(i => i.action === 'dislike'),
+      wish: interactions.some(i => i.action === 'watchlist'),
     });
   }, [interactions]);
 
@@ -130,7 +131,7 @@ const MediaDetailPage = () => {
     setMyReview(
       reviews.find((r) => r.username === user.username) ?? null
     );
-  }, [reviews, user.username]);
+  }, [reviews, user]);
 
   const [myRating, setMyRating] = useState(0);
   useEffect(() => {
