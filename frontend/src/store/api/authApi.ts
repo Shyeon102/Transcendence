@@ -14,7 +14,6 @@ import type {
   AdminReportStatus,
   AdminReportTargetType,
   AdminReportType,
-  AdminUser,
   AuthUser,
   DashboardReview,
   LoginRequest,
@@ -49,6 +48,8 @@ type RawAuthUser = {
   favorite_countries?: string[];
   isStaff?: boolean;
   is_staff?: boolean;
+  dateJoined?: string;
+  date_joined?: string;
 };
 
 type RawAuthResponse = {
@@ -82,10 +83,19 @@ type GoogleLoginRequest = {
 
 type RawDashboardReview = {
   id: number;
-  title: string;
-  note: string;
-  when: string;
+  title?: string;
+  note?: string;
+  when?: string;
+  media_title?: string;
+  content?: string;
+  created_at?: string;
   rating: number;
+  visibility?: 'public' | 'followers' | 'private';
+};
+
+type RawDashboardInteraction = {
+  media_id?: number;
+  media_title?: string;
 };
 
 type RawDashboard = {
@@ -94,6 +104,12 @@ type RawDashboard = {
   reviews?: RawDashboardReview[];
   watchlist?: string[];
   activities?: string[];
+  interactions?: {
+    like?: RawDashboardInteraction[];
+    dislike?: RawDashboardInteraction[];
+    watchlist?: RawDashboardInteraction[];
+    watched?: RawDashboardInteraction[];
+  };
 };
 
 type RawReview = {
@@ -153,19 +169,19 @@ type RawAdminReportsPayload = RawAdminReport[] | {
   results?: RawAdminReport[];
 };
 
-type RawAdminUser = RawAuthUser & {
-  is_active?: boolean;
-  isActive?: boolean;
-  date_joined?: string;
-  dateJoined?: string;
-};
+// type RawAdminUser = RawAuthUser & {
+//   is_active?: boolean;
+//   isActive?: boolean;
+//   date_joined?: string;
+//   dateJoined?: string;
+// };
 
-type RawAdminUsersPayload = RawAdminUser[] | {
-  users?: RawAdminUser[];
-  results?: RawAdminUser[];
-};
+// type RawAdminUsersPayload = RawAdminUser[] | {
+//   users?: RawAdminUser[];
+//   results?: RawAdminUser[];
+// };
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api').replace(/\/+$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'https://localhost:8443/api').replace(/\/+$/, '');
 const GOOGLE_AUTH_ENDPOINT = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT ?? '/auth/login/google/';
 
 const toMessage = (value: unknown): string | undefined => {
@@ -237,6 +253,7 @@ const normalizeUser = (user: RawAuthUser): AuthUser => ({
   favoriteTitles: user.favoriteTitles ?? user.favorite_titles,
   favoriteCountries: user.favoriteCountries ?? user.favorite_countries,
   isStaff: user.isStaff ?? user.is_staff,
+  dateJoined: user.dateJoined ?? user.date_joined,
 });
 
 const normalizeUserPayload = (payload: RawUserPayload): AuthUser => {
@@ -288,15 +305,19 @@ const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse 
 
 const normalizeDashboardReview = (review: RawDashboardReview): DashboardReview => ({
   id: review.id,
-  title: review.title,
-  note: review.note,
-  when: review.when,
+  title: review.title ?? review.media_title ?? `Review #${review.id}`,
+  note: review.note ?? review.content ?? '',
+  when: review.when ?? review.created_at ?? '',
   rating: review.rating,
+  visibility: review.visibility,
 });
 
 const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
   reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
-  watchlist: payload.watchlist ?? [],
+  watchlist:
+    payload.watchlist ??
+    payload.interactions?.watchlist?.map((item) => item.media_title ?? `Media #${item.media_id ?? '-'}`) ??
+    [],
   activities: payload.activities ?? payload.activity ?? payload.recent_activity ?? [],
 });
 
@@ -382,20 +403,6 @@ const normalizeAdminReport = (report: RawAdminReport): AdminReport => {
 const normalizeAdminReports = (payload: RawAdminReportsPayload): AdminReport[] => {
   const reports = Array.isArray(payload) ? payload : payload.results ?? payload.reports ?? [];
   return reports.map(normalizeAdminReport);
-};
-
-const normalizeAdminUser = (user: RawAdminUser): AdminUser => ({
-  id: user.id ?? 0,
-  email: user.email ?? '',
-  username: user.username ?? '',
-  isActive: user.isActive ?? user.is_active ?? true,
-  isStaff: user.isStaff ?? user.is_staff ?? false,
-  dateJoined: user.dateJoined ?? user.date_joined ?? '',
-});
-
-const normalizeAdminUsers = (payload: RawAdminUsersPayload): AdminUser[] => {
-  const users = Array.isArray(payload) ? payload : payload.results ?? payload.users ?? [];
-  return users.map(normalizeAdminUser);
 };
 
 const getRequestUrl = (args: string | FetchArgs) => (typeof args === 'string' ? args : args.url);
@@ -649,6 +656,7 @@ export const authApi = createApi({
           },
         };
       },
+      providesTags: ['Me'],
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
@@ -670,7 +678,9 @@ export const authApi = createApi({
         );
 
         if (result.data) {
-          return { data: normalizeUserPayload(result.data as RawUserPayload) };
+          const data = normalizeUserPayload(result.data as RawUserPayload);
+          api.dispatch(updateProfile(data));
+          return { data };
         }
 
         const error = result.error as FetchBaseQueryError;
@@ -682,6 +692,7 @@ export const authApi = createApi({
           },
         };
       },
+      invalidatesTags: ['Me'],
     }),
     updateAvatar: builder.mutation<AuthUser, string>({
       async queryFn(avatarUrl, api) {
@@ -870,7 +881,7 @@ export const authApi = createApi({
     getAdminReports: builder.query<AdminReport[], AdminReportStatus | void>({
       async queryFn(status, api) {
         const query = status ? `?status=${status}` : '';
-        const result = await rawBaseQuery(`/admin/reports${query}`, api, {});
+        const result = await rawBaseQuery(`/community/reports/${query}`, api, {});
 
         if (result.data) {
           return { data: normalizeAdminReports(result.data as RawAdminReportsPayload) };
@@ -891,9 +902,9 @@ export const authApi = createApi({
       async queryFn({ reportId, status }, api) {
         const result = await rawBaseQuery(
           {
-            url: `/admin/reports/${reportId}`,
-            method: 'PUT',
-            body: { status },
+            url: `/community/reports/${reportId}/`,
+            method: 'PATCH',
+            body: { action: status === 'approved' ? 'approve' : 'reject' },
           },
           api,
           {}
@@ -914,28 +925,9 @@ export const authApi = createApi({
       },
       invalidatesTags: ['AdminReports'],
     }),
-    getAdminUsers: builder.query<AdminUser[], void>({
-      async queryFn(_arg, api) {
-        const result = await rawBaseQuery('/admin/users', api, {});
-
-        if (result.data) {
-          return { data: normalizeAdminUsers(result.data as RawAdminUsersPayload) };
-        }
-
-        const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
-        return {
-          error: {
-            message: toMessage(data) ?? 'Admin users request failed.',
-            fields: toFieldErrors(data),
-          },
-        };
-      },
-      providesTags: ['AdminUsers'],
-    }),
     banAdminUser: builder.mutation<void, number>({
       query: (userId) => ({
-        url: `/admin/users/${userId}/ban`,
+        url: `/users/${userId}/ban/`,
         method: 'PUT',
       }),
       invalidatesTags: ['AdminUsers'],
@@ -949,7 +941,6 @@ export const {
   useCreateMediaReviewMutation,
   useDeleteMediaReviewMutation,
   useGetAdminReportsQuery,
-  useGetAdminUsersQuery,
   useGetMeQuery,
   useGetMediaReviewsQuery,
   useGetMyPageDashboardQuery,
