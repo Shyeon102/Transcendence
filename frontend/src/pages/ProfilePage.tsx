@@ -108,7 +108,7 @@ export default function ProfilePage() {
       firstName: profileForm.firstName,
       lastName: profileForm.lastName,
       bio: profileForm.bio,
-      avatarUrl: /^https?:\/\//.test(avatarPreview) ? avatarPreview : undefined,
+      avatarUrl: avatarPreview.trim(),
     };
 
     try {
@@ -163,20 +163,6 @@ export default function ProfilePage() {
     );
   };
 
-  const handleAvatarSelect = (file: File | null) => {
-    if (!file) {
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setAvatarPreview(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
@@ -192,10 +178,8 @@ export default function ProfilePage() {
           initials={initials}
           isEditing={isEditing}
           joinedYearLabel={t('home.joinedYear')}
-          onAvatarSelect={handleAvatarSelect}
           onToggleEdit={() => setIsEditing((prev) => !prev)}
           stats={profileStats}
-          uploadAvatarLabel={t('home.uploadAvatar')}
           verifiedLabel={t('home.verifiedMember')}
         />
 
@@ -254,6 +238,9 @@ export default function ProfilePage() {
 
           {isOwnProfile ? (
             <ProfileEditForm
+              avatarUrl={avatarPreview}
+              avatarUrlLabel={t('home.avatarUrl')}
+              avatarUrlPlaceholder={t('home.avatarUrlPlaceholder')}
               bioLabel={t('home.bio')}
               changePasswordLabel={t('home.changePassword')}
               confirmNewPasswordLabel={t('home.confirmNewPassword')}
@@ -264,6 +251,7 @@ export default function ProfilePage() {
               isEditing={isEditing}
               lastNameLabel={t('signup.lastName')}
               newPasswordLabel={t('home.newPassword')}
+              onAvatarUrlChange={setAvatarPreview}
               onChange={handleProfileFormChange}
               onSave={handleProfileSave}
               passwordSectionLabel={t('home.passwordSection')}

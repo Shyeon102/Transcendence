@@ -64,6 +64,8 @@
     "closeEdit": "닫기",
     "uploadAvatar": "사진 변경",
     "avatarAlt": "프로필 아바타",
+    "avatarUrl": "프로필 사진 URL",
+    "avatarUrlPlaceholder": "https://example.com/avatar.jpg",
     "reviews": "리뷰",
     "posts": "게시글",
     "communityPosts": "커뮤니티 게시글",
@@ -225,36 +227,6 @@
       "copyright": "저작권 침해"
     }
   },
-  "admin": {
-    "eyebrow": "운영 관리",
-    "title": "관리자 콘솔",
-    "description": "신고된 콘텐츠를 검토하고 사용자 계정 상태를 관리합니다.",
-    "connectedNotice": "관리자 API에 연결되었습니다. 동작은 서버로 전송됩니다.",
-    "loading": "불러오는 중...",
-    "reportsLoadError": "신고 목록을 불러오지 못했습니다.",
-    "usersLoadError": "사용자 목록을 불러오지 못했습니다.",
-    "emptyReports": "조건에 맞는 신고가 없습니다.",
-    "emptyUsers": "조건에 맞는 사용자가 없습니다.",
-    "noReason": "신고 사유가 없습니다.",
-    "reportsEyebrow": "콘텐츠 관리",
-    "reportsTitle": "신고 목록",
-    "usersEyebrow": "계정 관리",
-    "usersTitle": "사용자",
-    "reportedBy": "신고자",
-    "reportCount": "신고 {{count}}건",
-    "approve": "승인",
-    "reject": "반려",
-    "ban": "차단",
-    "reactivate": "정지 해제",
-    "status": {
-      "all": "전체",
-      "pending": "대기",
-      "approved": "승인",
-      "rejected": "반려",
-      "active": "활성",
-      "banned": "차단"
-    }
-  },
   "mypage": {
     "eyebrow": "내 공간",
     "title": "내 활동",
@@ -297,7 +269,8 @@
     "passwordTooShort": "비밀번호는 8자 이상이어야 합니다.",
     "passwordWeak": "비밀번호는 대문자, 소문자, 숫자를 각각 1개 이상 포함해야 합니다.",
     "passwordMismatch": "비밀번호가 일치하지 않습니다.",
-    "usernameInvalid": "사용자명은 3자 이상이며 영문자, 숫자, 밑줄만 사용할 수 있습니다."
+    "usernameInvalid": "사용자명은 3자 이상이며 영문자, 숫자, 밑줄만 사용할 수 있습니다.",
+    "usernameRequired": "사용자명은 비워둘 수 없습니다."
   },
   "oauth": {
     "callbackEyebrow": "42 OAuth",

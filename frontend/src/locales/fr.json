@@ -64,6 +64,8 @@
     "closeEdit": "Fermer",
     "uploadAvatar": "Changer la photo",
     "avatarAlt": "Avatar du profil",
+    "avatarUrl": "URL de la photo de profil",
+    "avatarUrlPlaceholder": "https://example.com/avatar.jpg",
     "reviews": "Critiques",
     "posts": "Posts",
     "communityPosts": "Posts de la communaute",
@@ -225,36 +227,6 @@
       "copyright": "Atteinte aux droits d'auteur"
     }
   },
-  "admin": {
-    "eyebrow": "Espace de moderation",
-    "title": "Console admin",
-    "description": "Examinez les contenus signales et gerez le statut des comptes.",
-    "connectedNotice": "Connecte a l'API admin. Les actions sont envoyees au serveur.",
-    "loading": "Chargement...",
-    "reportsLoadError": "Impossible de charger les signalements.",
-    "usersLoadError": "Impossible de charger les utilisateurs.",
-    "emptyReports": "Aucun signalement ne correspond a ce filtre.",
-    "emptyUsers": "Aucun utilisateur ne correspond a ce filtre.",
-    "noReason": "Aucun motif de signalement n'a ete fourni.",
-    "reportsEyebrow": "Moderation du contenu",
-    "reportsTitle": "Signalements",
-    "usersEyebrow": "Moderation des comptes",
-    "usersTitle": "Utilisateurs",
-    "reportedBy": "Signale par",
-    "reportCount": "Signalements : {{count}}",
-    "approve": "Approuver",
-    "reject": "Rejeter",
-    "ban": "Bannir",
-    "reactivate": "Reactiver",
-    "status": {
-      "all": "Tous",
-      "pending": "En attente",
-      "approved": "Approuve",
-      "rejected": "Rejete",
-      "active": "Actif",
-      "banned": "Banni"
-    }
-  },
   "mypage": {
     "eyebrow": "Espace personnel",
     "title": "Mon activite",
@@ -297,7 +269,8 @@
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caracteres.",
     "passwordWeak": "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.",
     "passwordMismatch": "Les mots de passe ne correspondent pas.",
-    "usernameInvalid": "Le nom d'utilisateur doit contenir au moins 3 caracteres et utiliser lettres, chiffres ou tirets bas."
+    "usernameInvalid": "Le nom d'utilisateur doit contenir au moins 3 caracteres et utiliser lettres, chiffres ou tirets bas.",
+    "usernameRequired": "Le nom d'utilisateur ne peut pas etre vide."
   },
   "oauth": {
     "callbackEyebrow": "42 OAuth",
