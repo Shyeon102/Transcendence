@@ -4,6 +4,7 @@ export type ReportType = 'spam' | 'abuse' | 'nsfw' | 'copyright';
 export interface CommunityPost {
   id: number;
   user: number;
+  username?: string;
   title: string;
   content: string;
   media_files: string[];
@@ -20,6 +21,7 @@ export interface CommunityComment {
   id: number;
   post: number;
   user: number;
+  username?: string;
   parent_comment: number | null;
   content: string;
   media_files: string[];

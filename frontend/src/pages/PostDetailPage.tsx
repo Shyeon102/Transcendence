@@ -72,7 +72,7 @@ export default function PostDetailPage() {
           <article>
             {/* 메타 */}
             <div className="flex items-center gap-3 text-[9px] uppercase tracking-[0.14em] text-[#8a8474]/70">
-              <span>{t('community.user')} #{post.user}</span>
+              <span>{post.username ?? `${t('community.user')} #${post.user}`}</span>
               <span>·</span>
               <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
               <span className="ml-auto flex gap-4">

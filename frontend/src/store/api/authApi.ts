@@ -86,11 +86,6 @@ type GoogleLoginRequest = {
   id_token: string;
 };
 
-type RawActivityInteraction = {
-  media_id: number;
-  media_title: string;
-};
-
 type RawActivityReview = {
   id: number;
   title?: string;
@@ -110,21 +105,17 @@ type RawDashboardInteraction = {
 
 type RawDashboard = {
   interactions?: {
-    like?: RawActivityInteraction[];
-    dislike?: RawActivityInteraction[];
-    watchlist?: RawActivityInteraction[];
-    watched?: RawActivityInteraction[];
-  };
-  reviews?: RawActivityReview[];
-  // demo/legacy 응답 호환
-  watchlist?: string[];
-  activities?: string[];
-  interactions?: {
     like?: RawDashboardInteraction[];
     dislike?: RawDashboardInteraction[];
     watchlist?: RawDashboardInteraction[];
     watched?: RawDashboardInteraction[];
   };
+  reviews?: RawActivityReview[];
+  // demo/legacy 응답 호환
+  watchlist?: string[];
+  activities?: string[];
+  activity?: string[];
+  recent_activity?: string[];
 };
 
 type RawReview = {
