@@ -136,7 +136,7 @@
     "nicknameHintDefault": "3-20자, 영문자와 숫자만 사용",
     "nicknameHintShort": "너무 짧습니다",
     "nicknameHintInvalid": "영문자, 숫자, 밑줄만 사용할 수 있습니다",
-    "nicknameHintAvailable": "사용 가능합니다",
+    "nicknameHintFormatValid": "사용 가능한 형식입니다",
     "password": "비밀번호",
     "passwordPlaceholder": "8자 이상 입력",
     "passwordConfirm": "비밀번호 확인",
@@ -276,7 +276,8 @@
     "callbackErrorDescription": "42 OAuth 처리 중 문제가 발생했습니다. 설정된 callback URL과 백엔드 응답을 확인해야 합니다.",
     "callbackContinue": "다음으로 이동",
     "callbackRetry": "로그인으로 돌아가기",
-    "startUrlMissing": "42 OAuth 백엔드 URL이 아직 설정되지 않았습니다."
+    "startUrlMissing": "42 OAuth 백엔드 URL이 아직 설정되지 않았습니다.",
+    "googleClientMissing": "Google 로그인이 아직 설정되지 않았습니다."
   },
   "footer": {
     "privacyPolicy": "개인정보처리방침",
@@ -309,5 +310,24 @@
     "readMore": "더 보기",
     "noData": "미디어 정보가 아직 없어요.",
     "loading": "불러오는 중..."
+  },
+  "chat": {
+    "title": "채팅",
+    "nodescription" : "설명 없음",
+    "eyebrow": "실시간 대화",
+    "createRoom": "방 만들기",
+    "joinRoom": "방 참여",
+    "roomNamePlaceholder": "방 이름을 입력하세요.",
+    "roomPasswordPlaceholder": "비밀번호 (선택)",
+    "create": "생성",
+    "join": "참여",
+    "cancel": "취소",
+    "delete": "삭제",
+    "deleteRoomConfirm": "이 방을 삭제할까요?",
+    "deleteRoomError": "방을 삭제하지 못했습니다. 방장만 삭제할 수 있습니다.",
+    "loadingRooms": "방 목록 불러오는 중...",
+    "noRooms": "참여 가능한 방이 없습니다.",
+    "enterRoomPassword": "비밀번호를 입력하세요.",
+    "passwordIncorrect": "비밀번호가 틀렸습니다."
   }
 }

@@ -6,6 +6,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.contrib.auth import get_user_model
 from .services import login_user
+from django.conf import settings
 from .serializer import RegisterSerializer
 from apps.users.serializers import UserSerializer
 
@@ -95,10 +96,14 @@ class ChangePasswordView(APIView):
 
 
 def verify_google_token(token):
+    if not token:
+        raise ValueError("Missing Google ID token")
+
+    google_client = settings.GOOGLE_CLIENT_ID
     return id_token.verify_oauth2_token(
         token,
         requests.Request(),
-        audience="YOUR_GOOGLE_CLIENT_ID"
+        audience=google_client
     )
 
 
@@ -125,15 +130,26 @@ class GoogleLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        id_token = request.data.get("id_token")
+        google_id_token = request.data.get("id_token")
 
-        user_info = verify_google_token(id_token)
+        if not google_id_token:
+            return Response(
+                {"error": "id_token is required"},
+                status=400
+            )
+
+        try:
+            user_info = verify_google_token(google_id_token)
+        except ValueError as e:
+            return Response({"error": f"Token verification failed: {e}"},
+                            status=400)
 
         user = get_or_create_user_from_google(user_info)
 
         refresh = RefreshToken.for_user(user)
 
         return Response({
+            "user": UserSerializer(user).data,
             "access": str(refresh.access_token),
             "refresh": str(refresh),
         })

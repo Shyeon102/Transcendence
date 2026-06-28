@@ -7,6 +7,7 @@ from celery.schedules import crontab
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "dev-secret-key"
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
@@ -51,23 +52,44 @@ else:
     _redis_url = f"redis://{_redis_env}:6379/0"
 
 # Ensure a DB index for the cache (use DB 1 by default)
-if '/' in _redis_url.split('://', 1)[1]:
-    _cache_location = _redis_url
-else:
-    _cache_location = _redis_url.rstrip('/') + '/1'
+
+
+def _redis_base(url):
+    """Strip any trailing /db index from a redis URL."""
+    parts = url.rsplit('/', 1)
+    if len(parts) == 2 and parts[1].isdigit():
+        return parts[0]
+    return url
+
+
+_base = _redis_base(_redis_url)
 
 CACHES = {
     "default": {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': _cache_location,
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
-    }
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"{_base}/1",
+        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+    },
+    "presence": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"{_base}/2",
+        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+    },
 }
 
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", _redis_url)
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", _redis_url)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [f"{_base}/3"],
+            "capacity": 1500,
+            "expiry": 10,
+        },
+    },
+}
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", f"{_base}/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", f"{_base}/0")
 
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
@@ -177,17 +199,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 AUTHENTICATION_BACKENDS = {
     'django.contrib.auth.backends.ModelBackend',
-}
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            # channels_redis accepts full redis URL strings in the hosts list.
-            # Reuse normalized URL from above.
-            'hosts': [_redis_url],
-        },
-    },
 }
 
 ASGI_APPLICATION = 'project.asgi.application'

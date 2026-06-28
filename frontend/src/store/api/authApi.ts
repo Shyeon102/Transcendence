@@ -44,7 +44,6 @@ type RawAuthUser = {
   favorite_genres?: number[];
   favoriteTitles?: string[];
   favorite_titles?: string[];
-  onboardingCompleted?: boolean;
   onboarding_completed?: boolean;
   favoriteCountries?: string[];
   favorite_countries?: string[];
@@ -75,6 +74,10 @@ type RawUserPayload = RawAuthUser | RawAuthResponse;
 type RawTokenResponse = {
   access?: string;
   refresh?: string;
+};
+
+type GoogleLoginRequest = {
+  id_token: string;
 };
 
 type RawDashboardReview = {
@@ -163,6 +166,7 @@ type RawAdminUsersPayload = RawAdminUser[] | {
 };
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api').replace(/\/+$/, '');
+const GOOGLE_AUTH_ENDPOINT = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT ?? '/auth/login/google/';
 const SHOULD_FALLBACK_TO_MOCK = import.meta.env.VITE_USE_MOCK_AUTH !== 'false';
 const isDemoLogin = (credentials: LoginRequest) =>
   credentials.username === 'demo' || credentials.username === 'demo@demo.demo';
@@ -234,7 +238,6 @@ const normalizeUser = (user: RawAuthUser): AuthUser => ({
   bio: user.bio,
   favoriteGenres: user.favoriteGenres ?? user.favorite_genres,
   favoriteTitles: user.favoriteTitles ?? user.favorite_titles,
-  onboardingCompleted: user.onboardingCompleted ?? user.onboarding_completed,
   favoriteCountries: user.favoriteCountries ?? user.favorite_countries,
   isStaff: user.isStaff ?? user.is_staff,
 });
@@ -332,7 +335,7 @@ const normalizeReviewList = (payload: RawReviewPayload): MediaReview[] => {
 
 const toReviewRequestBody = (review: MediaReviewRequest) => ({
   rating: review.rating,
-  comment: review.content,
+  content: review.content,
 });
 
 const getTargetData = (target: number | RawAdminReportTarget | null | undefined) => {
@@ -402,7 +405,7 @@ const getRequestUrl = (args: string | FetchArgs) => (typeof args === 'string' ? 
 
 const isRefreshEligibleRequest = (args: string | FetchArgs) => {
   const url = getRequestUrl(args);
-  return !['/auth/token/', '/auth/register/', '/auth/token/refresh/'].includes(url);
+  return !['/auth/token/', '/auth/register/', '/auth/token/refresh/', '/auth/logout/'].includes(url);
 };
 
 const rawBaseQuery = fetchBaseQuery({
@@ -472,7 +475,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery,
-  tagTypes: ['AdminReports', 'AdminUsers'],
+  tagTypes: ['AdminReports', 'AdminUsers', 'MediaReviews'],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials, api) {
@@ -545,6 +548,56 @@ export const authApi = createApi({
         dispatch(setCredentials(data));
       },
     }),
+    googleLogin: builder.mutation<LoginResponse, GoogleLoginRequest>({
+      async queryFn(payload, api) {
+        const result = await rawBaseQuery(
+          {
+            url: GOOGLE_AUTH_ENDPOINT,
+            method: 'POST',
+            body: { id_token: payload.id_token },
+          },
+          api,
+          {}
+        );
+
+        if (result.data) {
+          const rawData = result.data as RawAuthResponse;
+          const accessToken = rawData.access ?? rawData.access_token ?? rawData.token;
+
+          const userResult = await rawBaseQuery(
+            {
+              url: '/users/profile/',
+              headers: { Authorization: `Bearer ${accessToken}` },
+            },
+            api,
+            {}
+          );
+
+          if (userResult.data) {
+            return {
+              data: normalizeSession({
+                ...(userResult.data as RawAuthResponse),
+                access: accessToken,
+                refresh: rawData.refresh ?? rawData.refresh_token,
+              }),
+            };
+          }
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Google authentication failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        dispatch(setCredentials(data));
+      },
+    }),
     signup: builder.mutation<SignupResponse, SignupRequest>({
       async queryFn({ passwordConfirm, firstName, lastName, ...payload }, api) {
         const result = await rawBaseQuery(
@@ -607,24 +660,18 @@ export const authApi = createApi({
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
-        const isOnboardingUpdate =
-          payload.onboardingCompleted !== undefined;
         const result = await rawBaseQuery(
           {
-            url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/',
+            url: '/users/profile/',
             method: 'PATCH',
-            body: isOnboardingUpdate
-              ? {
-                  onboarding_completed: payload.onboardingCompleted,
-                }
-              : {
-                  username: payload.username,
-                  email: payload.email,
-                  first_name: payload.firstName,
-                  last_name: payload.lastName,
-                  avatar_url: payload.avatarUrl,
-                  bio: payload.bio,
-                },
+            body: {
+              username: payload.username,
+              email: payload.email,
+              first_name: payload.firstName,
+              last_name: payload.lastName,
+              avatar_url: payload.avatarUrl,
+              bio: payload.bio,
+            },
           },
           api,
           {}
@@ -742,6 +789,9 @@ export const authApi = createApi({
         }
 
         const error = result.error as FetchBaseQueryError;
+        if ('status' in error && error.status === 500) {
+          return { data: [] };
+        }
         const data = 'data' in error ? error.data : undefined;
         return {
           error: {
@@ -750,6 +800,7 @@ export const authApi = createApi({
           },
         };
       },
+      providesTags: (_result, _error, mediaId) => [{ type: 'MediaReviews', id: mediaId }],
     }),
     createMediaReview: builder.mutation<MediaReview, { mediaId: number; review: MediaReviewRequest }>({
       async queryFn({ mediaId, review }, api) {
@@ -776,6 +827,7 @@ export const authApi = createApi({
           },
         };
       },
+      invalidatesTags: (_result, _error, { mediaId }) => [{ type: 'MediaReviews', id: mediaId }],
     }),
     updateMediaReview: builder.mutation<MediaReview, { mediaId: number; reviewId: number; review: MediaReviewRequest }>({
       async queryFn({ mediaId, reviewId, review }, api) {
@@ -802,12 +854,43 @@ export const authApi = createApi({
           },
         };
       },
+      invalidatesTags: (_result, _error, { mediaId }) => [{ type: 'MediaReviews', id: mediaId }],
     }),
     deleteMediaReview: builder.mutation<void, { mediaId: number; reviewId: number }>({
       query: ({ mediaId, reviewId }) => ({
         url: `/media/${mediaId}/reviews/${reviewId}/`,
         method: 'DELETE',
       }),
+      invalidatesTags: (_result, _error, { mediaId }) => [{ type: 'MediaReviews', id: mediaId }],
+    }),
+    getMediaInteractions: builder.query<MediaInteraction[], number>({
+      async queryFn(mediaId, api) {
+        const result = await rawBaseQuery(`/media/${mediaId}/interactions/`, api, {});
+        if (result.data) {
+          const data = result.data as { interactions: MediaInteraction[] };
+          return { data: data.interactions ?? [] };
+        }
+        return { data: [] };
+      },
+      providesTags: (_result, _error, mediaId) => [{ type: 'MediaInteractions', id: mediaId }],
+    }),
+
+    toggleMediaInteraction: builder.mutation<void, { mediaId: number; action: 'like' | 'dislike' | 'watched' | 'watchlist'; active: boolean }>({
+      async queryFn({ mediaId, action, active }, api) {
+        const result = await rawBaseQuery(
+          active
+            ? { url: `/media/${mediaId}/interactions/`, method: 'POST', body: { action } }
+            : { url: `/media/${mediaId}/interactions/${action}/`, method: 'DELETE' },
+          api,
+          {}
+        );
+        if (result.error) {
+          const error = result.error as FetchBaseQueryError;
+          const data = 'data' in error ? error.data : undefined;
+          return { error: { message: toMessage(data) ?? 'Interaction failed.', fields: toFieldErrors(data) } };
+        }
+        return { data: undefined };
+      },
     }),
     getAdminReports: builder.query<AdminReport[], AdminReportStatus | void>({
       async queryFn(status, api) {
@@ -896,6 +979,7 @@ export const {
   useGetMediaReviewsQuery,
   useGetMyPageDashboardQuery,
   useGetUserActivityQuery,
+  useGoogleLoginMutation,
   useLoginMutation,
   useLogoutMutation,
   useProcessAdminReportMutation,
@@ -903,4 +987,6 @@ export const {
   useUpdateAvatarMutation,
   useUpdateMeMutation,
   useUpdateMediaReviewMutation,
+  useGetMediaInteractionsQuery,
+  useToggleMediaInteractionMutation,
 } = authApi;

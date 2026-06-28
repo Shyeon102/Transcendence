@@ -5,7 +5,6 @@ from apps.ai.recommendation.hybrid.hybrid import (
 from apps.ai.retrieval.rag import rag_recommendations
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from apps.media.models import Media
 from apps.media.serializers import MediaSerializer
@@ -18,8 +17,6 @@ class HybridRecommendationView(APIView):
     # from rest_framework.permissions import AllowAny
     # permission_classes = [AllowAny]
 
-    permission_classes = [IsAuthenticated]
-
     # def get(self, request):
     def get(self, request, user_id):
         try:
@@ -29,7 +26,7 @@ class HybridRecommendationView(APIView):
                 get_hybrid_scores(user_id=user_id)
             )
             if not hybrid_series.empty:
-                score_dict = hybrid_series.to_dict()
+                score_dict = {int(k): v for k, v in hybrid_series.to_dict().items()}
                 medias = list(
                     Media.objects
                     .filter(id__in=score_dict.keys())
@@ -75,7 +72,7 @@ class RAGRecommendationView(APIView):
             if rag_series.empty:
                 return Response({"media": []},
                                 status=status.HTTP_200_OK)
-            score_dict = rag_series.to_dict()
+            score_dict = {int(k): v for k, v in rag_series.to_dict().items()}
             medias = list(
                     Media.objects
                     .filter(id__in=score_dict.keys())

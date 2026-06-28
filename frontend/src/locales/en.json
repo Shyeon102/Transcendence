@@ -136,7 +136,7 @@
     "nicknameHintDefault": "3-20 characters, letters and numbers only",
     "nicknameHintShort": "Too short",
     "nicknameHintInvalid": "Letters, numbers, and underscores only",
-    "nicknameHintAvailable": "Available",
+    "nicknameHintFormatValid": "Format looks valid",
     "password": "Password",
     "passwordPlaceholder": "At least 8 characters",
     "passwordConfirm": "Confirm password",
@@ -276,7 +276,8 @@
     "callbackErrorDescription": "There was a problem while handling 42 OAuth. Check the configured callback URL and backend response flow.",
     "callbackContinue": "Continue",
     "callbackRetry": "Back to login",
-    "startUrlMissing": "42 OAuth backend URL is not configured yet."
+    "startUrlMissing": "42 OAuth backend URL is not configured yet.",
+    "googleClientMissing": "Google login is not configured yet."
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",
@@ -309,5 +310,18 @@
     "readMore": "Read More",
     "noData": "No media detail data yet.",
     "loading": "Loading..."
+  },
+  "chat": {
+    "eyebrow": "Chat Rooms",
+    "title": "Join a Room",
+    "nodescription" : "No description",
+    "description": "Connect with others in real-time. Create or join a chat room to start chatting.",
+    "createRoom": "Create Room",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this room?",
+    "deleteError": "Failed to delete the room. Only the creator can delete it.",
+    "loading": "Loading chat rooms...",
+    "loadError": "Failed to load chat rooms.",
+    "empty": "No chat rooms available. Create one to get started!"
   }
 }

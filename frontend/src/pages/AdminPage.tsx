@@ -1,23 +1,19 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useI18n } from "../lib/i18n";
 import type { RootState } from "../store";
 import {
+  useBanAdminUserMutation,
   useGetAdminReportsQuery,
   useGetAdminUsersQuery,
   useProcessAdminReportMutation,
-  useUpdateAdminUserStatusMutation,
+  useUnbanAdminUserMutation,
   type AdminAccountStatus,
   type AdminReportStatus,
 } from "../store/api/adminApi";
 
 type TabKey = "reports" | "users";
-type ReportFilter = AdminReportStatus | "all";
-type UserFilter = AdminAccountStatus | "all";
-
-const reportFilterOptions: ReportFilter[] = ["all", "pending", "approved", "rejected"];
-const userFilterOptions: UserFilter[] = ["all", "active", "suspended", "banned"];
 
 const reportTypeColor: Record<string, string> = {
   Spam: "border-[#f2b84b]/30 bg-[#f2b84b]/10 text-[#f2b84b]",
@@ -39,42 +35,27 @@ const formatDate = (value?: string) => {
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const { t } = useI18n();
   const colors: Record<string, string> = {
     pending: "border-[#f2b84b]/40 bg-[#f2b84b]/10 text-[#f2d496]",
     approved: "border-[#6bbf72]/40 bg-[#6bbf72]/10 text-[#9edba2]",
     rejected: "border-[#f0ead0]/15 bg-[#f0ead0]/5 text-[#8a8474]",
     active: "border-[#6bbf72]/40 bg-[#6bbf72]/10 text-[#9edba2]",
-    suspended: "border-[#f2b84b]/40 bg-[#f2b84b]/10 text-[#f2d496]",
     banned: "border-[#ff4f38]/40 bg-[#ff4f38]/10 text-[#ff9c8e]",
   };
+  const { t } = useI18n();
 
   return (
-    <span
-      className={`inline-block border px-2.5 py-1 text-[8px] uppercase tracking-[0.14em] ${
-        colors[status] ?? "border-[#f0ead0]/10 text-[#8a8474]"
-      }`}
-    >
+    <span className={`inline-block border px-2.5 py-1 text-[8px] uppercase tracking-[0.14em] ${colors[status] ?? "text-[#8a8474]"}`}>
       {t(`admin.status.${status}`)}
     </span>
   );
 }
 
-function StatCard({
-  label,
-  value,
-  accent,
-}: {
-  label: string;
-  value: string | number;
-  accent?: string;
-}) {
+function StatCard({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
   return (
     <div className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-4">
       <p className="text-[9px] uppercase tracking-[0.14em] text-[#8a8474]">{label}</p>
-      <p className={`mt-1 font-['Bebas_Neue'] text-3xl tracking-[0.04em] ${accent ?? "text-[#f0ead0]"}`}>
-        {value}
-      </p>
+      <p className={`mt-1 font-['Bebas_Neue'] text-3xl tracking-[0.04em] ${accent ?? "text-[#f0ead0]"}`}>{value}</p>
     </div>
   );
 }
@@ -84,42 +65,21 @@ export default function AdminPage() {
   const user = useSelector((state: RootState) => state.auth.user);
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
   const [activeTab, setActiveTab] = useState<TabKey>("reports");
-  const [reportFilter, setReportFilter] = useState<ReportFilter>("all");
-  const [userFilter, setUserFilter] = useState<UserFilter>("all");
+  const [reportFilter, setReportFilter] = useState<AdminReportStatus | "all">("all");
+  const [userFilter, setUserFilter] = useState<AdminAccountStatus | "all">("all");
   const shouldFetchAdminData = Boolean(user?.isStaff && accessToken);
   const reportsQuery = useGetAdminReportsQuery(undefined, { skip: !shouldFetchAdminData });
   const usersQuery = useGetAdminUsersQuery(undefined, { skip: !shouldFetchAdminData });
   const [processReport, { isLoading: isProcessingReport }] = useProcessAdminReportMutation();
-  const [updateAccountStatus, { isLoading: isUpdatingUser }] = useUpdateAdminUserStatusMutation();
-
-  const reports = useMemo(() => reportsQuery.data ?? [], [reportsQuery.data]);
-  const users = useMemo(() => usersQuery.data ?? [], [usersQuery.data]);
-
-  const filteredReports = useMemo(
-    () => (reportFilter === "all" ? reports : reports.filter((report) => report.status === reportFilter)),
-    [reportFilter, reports],
-  );
-
-  const filteredUsers = useMemo(
-    () => (userFilter === "all" ? users : users.filter((managedUser) => managedUser.status === userFilter)),
-    [userFilter, users],
-  );
-
-  const reportCounts = useMemo(
-    () => ({
-      pending: reports.filter((report) => report.status === "pending").length,
-      approved: reports.filter((report) => report.status === "approved").length,
-      rejected: reports.filter((report) => report.status === "rejected").length,
-    }),
-    [reports],
-  );
-
-  const suspendedCount = users.filter((managedUser) => managedUser.status === "suspended").length;
-  const bannedCount = users.filter((managedUser) => managedUser.status === "banned").length;
+  const [banUser, { isLoading: isBanningUser }] = useBanAdminUserMutation();
+  const [unbanUser, { isLoading: isUnbanningUser }] = useUnbanAdminUserMutation();
 
   if (!user?.isStaff) {
     return <Navigate to="/home" replace />;
   }
+
+  const reports = reportsQuery.data ?? [];
+  const users = usersQuery.data ?? [];
 
   const handleReportStatus = async (
     id: number,
@@ -128,13 +88,24 @@ export default function AdminPage() {
     await processReport({ id, status });
   };
 
-  const handleContentVisibility = async (report: (typeof reports)[number]) => {
-    await processReport({ id: report.id, status: report.status, hidden: !report.hidden });
+  const handleUserStatus = async (id: number, status: AdminAccountStatus) => {
+    if (status === "banned") {
+      await banUser(id);
+      return;
+    }
+
+    await unbanUser(id);
   };
 
-  const handleUserStatus = async (id: number, status: AdminAccountStatus) => {
-    await updateAccountStatus({ id, status });
-  };
+  const pendingCount = reports.filter((report) => report.status === "pending").length;
+  const bannedCount = users.filter((managedUser) => managedUser.status === "banned").length;
+  const filteredReports =
+    reportFilter === "all" ? reports : reports.filter((report) => report.status === reportFilter);
+  const filteredUsers =
+    userFilter === "all" ? users : users.filter((managedUser) => managedUser.status === userFilter);
+  const reportFilterOptions: (AdminReportStatus | "all")[] = ["all", "pending", "approved", "rejected"];
+  const userFilterOptions: (AdminAccountStatus | "all")[] = ["all", "active", "banned"];
+  const isUpdatingUser = isBanningUser || isUnbanningUser;
 
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">

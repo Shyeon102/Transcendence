@@ -4,14 +4,19 @@ import type { RootState } from "../store";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useState, useRef, useEffect } from "react";
 import { sendMessage } from "../services/websocketService";
+import { useGetChatRoomsQuery } from "../store/api/chatApi";
+import { useNavigate } from "react-router-dom";
 
 const ChatRoomPage = () => {
   const { id } = useParams(); // ex) URL: /chat/rooms/3 -> id = "3" (문자열)
   const token = useSelector((state: RootState) => state.auth.accessToken);
   const roomId = Number(id); // "3" -> 3 (문자열 -> 숫자)
+  const { data: rooms } = useGetChatRoomsQuery();
+  const room = rooms?.find((r) => r.id === roomId);
   useWebSocket(roomId, token ?? ""); // 우리가 만든 useWebSocket 훅을 두 인자로 호출 / A ?? B : 왼쪽 값이 null or undefined이면 오른쪽 값 사용
   const messages = useSelector((state: RootState) => state.chat.messages);
   const [input, setInput] = useState("");
+  const navigate = useNavigate();
   const handleSend = () => {
     if (!input.trim()) return;
     sendMessage(input);
@@ -26,7 +31,13 @@ const ChatRoomPage = () => {
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white">
       <div className="px-[4.72vw] pt-[3vh]">
-        <h1 className="font-bold">Room #{roomId}</h1>
+        <button
+          onClick={() => navigate("/chat/rooms")}
+          className="mb-4 text-sm text-gray-400 hover:text-white transition"
+        >
+          ←
+        </button>
+        <h1 className="font-bold">{room?.title ?? `Room #${roomId}`}</h1>
 
         <div>
           {messages.map((msg) => (

@@ -1,7 +1,8 @@
 import { apiSlice } from "../slices/apiSlice";
 
 export type AdminReportStatus = "pending" | "approved" | "rejected";
-export type AdminAccountStatus = "active" | "suspended" | "banned";
+export type AdminReportAction = "approve" | "reject";
+export type AdminAccountStatus = "active" | "banned";
 
 export type AdminReport = {
   id: number;
@@ -11,7 +12,6 @@ export type AdminReport = {
   reason: string;
   createdAt: string;
   status: AdminReportStatus;
-  hidden: boolean;
 };
 
 export type AdminUser = {
@@ -134,13 +134,14 @@ export const adminApi = apiSlice.injectEndpoints({
     }),
     processAdminReport: builder.mutation<
       AdminReport,
-      { id: number; status: AdminReportStatus; hidden?: boolean }
+      { id: number; status: Exclude<AdminReportStatus, "pending"> }
     >({
       query: ({ id, status, hidden }) => ({
         url: `/admin/reports/${id}/`,
         method: "PATCH",
         body: hidden === undefined ? { status } : { status, hidden },
       }),
+      transformResponse: (response: RawAdminReport) => normalizeReport(response),
       invalidatesTags: ["AdminReports"],
     }),
     getAdminUsers: builder.query<AdminUser[], void>({
@@ -149,14 +150,17 @@ export const adminApi = apiSlice.injectEndpoints({
         toList(response).map(normalizeUser),
       providesTags: ["AdminUsers"],
     }),
-    updateAdminUserStatus: builder.mutation<
-      AdminUser,
-      { id: number; status: AdminAccountStatus }
-    >({
-      query: ({ id, status }) => ({
-        url: `/admin/users/${id}/ban/`,
-        method: "PATCH",
-        body: { status },
+    banAdminUser: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/users/${id}/ban/`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["AdminUsers"],
+    }),
+    unbanAdminUser: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/users/${id}/ban/`,
+        method: "DELETE",
       }),
       invalidatesTags: ["AdminUsers"],
     }),
@@ -164,8 +168,9 @@ export const adminApi = apiSlice.injectEndpoints({
 });
 
 export const {
+  useBanAdminUserMutation,
   useGetAdminReportsQuery,
-  useProcessAdminReportMutation,
   useGetAdminUsersQuery,
-  useUpdateAdminUserStatusMutation,
+  useProcessAdminReportMutation,
+  useUnbanAdminUserMutation,
 } = adminApi;

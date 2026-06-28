@@ -136,7 +136,7 @@
     "nicknameHintDefault": "3-20 caracteres, lettres et chiffres uniquement",
     "nicknameHintShort": "Trop court",
     "nicknameHintInvalid": "Lettres, chiffres et tirets bas uniquement",
-    "nicknameHintAvailable": "Disponible",
+    "nicknameHintFormatValid": "Format valide",
     "password": "Mot de passe",
     "passwordPlaceholder": "Au moins 8 caracteres",
     "passwordConfirm": "Confirmation du mot de passe",
@@ -276,7 +276,8 @@
     "callbackErrorDescription": "Un probleme est survenu pendant le traitement de 42 OAuth. Verifiez l'URL de callback configuree et le flux de reponse du backend.",
     "callbackContinue": "Continuer",
     "callbackRetry": "Retour a la connexion",
-    "startUrlMissing": "L'URL backend 42 OAuth n'est pas encore configuree."
+    "startUrlMissing": "L'URL backend 42 OAuth n'est pas encore configuree.",
+    "googleClientMissing": "La connexion Google n'est pas encore configuree."
   },
   "footer": {
     "privacyPolicy": "Politique de confidentialité",
@@ -309,5 +310,23 @@
     "readMore": "Voir plus",
     "noData": "Aucune info média pour le moment.",
     "loading": "Chargement..."
+  },
+  "chat": {
+    "title": "Salles de discussion",
+    "nodescription" : "Aucune description",
+    "createRoom": "Créer une salle",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer cette salle ?",
+    "deleteError": "Échec de la suppression de la salle. Seul le créateur peut la supprimer.",
+    "loading": "Chargement des salles...",
+    "loadError": "Échec du chargement des salles.",
+    "empty": "Aucune salle de discussion pour le moment.",
+    "roomNamePlaceholder": "Nom de la salle",
+    "roomTypeLabel": "Type de salle",
+    "roomTypePublic": "Publique",
+    "roomTypePrivate": "Privée",
+    "createRoomSubmit": "Créer la salle",
+    "createRoomValidation": "Veuillez saisir un nom et choisir un type pour la salle.",
+    "createRoomError": "Échec de la création de la salle. Réessayez."
   }
 }
