@@ -128,13 +128,16 @@ const MediaDetailPage = () => {
     setMyReview(reviews.find((r) => r.username === user.username) ?? null);
   }, [reviews, user]);
 
-  const [myRating, setMyRating] = useState(0);
+  const myRating = myReview?.rating ?? 0;
 
-  useEffect(() => {
-    if (!myReview) return;
+  // const [myRating, setMyRating] = useState(0);
+  // useEffect(() => {
+  //   if (!myReview) return;
 
-    setMyRating(myReview.rating);
-  }, [myReview]);
+  //   setMyRating(myReview.rating);
+  // }, [myReview]);
+
+
 
   if (!isDemo && isLoading) {
     return (
