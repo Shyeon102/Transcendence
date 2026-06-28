@@ -97,7 +97,11 @@ export default function AdminPage() {
     await unbanUser(id);
   };
 
-  const pendingCount = reports.filter((report) => report.status === "pending").length;
+  const reportCounts = {
+    pending: reports.filter((report) => report.status === "pending").length,
+    approved: reports.filter((report) => report.status === "approved").length,
+    rejected: reports.filter((report) => report.status === "rejected").length,
+  };
   const bannedCount = users.filter((managedUser) => managedUser.status === "banned").length;
   const filteredReports =
     reportFilter === "all" ? reports : reports.filter((report) => report.status === reportFilter);
@@ -127,7 +131,7 @@ export default function AdminPage() {
 
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard label={t("admin.reportsTitle")} value={reports.length} />
-          <StatCard label={t("admin.status.pending")} value={pendingCount} accent={pendingCount > 0 ? "text-[#f2b84b]" : "text-[#f0ead0]"} />
+          <StatCard label={t("admin.status.pending")} value={reportCounts.pending} accent={reportCounts.pending > 0 ? "text-[#f2b84b]" : "text-[#f0ead0]"} />
           <StatCard label={t("admin.usersTitle")} value={users.length} />
           <StatCard label={t("admin.status.banned")} value={bannedCount} accent={bannedCount > 0 ? "text-[#ff9c8e]" : "text-[#f0ead0]"} />
         </div>
