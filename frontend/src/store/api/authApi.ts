@@ -151,7 +151,7 @@ type RawAdminReportsPayload = RawAdminReport[] | {
   results?: RawAdminReport[];
 };
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api').replace(/\/+$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'https://localhost:8443/api').replace(/\/+$/, '');
 const GOOGLE_AUTH_ENDPOINT = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT ?? '/auth/login/google/';
 
 const toMessage = (value: unknown): string | undefined => {
