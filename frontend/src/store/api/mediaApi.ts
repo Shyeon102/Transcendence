@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { Media, Genre } from "../../types/media";
 import type { RootState } from "../index";
+import defaultPoster from '/src/assets/images/defaultposter.png';
 
 export interface BackendMedia {
   id: number;
@@ -76,7 +77,7 @@ export const mediaApi = createApi({
         if (source === "TRENDING") return `/media/trending/${qs}`;
         if (source === "MY FAV" && userId) return `/ai/recommend/${userId}${qs}`;
 
-        return `/media/trending/${qs}`;
+        return `/media/random/${qs}`;
       },
       transformResponse: (response: BackendMediaListResponse) => {
         return response.media.map((movie) => {
@@ -97,7 +98,7 @@ export const mediaApi = createApi({
             starRating: movie.avg_rating,
             runtime: `${hours}h ${minutes}m`,
             type: movie.media_type,
-            frontPosterUrl: movie.image_url,
+            frontPosterUrl: movie.image_url || defaultPoster, // 백엔드가 null 주면 defaultPoster로 대체
             sidePosterUrl: movie.side_poster_url ?? "",
             reviews: [],
           };
@@ -127,7 +128,7 @@ export const mediaApi = createApi({
           starRating: movie.avg_rating,
           runtime: `${hours}h ${minutes}m`,
           type: movie.media_type,
-          frontPosterUrl: movie.image_url,
+          frontPosterUrl: movie.image_url || defaultPoster,
           sidePosterUrl: movie.side_poster_url ?? "",
           reviews: [],
         };
@@ -156,7 +157,7 @@ export const mediaApi = createApi({
             starRating: movie.avg_rating,
             runtime: `${hours}h ${minutes}m`,
             type: movie.media_type,
-            frontPosterUrl: movie.image_url,
+            frontPosterUrl: movie.image_url || defaultPoster,
             sidePosterUrl: movie.side_poster_url ?? "",
             reviews: [],
           };
@@ -189,7 +190,7 @@ export const mediaApi = createApi({
             starRating: movie.avg_rating,
             runtime: `${hours}h ${minutes}m`,
             type: movie.media_type,
-            frontPosterUrl: movie.image_url,
+            frontPosterUrl: movie.image_url || defaultPoster,
             sidePosterUrl: movie.side_poster_url ?? "",
             reviews: [],
           };

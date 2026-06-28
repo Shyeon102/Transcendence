@@ -144,7 +144,7 @@ const mockMediaList: Media[] = [
 // 컴포넌트
 
 const HomePage = () => {
-  const [source, setSource] = useState<"RANDOM" | "TRENDING" | "MY FAV">("TRENDING");
+  const [source, setSource] = useState<"RANDOM" | "TRENDING" | "MY FAV">("RANDOM");
   const [type, setType ] = useState<string | null>(null);
   const { t } = useI18n();
   const [triggerSearch, searchResult] = useLazySearchMediaQuery();
@@ -305,9 +305,9 @@ const HomePage = () => {
           {t("main.random")}
         </button>
         <button
-          onClick={() => setSource("TREDING")}
+          onClick={() => setSource("TRENDING")}
           className={
-            source === "TREDING"
+            source === "TRENDING"
               ? filterBtnClass +
                 " shadow-[0_0_28px_1px_#00ffff] border-[#00ffff] text-[#00ffff]"
               : filterBtnClass + " border-white/30 text-white"

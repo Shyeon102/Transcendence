@@ -18,7 +18,7 @@ User = get_user_model()
 
 
 class IsRoomMember(BasePermission):
-    def has_object_permission(self, request, obj):
+    def has_object_permission(self, request, view, obj):
         return ChatRoomMember.objects.filter(room=obj,
                                              user=request.user).exists()
 
@@ -35,7 +35,13 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
     pagination_class = ChatRoomCursorPagination
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        room = serializer.save(created_by=self.request.user)
+
+        ChatRoomMember.objects.create(
+            room=room,
+            user=self.request.user,
+            role="owner"
+        )
 
     @staticmethod
     def is_member(room, user):
@@ -92,7 +98,7 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
 
         member, created = ChatRoomMember.objects.get_or_create(
             room=room,
-            user=user
+            user=user,
         )
 
         serializer = ChatRoomMemberSerializer(member)
@@ -126,3 +132,14 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         membership.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def destroy(self, request, *args, **kwargs):
+        room = self.get_object()
+
+        is_owner = room.created_by == request.user
+        is_staff = request.user.is_staff
+
+        if not (is_owner or is_staff):
+            return Response({"error": "Forbidden"}, status=403)
+
+        return super().destroy(request, *args, **kwargs)

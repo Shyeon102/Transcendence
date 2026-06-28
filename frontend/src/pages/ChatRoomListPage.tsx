@@ -1,12 +1,28 @@
-import { useGetChatRoomsQuery } from "../store/api/chatApi";
+import {
+  useGetChatRoomsQuery,
+  useDeleteChatRoomMutation,
+} from "../store/api/chatApi";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import NewRoomModal from "../components/NewRoomModal";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
 
 const ChatRoomListPage = () => {
   const { data, isLoading, error } = useGetChatRoomsQuery(); // const {RTK Query에서 제공}
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteChatRoom] = useDeleteChatRoomMutation();
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  const handleDelete = async (roomId: number) => {
+    if (!confirm("이 방을 삭제할까요?")) return;
+    try {
+      await deleteChatRoom(roomId).unwrap();
+    } catch {
+      alert("삭제 실패 (방장만 삭제할 수 있어요)");
+    }
+  };
 
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white">
@@ -35,6 +51,17 @@ const ChatRoomListPage = () => {
             >
               <h2>{room.title}</h2>
               <p>{room.description}</p>
+              {room.created_by.id === user?.id && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(room.id);
+                  }}
+                  className="ml-2 text-red-500 text-sm"
+                >
+                  삭제
+                </button>
+              )}
             </div>
           ))}
         </div>

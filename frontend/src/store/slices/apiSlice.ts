@@ -147,4 +147,4 @@ export const apiSlice = createApi({
   }),
 })
 
-export const { useLazySearchMediaQuery, useLazyRagMediaQuery, useLoginMutation, useRefreshTokenMutation } = apiSlice
+export const { useLazySearchMediaQuery, useLoginMutation, useRefreshTokenMutation } = apiSlice

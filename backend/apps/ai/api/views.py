@@ -5,7 +5,6 @@ from apps.ai.recommendation.hybrid.hybrid import (
 from apps.ai.retrieval.rag import rag_recommendations
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from apps.media.models import Media
 from apps.media.serializers import MediaSerializer
@@ -17,8 +16,6 @@ class HybridRecommendationView(APIView):
     # only for test
     # from rest_framework.permissions import AllowAny
     # permission_classes = [AllowAny]
-
-    permission_classes = [IsAuthenticated]
 
     # def get(self, request):
     def get(self, request, user_id):
