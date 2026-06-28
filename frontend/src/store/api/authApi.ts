@@ -446,10 +446,6 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-import { Mutex } from 'async-mutex';
-
-const refreshMutex = new Mutex();
-
 const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = async (args, api, extraOptions) => {
   let result = await rawBaseQuery(args, api, extraOptions);
 
@@ -463,28 +459,26 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
     if (!refreshToken) {
       api.dispatch(logout());
     } else {
-      await refreshMutex.runExclusive(async () => {
-        const refreshResult = await rawBaseQuery(
-          {
-            url: '/auth/token/refresh/',
-            method: 'POST',
-            body: { refresh: refreshToken },
-          },
-          api,
-          extraOptions
-        );
+      const refreshResult = await rawBaseQuery(
+        {
+          url: '/auth/token/refresh/',
+          method: 'POST',
+          body: { refresh: refreshToken },
+        },
+        api,
+        extraOptions
+      );
 
-        if (refreshResult.data) {
-          try {
-            const tokens = normalizeRefreshTokens(refreshResult.data as RawAuthResponse);
-            api.dispatch(updateTokens(tokens));
-          } catch {
-            api.dispatch(logout());
-          }
-        } else {
+      if (refreshResult.data) {
+        try {
+          const tokens = normalizeRefreshTokens(refreshResult.data as RawAuthResponse);
+          api.dispatch(updateTokens(tokens));
+        } catch {
           api.dispatch(logout());
         }
-      });
+      } else {
+        api.dispatch(logout());
+      }
 
       // refresh 후 재시도
       result = await rawBaseQuery(args, api, extraOptions);
@@ -1063,6 +1057,7 @@ export const authApi = createApi({
 export const {
   useBanAdminUserMutation,
   useChangePasswordMutation,
+  useDeleteAccountMutation,
   useCreateMediaReviewMutation,
   useDeleteAccountMutation,
   useDeleteMediaReviewMutation,

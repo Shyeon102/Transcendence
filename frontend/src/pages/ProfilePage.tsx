@@ -274,10 +274,7 @@ export default function ProfilePage() {
   };
 
   const handleProfileSave = async () => {
-    const avatarUrl =
-      avatarPreview && /^https?:\/\//.test(avatarPreview)
-        ? avatarPreview
-        : undefined;
+    const avatarUrl = avatarPreview?.trim() ?? undefined;
 
     const payload = {
       username: profileForm.username,
@@ -336,22 +333,6 @@ export default function ProfilePage() {
     );
   };
 
-  const handleAvatarSelect = (file: File | null) => {
-    if (!file) {
-      return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        setAvatarPreview(reader.result);
-      }
-    };
-
-    reader.readAsDataURL(file);
-  };
-
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
@@ -381,12 +362,10 @@ export default function ProfilePage() {
               isFollowLoading={followState.isLoading || unfollowState.isLoading}
               isFollowing={viewedProfile?.isFollowing ?? false}
               joinedYearLabel={joinedLabel}
-              onAvatarSelect={handleAvatarSelect}
               onToggleEdit={handleToggleEdit}
               onToggleFollow={handleToggleFollow}
               stats={profileStats}
               unfollowLabel={t('home.following')}
-              uploadAvatarLabel={t('home.uploadAvatar')}
               verifiedLabel={t('home.verifiedMember')}
             />
 
@@ -457,6 +436,9 @@ export default function ProfilePage() {
 
               {isOwnProfile ? (
                 <ProfileEditForm
+                  avatarUrl={avatarPreview ?? ''}
+                  avatarUrlLabel={t('home.avatarUrl')}
+                  avatarUrlPlaceholder={t('home.avatarUrlPlaceholder')}
                   bioLabel={t('home.bio')}
                   changePasswordLabel={t('home.changePassword')}
                   confirmNewPasswordLabel={t('home.confirmNewPassword')}
@@ -467,6 +449,7 @@ export default function ProfilePage() {
                   isEditing={isEditing}
                   lastNameLabel={t('signup.lastName')}
                   newPasswordLabel={t('home.newPassword')}
+                  onAvatarUrlChange={(value) => setAvatarPreview(value)}
                   onChange={handleProfileFormChange}
                   onSave={handleProfileSave}
                   passwordSectionLabel={t('home.passwordSection')}
