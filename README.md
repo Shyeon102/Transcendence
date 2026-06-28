@@ -238,7 +238,7 @@ Required environment variables:
 | `POSTGRES_HOST` | Use `db` with Docker Compose |
 | `POSTGRES_PORT` | Default: `5432` |
 | `REDIS_URL` | Use `redis` or `redis://redis:6379/0` with Docker Compose |
-| `VITE_API_BASE_URL` | Example: `http://localhost:8000/api` |
+| `VITE_API_BASE_URL` | Example: `https://localhost:8443/api` |
 | `GEMINI_API_KEY` | Required for AI embedding/RAG recommendations |
 | `TMDB_API_KEY` | Required for movie/drama data loading |
 | `ANILIST_API_KEY` | Required for anime data loading |
@@ -271,7 +271,7 @@ POSTGRES_PASSWORD=transcendence
 POSTGRES_HOST=db
 POSTGRES_PORT=5432
 REDIS_URL=redis
-VITE_API_BASE_URL=http://localhost:8000/api
+VITE_API_BASE_URL=https://localhost:8443/api
 GEMINI_API_KEY=
 TMDB_API_KEY=
 ANILIST_API_KEY=
@@ -294,8 +294,8 @@ make up
 
 ```text
 Frontend: http://localhost:5173
-Backend API: http://localhost:8000
-Health check: http://localhost:8000/health/
+Backend API: https://localhost:8443
+Health check: https://localhost:8443/health/
 ```
 
 ### Useful Commands
@@ -322,7 +322,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py load_media
-daphne -b 0.0.0.0 -p 8000 project.asgi:application
+daphne -b 0.0.0.0 -p 8443 project.asgi:application
 ```
 
 Frontend:
