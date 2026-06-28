@@ -418,6 +418,10 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
+import { Mutex } from 'async-mutex';
+
+const refreshMutex = new Mutex();
+
 const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = async (args, api, extraOptions) => {
   let result = await rawBaseQuery(args, api, extraOptions);
 
@@ -431,27 +435,31 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
     if (!refreshToken) {
       api.dispatch(logout());
     } else {
-      const refreshResult = await rawBaseQuery(
+      await refreshMutex.runExclusive(async () => {
+        const refreshResult = await rawBaseQuery(
           {
             url: '/auth/token/refresh/',
             method: 'POST',
             body: { refresh: refreshToken },
-        },
-        api,
-        extraOptions
-      );
+          },
+          api,
+          extraOptions
+        );
 
-      if (refreshResult.data) {
-        try {
-          const tokens = normalizeRefreshTokens(refreshResult.data as RawAuthResponse);
-          api.dispatch(updateTokens(tokens));
-          result = await rawBaseQuery(args, api, extraOptions);
-        } catch {
+        if (refreshResult.data) {
+          try {
+            const tokens = normalizeRefreshTokens(refreshResult.data as RawAuthResponse);
+            api.dispatch(updateTokens(tokens));
+          } catch {
+            api.dispatch(logout());
+          }
+        } else {
           api.dispatch(logout());
         }
-      } else {
-        api.dispatch(logout());
-      }
+      });
+
+      // refresh 후 재시도
+      result = await rawBaseQuery(args, api, extraOptions);
     }
   }
 
