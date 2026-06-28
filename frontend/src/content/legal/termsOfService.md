@@ -12,7 +12,7 @@ Transcendence is an educational media platform created as part of the 42 school 
 
 2. Educational Project
 
-This service is provided for educational and demonstration purposes. It is not a commercial media provider, streaming platform, professional recommendation service, or legal archive.
+This service is provided for educational showcase purposes. It is not a commercial media provider, streaming platform, professional recommendation service, or legal archive.
 
 Features may be incomplete, experimental, unavailable, or changed during development.
 
