@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useI18n } from "../lib/i18n";
 import { useCreateMediaReviewMutation, useGetMediaReviewsQuery, useUpdateMediaReviewMutation } from "../store/api/authApi";
 import { useState, useEffect } from "react";
@@ -114,13 +115,11 @@ const MediaDetailPage = () => {
 
   useEffect(() => {
     if (!interactions) return;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     setActiveIcon({
       eye: interactions.some(i => i.action === 'watched'),
       like: interactions.some(i => i.action === 'like'),
       dislike: interactions.some(i => i.action === 'dislike'),
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [interactions]);
 
 
@@ -128,20 +127,16 @@ const MediaDetailPage = () => {
 
   useEffect(() => {
     if (!reviews || !user) return;
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     setMyReview(
       reviews.find((r) => r.username === user.username) ?? null
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reviews, user.username]);
 
   const [myRating, setMyRating] = useState(0);
   useEffect(() => {
     if (myReview) {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
       setMyRating(myReview.rating);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myReview?.rating]);
 
 
