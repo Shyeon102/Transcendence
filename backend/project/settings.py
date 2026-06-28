@@ -7,6 +7,7 @@ from celery.schedules import crontab
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "dev-secret-key"
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]

@@ -6,10 +6,12 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.contrib.auth import get_user_model
 from .services import login_user
+from django.conf import settings
 from .serializer import RegisterSerializer
 from apps.users.serializers import UserSerializer
 
 User = get_user_model()
+google_client = settings.GOOGLE_CLIENT_ID
 
 
 class LogoutView(APIView):
@@ -95,10 +97,13 @@ class ChangePasswordView(APIView):
 
 
 def verify_google_token(token):
+    if not token:
+        raise ValueError("Missing Google ID token")
+
     return id_token.verify_oauth2_token(
         token,
         requests.Request(),
-        audience="YOUR_GOOGLE_CLIENT_ID"
+        audience=google_client
     )
 
 
@@ -125,9 +130,15 @@ class GoogleLoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        id_token = request.data.get("id_token")
+        google_id_token = request.data.get("id_token")
 
-        user_info = verify_google_token(id_token)
+        if not google_id_token:
+            return Response(
+                {"error": "id_token is required"},
+                status=400
+            )
+
+        user_info = verify_google_token(google_id_token)
 
         user = get_or_create_user_from_google(user_info)
 
@@ -137,3 +148,59 @@ class GoogleLoginView(APIView):
             "access": str(refresh.access_token),
             "refresh": str(refresh),
         })
+
+
+class GoogleRegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        token = request.data.get("id_token")
+
+        if not token:
+            return Response(
+                {"error": "id_token is required."},
+                status=400,
+            )
+
+        try:
+            user_info = verify_google_token(token)
+        except Exception:
+            return Response(
+                {"error": "Invalid Google token."},
+                status=400,
+            )
+
+        email = user_info["email"]
+
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {
+                    "error": "An account with this email already exists. "
+                    "Please login instead."
+                },
+                status=409,
+            )
+
+        user = User.objects.create(
+            email=email,
+            username=email.split("@")[0],
+            first_name=user_info.get("given_name", ""),
+            last_name=user_info.get("family_name", ""),
+            avatar_url=user_info.get("picture", ""),
+            google_id=user_info["sub"],
+            auth_provider="google",
+        )
+
+        user.set_unusable_password()
+        user.save()
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "user": UserSerializer(user).data,
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            },
+            status=201,
+        )

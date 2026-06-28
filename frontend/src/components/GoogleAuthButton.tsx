@@ -34,55 +34,48 @@ declare global {
 const GOOGLE_SCRIPT_ID = 'google-identity-services';
 const GOOGLE_SCRIPT_SRC = 'https://accounts.google.com/gsi/client';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
+
 let googleScriptPromise: Promise<void> | null = null;
 
 const isGoogleReady = () => Boolean(window.google?.accounts?.id);
 
-const loadGoogleScript = () =>
-  {
-    if (isGoogleReady()) {
-      return Promise.resolve();
+const loadGoogleScript = () => {
+  if (isGoogleReady()) return Promise.resolve();
+
+  if (googleScriptPromise) return googleScriptPromise;
+
+  googleScriptPromise = new Promise<void>((resolve, reject) => {
+    const handleLoad = () => {
+      if (isGoogleReady()) return resolve();
+      googleScriptPromise = null;
+      reject(new Error('Google script loaded but accounts not available.'));
+    };
+
+    const handleError = () => {
+      googleScriptPromise = null;
+      reject(new Error('Google script failed to load.'));
+    };
+
+    const existing = document.getElementById(GOOGLE_SCRIPT_ID);
+    if (existing) {
+      existing.addEventListener('load', handleLoad, { once: true });
+      existing.addEventListener('error', handleError, { once: true });
+      return;
     }
 
-    if (googleScriptPromise) {
-      return googleScriptPromise;
-    }
+    const script = document.createElement('script');
+    script.id = GOOGLE_SCRIPT_ID;
+    script.src = GOOGLE_SCRIPT_SRC;
+    script.async = true;
+    script.defer = true;
+    script.addEventListener('load', handleLoad, { once: true });
+    script.addEventListener('error', handleError, { once: true });
 
-    googleScriptPromise = new Promise<void>((resolve, reject) => {
-      const handleLoad = () => {
-        if (isGoogleReady()) {
-          resolve();
-          return;
-        }
+    document.head.appendChild(script);
+  });
 
-        googleScriptPromise = null;
-        reject(new Error('Google auth script loaded without Google accounts.'));
-      };
-
-      const handleError = () => {
-        googleScriptPromise = null;
-        reject(new Error('Google auth script failed to load.'));
-      };
-
-      const existingScript = document.getElementById(GOOGLE_SCRIPT_ID);
-      if (existingScript) {
-        existingScript.addEventListener('load', handleLoad, { once: true });
-        existingScript.addEventListener('error', handleError, { once: true });
-        return;
-      }
-
-      const script = document.createElement('script');
-      script.id = GOOGLE_SCRIPT_ID;
-      script.src = GOOGLE_SCRIPT_SRC;
-      script.async = true;
-      script.defer = true;
-      script.addEventListener('load', handleLoad, { once: true });
-      script.addEventListener('error', handleError, { once: true });
-      document.head.appendChild(script);
-    });
-
-    return googleScriptPromise;
-  };
+  return googleScriptPromise;
+};
 
 type GoogleAuthButtonProps = {
   disabled?: boolean;
@@ -100,20 +93,23 @@ export default function GoogleAuthButton({
   text = 'continue_with',
 }: GoogleAuthButtonProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // 🔥 IMPORTANT: prevents multiple initialize() calls
+  const initializedRef = useRef(false);
+
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (!GOOGLE_CLIENT_ID || disabled) {
-      return;
-    }
+    if (!GOOGLE_CLIENT_ID || disabled) return;
+    if (initializedRef.current) return;
 
     let mounted = true;
 
     loadGoogleScript()
       .then(() => {
-        if (!mounted || !containerRef.current || !window.google?.accounts) {
-          return;
-        }
+        if (!mounted || !containerRef.current || !window.google?.accounts) return;
+
+        initializedRef.current = true;
 
         window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
@@ -122,35 +118,36 @@ export default function GoogleAuthButton({
               onError('Google did not return a credential.');
               return;
             }
+
             onCredential(response.credential);
           },
         });
 
         containerRef.current.innerHTML = '';
+
         window.google.accounts.id.renderButton(containerRef.current, {
           theme: 'outline',
           size: 'large',
           text,
           width: containerRef.current.offsetWidth || 360,
         });
+
         setIsReady(true);
       })
       .catch((error) => {
-        onError(error instanceof Error ? error.message : 'Google auth failed to load.');
+        onError(
+          error instanceof Error ? error.message : 'Google auth failed to load.',
+        );
       });
 
     return () => {
       mounted = false;
     };
-  }, [disabled, onCredential, onError, text]);
+  }, [disabled]);
 
   if (!GOOGLE_CLIENT_ID) {
     return (
-      <Button
-        disabled
-        variant="secondary"
-        className="w-full py-[13px] text-[11px]"
-      >
+      <Button disabled variant="secondary" className="w-full py-[13px] text-[11px]">
         {missingConfigLabel}
       </Button>
     );
@@ -158,8 +155,10 @@ export default function GoogleAuthButton({
 
   return (
     <div
-      className={`min-h-[44px] w-full overflow-hidden ${disabled || !isReady ? 'opacity-60' : ''}`}
       ref={containerRef}
+      className={`min-h-[44px] w-full overflow-hidden ${
+        disabled || !isReady ? 'opacity-60' : ''
+      }`}
     />
   );
 }
