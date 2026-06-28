@@ -32,9 +32,11 @@ class ChatRoomCursorPagination(CursorPagination):
 class ChatRoomViewSet(viewsets.ModelViewSet):
 
     permission_classes = [IsRoomMember]
-    queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
     pagination_class = ChatRoomCursorPagination
+
+    def get_queryset(self):
+        return ChatRoom.objects.filter(members__user=self.request.user)
 
     def perform_create(self, serializer):
         is_private = self.request.data.get('is_private', False)
