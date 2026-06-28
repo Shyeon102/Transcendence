@@ -8,7 +8,9 @@ from django.contrib.auth import get_user_model
 from .services import login_user
 from django.conf import settings
 from .serializer import RegisterSerializer
+from rest_framework import serializers
 from apps.users.serializers import UserSerializer
+from apps.authentication.serializer import validate_password_strength
 
 User = get_user_model()
 
@@ -85,6 +87,11 @@ class ChangePasswordView(APIView):
                 {"error": "Old password is incorrect."},
                 status=400
             )
+
+        try:
+            validate_password_strength(new_password)
+        except serializers.ValidationError as e:
+            return Response({"error": e.detail[0]}, status=400)
 
         user.set_password(new_password)
         user.save()
