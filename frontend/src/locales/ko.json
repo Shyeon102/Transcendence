@@ -19,6 +19,7 @@
     "usersLoadError": "서버에서 사용자 목록을 불러오지 못했습니다.",
     "emptyReports": "조건에 맞는 신고가 없습니다.",
     "emptyUsers": "조건에 맞는 사용자가 없습니다.",
+    "noReason": "신고 사유가 없습니다.",
     "reportsEyebrow": "콘텐츠 관리",
     "reportsTitle": "신고 목록",
     "usersEyebrow": "계정 관리",
@@ -59,7 +60,7 @@
     "welcomePrefix": "환영합니다,",
     "welcomeSuffix": "님",
     "verifiedMember": "인증 회원",
-    "joinedYear": "2025 가입",
+    "joinedYear": "가입",
     "editProfile": "프로필 수정",
     "closeEdit": "닫기",
     "uploadAvatar": "사진 변경",
@@ -71,6 +72,9 @@
     "communityPosts": "커뮤니티 게시글",
     "watchlist": "워치리스트",
     "followers": "팔로워",
+    "follow": "팔로우",
+    "following": "팔로잉",
+    "profileLoadError": "프로필을 불러올 수 없습니다.",
     "defaultDisplayName": "사용자",
     "editPanelTitle": "프로필 수정",
     "displayName": "표시 이름",
@@ -119,7 +123,6 @@
     "oauth42": "42 OAuth로 로그인",
     "oauthPending": "42 OAuth 연결은 Week 2에서 붙입니다.",
     "oauthDivider": "또는 다음으로 계속",
-    "demoHint": "demo@demo.demo / demo1234",
     "noAccount": "계정이 없나요?",
     "toSignup": "회원가입",
     "toSignupCta": "무료로 계정 만들기"
@@ -317,7 +320,7 @@
   },
   "chat": {
     "title": "채팅",
-    "nodescription" : "설명 없음",
+    "nodescription": "설명 없음",
     "eyebrow": "실시간 대화",
     "createRoom": "방 만들기",
     "joinRoom": "방 참여",
@@ -332,6 +335,14 @@
     "loadingRooms": "방 목록 불러오는 중...",
     "noRooms": "참여 가능한 방이 없습니다.",
     "enterRoomPassword": "비밀번호를 입력하세요.",
-    "passwordIncorrect": "비밀번호가 틀렸습니다."
+    "passwordIncorrect": "비밀번호가 틀렸습니다.",
+    "roomList": "채팅방 목록",
+    "newRoom": "새 방 만들기",
+    "inputPlaceholder": "메시지를 입력하세요",
+    "send": "전송",
+    "descriptionPlaceholder": "설명을 입력하세요",
+    "maxMembersPlaceholder": "최대 인원",
+    "creating": "생성 중...",
+    "maxMembersRange": "인원은 4~10명이어야 합니다."
   }
 }

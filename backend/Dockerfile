@@ -17,6 +17,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 8000
+EXPOSE 8443
 
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "project.asgi:application"]
+CMD ["daphne", "-e", "ssl:8443:privateKey=/app/key.pem:certKey=/app/cert.pem", "project.asgi:application"]

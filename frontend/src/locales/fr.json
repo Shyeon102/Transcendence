@@ -19,6 +19,7 @@
     "usersLoadError": "Impossible de charger les utilisateurs depuis le serveur.",
     "emptyReports": "Aucun signalement ne correspond a ce filtre.",
     "emptyUsers": "Aucun utilisateur ne correspond a ce filtre.",
+    "noReason": "Aucun motif de signalement n'a ete fourni.",
     "reportsEyebrow": "Moderation du contenu",
     "reportsTitle": "Signalements",
     "usersEyebrow": "Moderation des comptes",
@@ -59,7 +60,7 @@
     "welcomePrefix": "Bienvenue,",
     "welcomeSuffix": "",
     "verifiedMember": "Membre verifie",
-    "joinedYear": "Inscrit en 2025",
+    "joinedYear": "Inscrit en",
     "editProfile": "Modifier le profil",
     "closeEdit": "Fermer",
     "uploadAvatar": "Changer la photo",
@@ -71,6 +72,9 @@
     "communityPosts": "Posts de la communaute",
     "watchlist": "Liste a voir",
     "followers": "Abonnes",
+    "follow": "Suivre",
+    "following": "Abonne",
+    "profileLoadError": "Impossible de charger le profil.",
     "defaultDisplayName": "Utilisateur",
     "editPanelTitle": "Modifier le profil",
     "displayName": "Nom affiche",
@@ -119,7 +123,6 @@
     "oauth42": "Continuer avec 42 OAuth",
     "oauthPending": "La connexion 42 OAuth sera branchee en semaine 2.",
     "oauthDivider": "ou continuer avec",
-    "demoHint": "demo@demo.demo / demo1234",
     "noAccount": "Pas encore de compte ?",
     "toSignup": "Inscription",
     "toSignupCta": "Creer un compte gratuitement"
@@ -317,7 +320,7 @@
   },
   "chat": {
     "title": "Salles de discussion",
-    "nodescription" : "Aucune description",
+    "nodescription": "Aucune description",
     "createRoom": "Créer une salle",
     "delete": "Supprimer",
     "deleteConfirm": "Supprimer cette salle ?",
@@ -331,6 +334,18 @@
     "roomTypePrivate": "Privée",
     "createRoomSubmit": "Créer la salle",
     "createRoomValidation": "Veuillez saisir un nom et choisir un type pour la salle.",
-    "createRoomError": "Échec de la création de la salle. Réessayez."
+    "createRoomError": "Échec de la création de la salle. Réessayez.",
+    "roomList": "Salons de discussion",
+    "newRoom": "+ Nouveau salon",
+    "inputPlaceholder": "Tapez un message",
+    "send": "Envoyer",
+    "deleteRoomConfirm": "Supprimer cette salle ?",
+    "deleteRoomError": "Échec de la suppression de la salle. Seul le créateur peut la supprimer.",
+    "descriptionPlaceholder": "Description",
+    "maxMembersPlaceholder": "Membres max",
+    "creating": "Création...",
+    "create": "Créer",
+    "cancel": "Annuler",
+    "maxMembersRange": "Le nombre de membres doit être entre 4 et 10."
   }
 }

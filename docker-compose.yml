@@ -30,18 +30,18 @@ services:
       - ./backend:/app
     env_file: .env
     ports:
-      - "8000:8000"
+      - "8443:8443"
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live/', timeout=2)\" || exit 1"]
+      test: ["CMD-SHELL", "python -c 'import urllib.request,ssl; urllib.request.urlopen(\"https://localhost:8443/health/live/\", context=ssl._create_unverified_context(), timeout=2)' || exit 1"]
       interval: 10s
       retries: 5
       start_period: 30s
-    command: ["daphne", "-b", "0.0.0.0", "-p", "8000", "project.asgi:application"]
+    command: ["daphne", "-e", "ssl:8443:privateKey=/app/key.pem:certKey=/app/cert.pem", "project.asgi:application"]
   worker:
       build: ./backend
       restart: unless-stopped

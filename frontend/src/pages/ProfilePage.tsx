@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import ProfileCard from '../components/ProfileCard';
@@ -9,116 +9,296 @@ import EmptyState from '../components/ui/EmptyState';
 import type { ReviewItem } from '../components/ReviewCard';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
-import { useUpdateMeMutation } from '../store/api/authApi';
+import {
+  useFollowUserMutation,
+  useGetPublicProfileQuery,
+  useUnfollowUserMutation,
+  useGetMyPageDashboardQuery,
+  useUpdateMeMutation,
+} from '../store/api/authApi';
 import { updateProfile } from '../store/slices/authSlice';
-
-const initialReviews: ReviewItem[] = [
-  {
-    id: 'poor-things',
-    title: 'Poor Things',
-    type: 'film',
-    date: '2025.03.12',
-    poster: '🎬',
-    text: 'A deliriously chaotic triumph. Lanthimos at full throttle - grotesque, gorgeous, and genuinely funny.',
-    rating: 4,
-    visibility: 'public',
-    isOwn: true,
-  },
-  {
-    id: 'dune-two',
-    title: 'Dune: Part Two',
-    type: 'film',
-    date: '2025.02.28',
-    poster: '📺',
-    text: "Villeneuve's scale is unmatched. The Harkonnen arena sequence alone is worth the price of admission.",
-    rating: 5,
-    visibility: 'followers',
-    isOwn: true,
-  },
-  {
-    id: 'past-lives',
-    title: 'Past Lives',
-    type: 'film',
-    date: '2024.12.05',
-    poster: '🎞️',
-    text: "Celine Song's debut is devastating in its restraint. The final scene will stay with you for weeks.",
-    rating: 5,
-    visibility: 'private',
-    isOwn: true,
-  },
-];
-
-const watchlist = [
-  ['🎬', 'Joker 2'],
-  ['📽️', 'The Zone'],
-  ['🎞️', 'Barbie'],
-  ['🎥', 'Past Lives'],
-  ['📺', 'Deadpool 3'],
-  ['🎬', 'It · Part 2'],
-  ['🎞️', 'Captain M.'],
-  ['📽️', 'Scream VII'],
-  ['🎥', '+80 more'],
-] as const;
+import type { MediaReview } from '../types';
 
 type TabKey = 'reviews' | 'watchlist';
 
+const toReviewItem = (review: MediaReview): ReviewItem => ({
+  id: String(review.id),
+  title: review.mediaTitle || 'Review',
+  type: 'review',
+  date: review.createdAt,
+  poster: '🎬',
+  text: review.content,
+  rating: review.rating,
+  visibility: review.visibility,
+});
+
+type AuthUser = NonNullable<RootState['auth']['user']>;
+
+type AuthUserWithDates = AuthUser & {
+  createdAt?: string;
+  joinedAt?: string;
+};
+
+type DashboardShape = {
+  user?: AuthUser | null;
+  reviews?: ReviewItem[];
+};
+
+type ProfileFormState = {
+  username: string;
+  firstName: string;
+  lastName: string;
+  bio: string;
+};
+
+const EMPTY_REVIEWS: ReviewItem[] = [];
+
+const dateLocaleByLanguage = {
+  ko: 'ko-KR',
+  en: 'en-US',
+  fr: 'fr-FR',
+} as const;
+
+const formatJoinedDate = (
+  value: string | undefined,
+  language: keyof typeof dateLocaleByLanguage
+) => {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleDateString(dateLocaleByLanguage[language], {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+};
+
+const buildProfileForm = (
+  user: Partial<AuthUser> | null | undefined,
+  defaultBio: string
+): ProfileFormState => ({
+  username: user?.username ?? '',
+  firstName: user?.firstName ?? '',
+  lastName: user?.lastName ?? '',
+  bio: user?.bio ?? defaultBio,
+});
+
 export default function ProfilePage() {
   const dispatch = useDispatch();
-  const { t } = useI18n();
+  const { language, t } = useI18n();
   const { id: profileId } = useParams();
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateMe] = useUpdateMeMutation();
-  const isDemo = user?.username === 'demo';
-  const displayUsername = user?.username?.trim() || '';
-  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || displayUsername || t('home.defaultDisplayName');
+  const [followUser, followState] = useFollowUserMutation();
+  const [unfollowUser, unfollowState] = useUnfollowUserMutation();
+
+  const defaultProfileBio = t('home.profileBioDefault');
+
+  const isOwnProfile =
+    !profileId ||
+    profileId === 'me' ||
+    profileId === String(user?.id) ||
+    profileId === user?.username;
+
+  const isPublicProfile = !isOwnProfile;
+
+  const routeUserId =
+    profileId && /^\d+$/.test(profileId) ? Number(profileId) : undefined;
+
+  const cannotLoadPublicProfile = isPublicProfile && !routeUserId;
+
+  const shouldFetchViewedProfile = Boolean(
+    user && isPublicProfile && routeUserId
+  );
+
+  const {
+    data: viewedProfile,
+    isError: isViewedProfileError,
+    isLoading: isViewedProfileLoading,
+  } = useGetPublicProfileQuery(routeUserId ?? 0, {
+    pollingInterval: 3000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+    refetchOnReconnect: true,
+    skip: !shouldFetchViewedProfile,
+  });
+
+  const { data: dashboard } = useGetMyPageDashboardQuery(undefined, {
+    skip: !user || !isOwnProfile,
+  });
+
+  const dashboardData = dashboard as DashboardShape | undefined;
+  const dashboardUser = dashboardData?.user ?? null;
+  const dashboardReviews = dashboardData?.reviews ?? EMPTY_REVIEWS;
+
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
   const [isEditing, setIsEditing] = useState(false);
-  const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
-  const [reviews, setReviews] = useState<ReviewItem[]>(isDemo ? initialReviews : []);
-  const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl ?? '');
-  const [profileForm, setProfileForm] = useState({
-    username: user?.username ?? '',
-    firstName: user?.firstName ?? '',
-    lastName: user?.lastName ?? '',
-    bio: user?.bio ?? t('home.profileBioDefault'),
-  });
-  const displayName = [profileForm.firstName, profileForm.lastName].filter(Boolean).join(' ') || displayUsername;
+  const [localReviews, setLocalReviews] = useState<ReviewItem[] | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [profileForm, setProfileForm] = useState<ProfileFormState>(() =>
+    buildProfileForm(user, defaultProfileBio)
+  );
+
+  useEffect(() => {
+    if (dashboardUser) {
+      dispatch(updateProfile(dashboardUser));
+    }
+  }, [dispatch, dashboardUser]);
 
   if (!user) {
     return null;
   }
 
-  const isOwnProfile =
-    !profileId ||
-    profileId === 'me' ||
-    profileId === String(user.id) ||
-    profileId === user.username;
+  const profileUser = dashboardUser ?? user;
+  const profileUserWithDates = profileUser as AuthUserWithDates;
 
-  const initials = fullName
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('') || displayUsername.slice(0, 2).toUpperCase();
-  const userWatchlist = isDemo ? watchlist : [];
+  const safeLanguage = Object.prototype.hasOwnProperty.call(
+    dateLocaleByLanguage,
+    language
+  )
+    ? (language as keyof typeof dateLocaleByLanguage)
+    : 'en';
+
+  const savedDisplayUsername = profileUser.username?.trim() || '';
+  const formDisplayUsername =
+    profileForm.username.trim() || savedDisplayUsername;
+
+  const savedDisplayName =
+    [profileUser.firstName, profileUser.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .trim() ||
+    savedDisplayUsername ||
+    t('home.defaultDisplayName');
+
+  const formDisplayName =
+    [profileForm.firstName, profileForm.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .trim() ||
+    formDisplayUsername ||
+    t('home.defaultDisplayName');
+
+  const ownDisplayUsername = isEditing
+    ? formDisplayUsername
+    : savedDisplayUsername;
+
+  const publicDisplayUsername = viewedProfile?.username?.trim() || '';
+
+  const displayUsername = isPublicProfile
+    ? publicDisplayUsername
+    : ownDisplayUsername;
+
+  const ownDisplayName = isEditing ? formDisplayName : savedDisplayName;
+
+  const publicDisplayName =
+    publicDisplayUsername || t('home.defaultDisplayName');
+
+  const profileDisplayName = isPublicProfile
+    ? publicDisplayName
+    : ownDisplayName;
+
+  const profileBio = isPublicProfile
+    ? viewedProfile?.bio ?? ''
+    : isEditing
+      ? profileForm.bio || defaultProfileBio
+      : profileUser.bio || defaultProfileBio;
+
+  const profileAvatarUrl = isPublicProfile
+    ? viewedProfile?.avatarUrl ?? ''
+    : (isEditing ? avatarPreview : null) ?? profileUser.avatarUrl ?? '';
+
+  const joinedLabel = isPublicProfile
+    ? t('home.joinedYear')
+    : formatJoinedDate(
+        profileUserWithDates.createdAt ?? profileUserWithDates.joinedAt,
+        safeLanguage
+      );
+
+  const userReviews = localReviews ?? dashboardReviews;
+
+  const visibleReviews = isPublicProfile
+    ? viewedProfile?.reviews.map(toReviewItem) ?? []
+    : userReviews;
+
+  const userWatchlist: readonly (readonly [string, string])[] = [];
+
+  const shouldBlockForProfileLoad = isPublicProfile && isViewedProfileLoading;
+
+  const shouldBlockForProfileError =
+    cannotLoadPublicProfile || (isPublicProfile && isViewedProfileError);
+
+  const displayedFollowersCount = isPublicProfile
+    ? viewedProfile?.followersCount ?? 0
+    : profileUserWithDates.followersCount ?? 0;
+
+  const initials =
+    profileDisplayName
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('') || displayUsername.slice(0, 2).toUpperCase();
+
+  const handleToggleFollow = async () => {
+    if (!routeUserId || !viewedProfile || isOwnProfile) {
+      return;
+    }
+
+    if (viewedProfile.isFollowing) {
+      await unfollowUser(routeUserId);
+      return;
+    }
+
+    await followUser(routeUserId);
+  };
+
+  const handleToggleEdit = () => {
+    if (isEditing) {
+      setProfileForm(buildProfileForm(profileUser, defaultProfileBio));
+      setAvatarPreview(null);
+      setIsEditing(false);
+      return;
+    }
+
+    setProfileForm(buildProfileForm(profileUser, defaultProfileBio));
+    setAvatarPreview(profileUser.avatarUrl ?? null);
+    setIsEditing(true);
+  };
 
   const handleProfileSave = async () => {
+    const avatarUrl =
+      avatarPreview && /^https?:\/\//.test(avatarPreview)
+        ? avatarPreview
+        : undefined;
+
     const payload = {
       username: profileForm.username,
       firstName: profileForm.firstName,
       lastName: profileForm.lastName,
       bio: profileForm.bio,
-      avatarUrl: avatarPreview.trim(),
+      avatarUrl,
     };
 
     try {
-      const updatedUser = await updateMe(payload).unwrap();
+      const response = await updateMe(payload).unwrap();
+
+      const updatedUser =
+        (response as { user?: AuthUser } | null | undefined)?.user ??
+        (response as AuthUser);
+
       dispatch(updateProfile(updatedUser));
     } catch {
-      if (isDemo) {
-        dispatch(updateProfile(payload));
-      }
+      // Keep the edit panel behavior consistent even when the API reports an error.
     } finally {
+      setAvatarPreview(null);
       setIsEditing(false);
     }
   };
@@ -131,31 +311,24 @@ export default function ProfilePage() {
   };
 
   const profileStats = [
-    { label: t('home.reviews'), value: String(reviews.length) },
+    { label: t('home.reviews'), value: String(visibleReviews.length) },
     { label: t('home.watchlist'), value: String(userWatchlist.length) },
-    { label: t('home.followers'), value: isDemo ? '31' : '0' },
-  ];
-
-  const settingsToggles = [
-    {
-      label: t('home.emailNotifications'),
-      description: t('home.emailNotificationsDesc'),
-      value: emailNotificationsEnabled,
-      onToggle: setEmailNotificationsEnabled,
-    },
+    { label: t('home.followers'), value: String(displayedFollowersCount) },
   ];
 
   const handleReviewSubmit = (review: ReviewItem) => {
-    setReviews((prev) => [review, ...prev]);
+    setLocalReviews((prev) => [review, ...(prev ?? dashboardReviews)]);
   };
 
   const handleReviewDelete = (reviewId: string) => {
-    setReviews((prev) => prev.filter((review) => review.id !== reviewId));
+    setLocalReviews((prev) =>
+      (prev ?? dashboardReviews).filter((review) => review.id !== reviewId)
+    );
   };
 
   const handleReviewEdit = (review: ReviewItem) => {
-    setReviews((prev) =>
-      prev.map((item) =>
+    setLocalReviews((prev) =>
+      (prev ?? dashboardReviews).map((item) =>
         item.id === review.id
           ? { ...item, text: `${item.text} ${t('review.editDraftSuffix')}` }
           : item
@@ -163,110 +336,152 @@ export default function ProfilePage() {
     );
   };
 
+  const handleAvatarSelect = (file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setAvatarPreview(reader.result);
+      }
+    };
+
+    reader.readAsDataURL(file);
+  };
+
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
-        <ProfileCard
-          avatarAlt={t('home.avatarAlt')}
-          avatarUrl={avatarPreview || undefined}
-          bio={profileForm.bio}
-          canEdit={isOwnProfile}
-          closeEditLabel={t('home.closeEdit')}
-          displayName={displayName}
-          displayUsername={displayUsername}
-          editProfileLabel={t('home.editProfile')}
-          initials={initials}
-          isEditing={isEditing}
-          joinedYearLabel={t('home.joinedYear')}
-          onToggleEdit={() => setIsEditing((prev) => !prev)}
-          stats={profileStats}
-          verifiedLabel={t('home.verifiedMember')}
-        />
+        {shouldBlockForProfileLoad ? (
+          <EmptyState title={t('main.loading')} />
+        ) : null}
 
-        <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_320px]">
-          <div>
-            <div className="mb-7 flex border-b border-[#f0ead0]/10">
-              {[
-                ['reviews', t('home.reviews'), String(reviews.length)],
-                ['watchlist', t('home.watchlist'), String(userWatchlist.length)],
-              ].map(([key, label, count]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setActiveTab(key as TabKey)}
-                  className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
-                    activeTab === key ? 'border-[#d63e2a] text-[#f0ead0]' : 'border-transparent text-[#8a8474] hover:text-[#c8c2a8]'
-                  }`}
-                >
-                  {label} <span className={activeTab === key ? 'text-[#d63e2a]' : 'text-[#8a8474]'}>{count}</span>
-                </button>
-              ))}
-            </div>
+        {shouldBlockForProfileError ? (
+          <EmptyState title={t('home.profileLoadError')} />
+        ) : null}
 
-            {activeTab === 'reviews' ? (
-              <>
-                {isOwnProfile ? <ReviewForm onSubmit={handleReviewSubmit} /> : null}
-                <ReviewList
-                  onDelete={isOwnProfile ? handleReviewDelete : undefined}
-                  onEdit={isOwnProfile ? handleReviewEdit : undefined}
-                  reviews={reviews}
-                />
-              </>
-            ) : null}
-
-            {activeTab === 'watchlist' ? (
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {userWatchlist.length ? (
-                  userWatchlist.map(([icon, label]) => (
-                    <div
-                      key={label}
-                      className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] text-[22px] transition hover:border-[#f0ead0]/25"
-                    >
-                      <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_4px,rgba(240,234,210,0.02)_4px,rgba(240,234,210,0.02)_8px)]" />
-                      <span className="relative z-10">{icon}</span>
-                      <span className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-1 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
-                        {label}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <EmptyState title={t('mypage.empty')} />
-                )}
-              </div>
-            ) : null}
-          </div>
-
-          {isOwnProfile ? (
-            <ProfileEditForm
-              avatarUrl={avatarPreview}
-              avatarUrlLabel={t('home.avatarUrl')}
-              avatarUrlPlaceholder={t('home.avatarUrlPlaceholder')}
-              bioLabel={t('home.bio')}
-              changePasswordLabel={t('home.changePassword')}
-              confirmNewPasswordLabel={t('home.confirmNewPassword')}
-              currentPasswordLabel={t('home.currentPassword')}
-              deleteAccountLabel={t('home.deleteAccount')}
-              firstNameLabel={t('signup.firstName')}
-              form={profileForm}
+        {!shouldBlockForProfileLoad && !shouldBlockForProfileError ? (
+          <>
+            <ProfileCard
+              avatarAlt={t('home.avatarAlt')}
+              avatarUrl={profileAvatarUrl || undefined}
+              bio={profileBio}
+              canEdit={isOwnProfile}
+              canFollow={isPublicProfile && Boolean(viewedProfile)}
+              closeEditLabel={t('home.closeEdit')}
+              displayName={profileDisplayName}
+              displayUsername={displayUsername}
+              editProfileLabel={t('home.editProfile')}
+              followLabel={t('home.follow')}
+              initials={initials}
               isEditing={isEditing}
-              lastNameLabel={t('signup.lastName')}
-              newPasswordLabel={t('home.newPassword')}
-              onAvatarUrlChange={setAvatarPreview}
-              onChange={handleProfileFormChange}
-              onSave={handleProfileSave}
-              passwordSectionLabel={t('home.passwordSection')}
-              saveLabel={t('home.saveChanges')}
-              sectionTitle={t('home.editPanelTitle')}
-              settingsTitle={t('home.accountSettings')}
-              toggles={settingsToggles}
-              usernameLabel={t('home.username')}
+              isFollowLoading={followState.isLoading || unfollowState.isLoading}
+              isFollowing={viewedProfile?.isFollowing ?? false}
+              joinedYearLabel={joinedLabel}
+              onAvatarSelect={handleAvatarSelect}
+              onToggleEdit={handleToggleEdit}
+              onToggleFollow={handleToggleFollow}
+              stats={profileStats}
+              unfollowLabel={t('home.following')}
+              uploadAvatarLabel={t('home.uploadAvatar')}
+              verifiedLabel={t('home.verifiedMember')}
             />
-          ) : (
-            <aside className="border border-[#f0ead0]/10 bg-[#141412] p-6 text-sm leading-6 text-[#8a8474]">
-              {t('home.publicProfilePlaceholder')}
-            </aside>
-          )}
-        </div>
+
+            <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_320px]">
+              <div>
+                <div className="mb-7 flex border-b border-[#f0ead0]/10">
+                  {[
+                    ['reviews', t('home.reviews'), String(visibleReviews.length)],
+                    ['watchlist', t('home.watchlist'), String(userWatchlist.length)],
+                  ].map(([key, label, count]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setActiveTab(key as TabKey)}
+                      className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
+                        activeTab === key
+                          ? 'border-[#d63e2a] text-[#f0ead0]'
+                          : 'border-transparent text-[#8a8474] hover:text-[#c8c2a8]'
+                      }`}
+                    >
+                      {label}{' '}
+                      <span
+                        className={
+                          activeTab === key ? 'text-[#d63e2a]' : 'text-[#8a8474]'
+                        }
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {activeTab === 'reviews' ? (
+                  <>
+                    {isOwnProfile ? (
+                      <ReviewForm onSubmit={handleReviewSubmit} />
+                    ) : null}
+
+                    <ReviewList
+                      onDelete={isOwnProfile ? handleReviewDelete : undefined}
+                      onEdit={isOwnProfile ? handleReviewEdit : undefined}
+                      reviews={visibleReviews}
+                    />
+                  </>
+                ) : null}
+
+                {activeTab === 'watchlist' ? (
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {userWatchlist.length ? (
+                      userWatchlist.map(([icon, label]) => (
+                        <div
+                          key={label}
+                          className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] text-[22px] transition hover:border-[#f0ead0]/25"
+                        >
+                          <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_4px,rgba(240,234,210,0.02)_4px,rgba(240,234,210,0.02)_8px)]" />
+                          <span className="relative z-10">{icon}</span>
+                          <span className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-1 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
+                            {label}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <EmptyState title={t('mypage.empty')} />
+                    )}
+                  </div>
+                ) : null}
+              </div>
+
+              {isOwnProfile ? (
+                <ProfileEditForm
+                  bioLabel={t('home.bio')}
+                  changePasswordLabel={t('home.changePassword')}
+                  confirmNewPasswordLabel={t('home.confirmNewPassword')}
+                  currentPasswordLabel={t('home.currentPassword')}
+                  deleteAccountLabel={t('home.deleteAccount')}
+                  firstNameLabel={t('signup.firstName')}
+                  form={profileForm}
+                  isEditing={isEditing}
+                  lastNameLabel={t('signup.lastName')}
+                  newPasswordLabel={t('home.newPassword')}
+                  onChange={handleProfileFormChange}
+                  onSave={handleProfileSave}
+                  passwordSectionLabel={t('home.passwordSection')}
+                  saveLabel={t('home.saveChanges')}
+                  sectionTitle={t('home.editPanelTitle')}
+                  usernameLabel={t('home.username')}
+                />
+              ) : (
+                <aside className="border border-[#f0ead0]/10 bg-[#141412] p-6 text-sm leading-6 text-[#8a8474]">
+                  {t('home.publicProfilePlaceholder')}
+                </aside>
+              )}
+            </div>
+          </>
+        ) : null}
       </div>
     </section>
   );

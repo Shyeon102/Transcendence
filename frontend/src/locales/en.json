@@ -19,6 +19,7 @@
     "usersLoadError": "Could not load users from the server.",
     "emptyReports": "No reports match this filter.",
     "emptyUsers": "No users match this filter.",
+    "noReason": "No report reason was provided.",
     "reportsEyebrow": "Content moderation",
     "reportsTitle": "Reports",
     "usersEyebrow": "Account moderation",
@@ -59,7 +60,7 @@
     "welcomePrefix": "Welcome,",
     "welcomeSuffix": "",
     "verifiedMember": "Verified Member",
-    "joinedYear": "Joined 2025",
+    "joinedYear": "Joined",
     "editProfile": "Edit Profile",
     "closeEdit": "Close",
     "uploadAvatar": "Change Photo",
@@ -71,6 +72,9 @@
     "communityPosts": "Community Posts",
     "watchlist": "Watchlist",
     "followers": "Followers",
+    "follow": "Follow",
+    "following": "Following",
+    "profileLoadError": "Profile could not be loaded.",
     "defaultDisplayName": "User",
     "editPanelTitle": "Edit Profile",
     "displayName": "Display Name",
@@ -119,7 +123,6 @@
     "oauth42": "Continue with 42 OAuth",
     "oauthPending": "42 OAuth will be connected in Week 2.",
     "oauthDivider": "or continue with",
-    "demoHint": "demo@demo.demo / demo1234",
     "noAccount": "Need an account?",
     "toSignup": "Sign up",
     "toSignupCta": "Create one - it's free"
@@ -318,7 +321,7 @@
   "chat": {
     "eyebrow": "Chat Rooms",
     "title": "Join a Room",
-    "nodescription" : "No description",
+    "nodescription": "No description",
     "description": "Connect with others in real-time. Create or join a chat room to start chatting.",
     "createRoom": "Create Room",
     "delete": "Delete",
@@ -326,6 +329,17 @@
     "deleteError": "Failed to delete the room. Only the creator can delete it.",
     "loading": "Loading chat rooms...",
     "loadError": "Failed to load chat rooms.",
-    "empty": "No chat rooms available. Create one to get started!"
+    "empty": "No chat rooms available. Create one to get started!",
+    "roomList": "Chat Rooms",
+    "newRoom": "+ New Room",
+    "inputPlaceholder": "Type a message",
+    "send": "Send",
+    "descriptionPlaceholder": "Description",
+    "maxMembersPlaceholder": "Max members",
+    "creating": "Creating...",
+    "roomNamePlaceholder": "Title",
+    "create": "Create",
+    "cancel": "Cancel",
+    "maxMembersRange": "Members must be between 4 and 10."
   }
 }
