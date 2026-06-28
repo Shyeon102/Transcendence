@@ -45,6 +45,10 @@ export default function LoginPage() {
       navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
+      if (apiError.status === 401) {
+        setErrorMsg(t('login.invalidCredentials'));
+        return;
+      }
       setErrorMsg(apiError.message ?? t('common.error'));
     }
   };
@@ -159,9 +163,6 @@ export default function LoginPage() {
         </Link>
       </p>
 
-      <p className="mt-4 border border-[#f0ead0]/10 bg-[#141412] px-4 py-3 text-center text-[10px] tracking-[0.08em] text-[#8a8474]">
-        {t('login.demoHint')}
-      </p>
     </AuthShell>
   );
 }

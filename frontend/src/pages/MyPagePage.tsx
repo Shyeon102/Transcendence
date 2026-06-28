@@ -8,7 +8,9 @@ export default function MyPagePage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
   const isDemo = user?.username === 'demo';
-  const { data: dashboard } = useGetMyPageDashboardQuery(undefined, { skip: !user || isDemo });
+  const { data: dashboard } = useGetMyPageDashboardQuery(undefined, {
+    skip: !user || isDemo,
+  });
 
   if (!user) {
     return null;
@@ -37,7 +39,6 @@ export default function MyPagePage() {
           activities={dashboard?.activities}
           emptyLabel={t('mypage.empty')}
           entriesLabel={t('mypage.entries')}
-          isDemo={isDemo}
           logLabel={t('mypage.log')}
           queueLabel={t('mypage.queue')}
           recentActivityLabel={t('mypage.recentActivity')}

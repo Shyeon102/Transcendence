@@ -21,7 +21,8 @@ class MediaSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     user = SimpleUserSerializer(read_only=True)
     media_title = serializers.CharField(source="media.title", read_only=True)
-    content = serializers.CharField(required=False, allow_blank=True, default='')
+    content = serializers.CharField(required=False,
+                                    allow_blank=True, default='')
 
     class Meta:
         model = Review

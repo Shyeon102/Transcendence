@@ -10,17 +10,21 @@ type ProfileCardProps = {
   avatarUrl?: string;
   bio: string;
   canEdit?: boolean;
+  canFollow?: boolean;
   closeEditLabel: string;
   displayName: string;
   displayUsername: string;
   editProfileLabel: string;
+  followLabel?: string;
   initials: string;
+  isFollowLoading?: boolean;
+  isFollowing?: boolean;
   isEditing: boolean;
   joinedYearLabel: string;
-  onAvatarSelect: (file: File | null) => void;
+  onToggleFollow?: () => void;
   onToggleEdit: () => void;
   stats: ProfileStat[];
-  uploadAvatarLabel: string;
+  unfollowLabel?: string;
   verifiedLabel: string;
 };
 
@@ -29,17 +33,21 @@ export default function ProfileCard({
   avatarUrl,
   bio,
   canEdit = true,
+  canFollow = false,
   closeEditLabel,
   displayName,
   displayUsername,
   editProfileLabel,
+  followLabel = 'Follow',
   initials,
+  isFollowLoading = false,
+  isFollowing = false,
   isEditing,
   joinedYearLabel,
-  onAvatarSelect,
+  onToggleFollow,
   onToggleEdit,
   stats,
-  uploadAvatarLabel,
+  unfollowLabel = 'Following',
   verifiedLabel,
 }: ProfileCardProps) {
   return (
@@ -58,24 +66,13 @@ export default function ProfileCard({
           )}
         </div>
         {canEdit ? (
-          <>
-            <button
-              type="button"
-              onClick={onToggleEdit}
-              className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center border-2 border-[#0c0c0b] bg-[#d63e2a] text-[11px]"
-            >
-              ✎
-            </button>
-            <label className="absolute -bottom-10 left-1/2 flex -translate-x-1/2 cursor-pointer border border-[#f0ead0]/20 bg-[#141412] px-3 py-1 text-[8px] uppercase tracking-[0.14em] text-[#c8c2a8] transition hover:border-[#f0ead0]/35 hover:text-[#f0ead0]">
-              {uploadAvatarLabel}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(event) => onAvatarSelect(event.target.files?.[0] ?? null)}
-              />
-            </label>
-          </>
+          <button
+            type="button"
+            onClick={onToggleEdit}
+            className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center border-2 border-[#0c0c0b] bg-[#d63e2a] text-[11px]"
+          >
+            ✎
+          </button>
         ) : null}
       </div>
 
@@ -101,6 +98,18 @@ export default function ProfileCard({
             className="px-5"
           >
             {isEditing ? `✕ ${closeEditLabel}` : editProfileLabel}
+          </Button>
+        ) : null}
+
+        {!canEdit && canFollow ? (
+          <Button
+            disabled={isFollowLoading}
+            onClick={onToggleFollow}
+            size="sm"
+            variant={isFollowing ? 'secondary' : 'primary'}
+            className="px-5"
+          >
+            {isFollowing ? unfollowLabel : followLabel}
           </Button>
         ) : null}
 

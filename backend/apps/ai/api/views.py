@@ -26,14 +26,13 @@ class HybridRecommendationView(APIView):
                 get_hybrid_scores(user_id=user_id)
             )
             if not hybrid_series.empty:
-                score_dict = {int(k): v for k, v in hybrid_series.to_dict().items()}
-                medias = list(
-                    Media.objects
-                    .filter(id__in=score_dict.keys())
-                    .prefetch_related("genres")
-                )
+                score_dict = {int(k): v for k, v in
+                              hybrid_series.to_dict().items()}
+                medias = Media.objects.filter(
+                    id__in=score_dict.keys()).prefetch_related("genres")
                 if media_type:
                     medias = medias.filter(media_type=media_type)
+                medias = list(medias)
                 medias.sort(key=lambda m: score_dict[m.id], reverse=True)
             else:
                 medias = (

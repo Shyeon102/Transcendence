@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"; // RTK Query 도구
-import type { ChatRoom } from "../../types/chat";
+import type { ChatRoom, ChatMessage } from "../../types/chat";
 import type { RootState } from "../index";
 
 export const chatApi = createApi({
@@ -8,7 +8,7 @@ export const chatApi = createApi({
   tagTypes: ["ChatRoom"],
   // fetchBaseQuery: 기본 URL 설정
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api", // 서버 요청 보낼 때 기본 URL: .env 파일에 정의된 URL을 가져오는 부분. 만약 없으면 || 뒤의 기본값(localhost:8000/api) 사용
+    baseUrl: import.meta.env.VITE_API_BASE_URL || "https://localhost:8443/api", // 서버 요청 보낼 때 기본 URL: .env 파일에 정의된 URL을 가져오는 부분. 만약 없으면 || 뒤의 기본값(localhost:8443/api) 사용
     prepareHeaders: (headers, { getState }) => {
       const state = (getState as () => RootState)();
       const token = state.auth.accessToken;
@@ -30,10 +30,14 @@ export const chatApi = createApi({
         response.results,
       providesTags: ["ChatRoom"],
     }),
-    // 추후 추가: createChatRoom, getChatMessages 등
     createChatRoom: builder.mutation<
       ChatRoom,
-      { title: string; description: string; max_members: number }
+      {
+        title: string;
+        description: string;
+        max_members: number;
+        is_private: boolean;
+      }
     >({
       query: (body) => ({
         url: "/chat/rooms/",
@@ -49,7 +53,47 @@ export const chatApi = createApi({
       }),
       invalidatesTags: ["ChatRoom"],
     }),
+    inviteToRoom: builder.mutation<void, { roomId: number; userId: number }>({
+      query: ({ roomId, userId }) => ({
+        url: `/chat/rooms/${roomId}/invite/`,
+        method: "POST",
+        body: { user_id: userId },
+      }),
+    }),
+    joinChatRoom: builder.mutation<void, number>({
+      query: (roomId) => ({
+        url: `/chat/rooms/${roomId}/members/`,
+        method: "POST",
+      }),
+    }),
+    getChatMessages: builder.query<ChatMessage[], number>({
+      query: (roomId) => `/chat/rooms/${roomId}/messages/`,
+      transformResponse: (
+        response: {
+          id: number;
+          user: { id: number; username: string };
+          content: string;
+          message_type: string;
+          created_at: string;
+        }[],
+      ) =>
+        response.map((m) => ({
+          id: m.id,
+          userId: m.user.id,
+          username: m.user.username,
+          content: m.content,
+          messageType: "message" as const,
+          createdAt: m.created_at,
+        })),
+    }),
   }),
 });
 
-export const { useGetChatRoomsQuery, useCreateChatRoomMutation, useDeleteChatRoomMutation, } = chatApi; // 훅 노출: 이 훅을 컴포넌트에서 호출하면 데이터/로딩/에러 다 받아짐
+export const {
+  useGetChatRoomsQuery,
+  useCreateChatRoomMutation,
+  useDeleteChatRoomMutation,
+  useInviteToRoomMutation,
+  useGetChatMessagesQuery,
+  useJoinChatRoomMutation,
+} = chatApi; // 훅 노출: 이 훅을 컴포넌트에서 호출하면 데이터/로딩/에러 다 받아짐

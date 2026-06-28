@@ -64,7 +64,8 @@ class ReviewCreateView(APIView):
         media = get_object_or_404(Media, pk=media_id)
         reviews = media.reviews.all()
         serializer = ReviewSerializer(reviews, many=True)
-        return Response({'reviews': serializer.data}, status=status.HTTP_200_OK)
+        return Response({'reviews': serializer.data},
+                        status=status.HTTP_200_OK)
 
     def put(self, request, media_id, review_id):
         return self.patch(request, media_id, review_id)

@@ -138,12 +138,6 @@ export default function OnboardingPage() {
       navigate("/home");
     } catch (error) {
       const apiError = error as { message?: string };
-
-      if (user?.username === "demo") {
-        navigate("/home");
-        return;
-      }
-
       setErrorMsg(apiError.message ?? t("onboarding.saveError"));
     }
   };

@@ -10,4 +10,4 @@ The backend exposes health check endpoints:
 After backup or restore operations, verify the system with:
 
 ```bash
-curl http://localhost:8000/health/
+curl https://localhost:8443/health/

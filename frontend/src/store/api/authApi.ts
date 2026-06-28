@@ -5,7 +5,6 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
-import { mockLogin, mockUpdateProfile } from '../../features/auth/mockAuth';
 import { logout, setCredentials, updateProfile, updateTokens } from '../../features/auth/authSlice';
 import type { RootState } from '../index';
 import type {
@@ -24,6 +23,7 @@ import type {
   MediaInteraction,
   MyPageDashboardData,
   PasswordChangeRequest,
+  PublicUserProfile,
   RefreshTokenResponse,
   SignupRequest,
   SignupResponse,
@@ -49,6 +49,10 @@ type RawAuthUser = {
   favorite_countries?: string[];
   isStaff?: boolean;
   is_staff?: boolean;
+  followersCount?: number;
+  followers_count?: number;
+  followingCount?: number;
+  following_count?: number;
   dateJoined?: string;
   date_joined?: string;
 };
@@ -82,7 +86,12 @@ type GoogleLoginRequest = {
   id_token: string;
 };
 
-type RawDashboardReview = {
+type RawActivityInteraction = {
+  media_id: number;
+  media_title: string;
+};
+
+type RawActivityReview = {
   id: number;
   title?: string;
   note?: string;
@@ -100,9 +109,14 @@ type RawDashboardInteraction = {
 };
 
 type RawDashboard = {
-  activity?: string[];
-  recent_activity?: string[];
-  reviews?: RawDashboardReview[];
+  interactions?: {
+    like?: RawActivityInteraction[];
+    dislike?: RawActivityInteraction[];
+    watchlist?: RawActivityInteraction[];
+    watched?: RawActivityInteraction[];
+  };
+  reviews?: RawActivityReview[];
+  // demo/legacy 응답 호환
   watchlist?: string[];
   activities?: string[];
   interactions?: {
@@ -130,6 +144,13 @@ type RawReview = {
 
 type RawReviewPayload = RawReview | {
   review?: RawReview;
+  reviews?: RawReview[];
+};
+
+type RawPublicUserProfile = RawAuthUser & {
+  followers_count?: number;
+  following_count?: number;
+  is_following?: boolean;
   reviews?: RawReview[];
 };
 
@@ -170,11 +191,8 @@ type RawAdminReportsPayload = RawAdminReport[] | {
   results?: RawAdminReport[];
 };
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api').replace(/\/+$/, '');
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'https://localhost:8443/api').replace(/\/+$/, '');
 const GOOGLE_AUTH_ENDPOINT = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT ?? '/auth/login/google/';
-const SHOULD_FALLBACK_TO_MOCK = import.meta.env.VITE_USE_MOCK_AUTH !== 'false';
-const isDemoLogin = (credentials: LoginRequest) =>
-  credentials.username === 'demo' || credentials.username === 'demo@demo.demo';
 
 const toMessage = (value: unknown): string | undefined => {
   if (typeof value === 'string' && value.trim()) {
@@ -295,7 +313,7 @@ const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse 
   };
 };
 
-const normalizeDashboardReview = (review: RawDashboardReview): DashboardReview => ({
+const normalizeDashboardReview = (review: RawActivityReview): DashboardReview => ({
   id: review.id,
   title: review.title ?? review.media_title ?? `Review #${review.id}`,
   note: review.note ?? review.content ?? '',
@@ -342,6 +360,17 @@ const normalizeReviewList = (payload: RawReviewPayload): MediaReview[] => {
   }
   return [];
 };
+
+const normalizePublicUserProfile = (profile: RawPublicUserProfile): PublicUserProfile => ({
+  id: profile.id ?? 0,
+  username: profile.username ?? '',
+  avatarUrl: profile.avatarUrl ?? profile.avatar_url,
+  bio: profile.bio,
+  followersCount: profile.followers_count ?? 0,
+  followingCount: profile.following_count ?? 0,
+  isFollowing: profile.is_following ?? false,
+  reviews: (profile.reviews ?? []).map(normalizeReview),
+});
 
 const toReviewRequestBody = (review: MediaReviewRequest) => ({
   rating: review.rating,
@@ -431,10 +460,10 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
       api.dispatch(logout());
     } else {
       const refreshResult = await rawBaseQuery(
-          {
-            url: '/auth/token/refresh/',
-            method: 'POST',
-            body: { refresh: refreshToken },
+        {
+          url: '/auth/token/refresh/',
+          method: 'POST',
+          body: { refresh: refreshToken },
         },
         api,
         extraOptions
@@ -444,13 +473,15 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
         try {
           const tokens = normalizeRefreshTokens(refreshResult.data as RawAuthResponse);
           api.dispatch(updateTokens(tokens));
-          result = await rawBaseQuery(args, api, extraOptions);
         } catch {
           api.dispatch(logout());
         }
       } else {
         api.dispatch(logout());
       }
+
+      // refresh 후 재시도
+      result = await rawBaseQuery(args, api, extraOptions);
     }
   }
 
@@ -471,7 +502,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery,
-  tagTypes: ['AdminReports', 'AdminUsers', 'MediaInteractions', 'MediaReviews', 'Me'],
+  tagTypes: ['AdminReports', 'AdminUsers', 'MediaReviews', 'MediaInteractions', 'Me', 'UserProfile'],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials, api) {
@@ -517,25 +548,13 @@ export const authApi = createApi({
           }
         }
 
-        if (SHOULD_FALLBACK_TO_MOCK && isDemoLogin(credentials)) {
-          try {
-            const data = await mockLogin(credentials);
-            return { data };
-          } catch (error) {
-            return {
-              error: {
-                message: error instanceof Error ? error.message : 'Login failed.',
-              },
-            };
-          }
-        }
-
         const error = (tokenResult.error ?? {}) as FetchBaseQueryError;
         const data = 'data' in error ? error.data : undefined;
         return {
           error: {
             message: toMessage(data) ?? 'Request failed.',
             fields: toFieldErrors(data),
+            status: typeof error.status === 'number' ? error.status : undefined,
           },
         };
       },
@@ -680,24 +699,6 @@ export const authApi = createApi({
           return { data };
         }
 
-        if (SHOULD_FALLBACK_TO_MOCK) {
-          try {
-            const currentUser = (api.getState() as RootState).auth.user;
-            if (!currentUser || currentUser.username !== 'demo') {
-              throw new Error('Profile update failed.');
-            }
-            const data = await mockUpdateProfile(currentUser.id, payload);
-            api.dispatch(updateProfile(data));
-            return { data };
-          } catch (error) {
-            return {
-              error: {
-                message: error instanceof Error ? error.message : 'Profile update failed.',
-              },
-            };
-          }
-        }
-
         const error = result.error as FetchBaseQueryError;
         const data = 'data' in error ? error.data : undefined;
         return {
@@ -734,6 +735,12 @@ export const authApi = createApi({
           },
         };
       },
+    }),
+    deleteAccount: builder.mutation<void, void>({
+      query: () => ({
+        url: '/users/profile/',
+        method: 'DELETE',
+      }),
     }),
     changePassword: builder.mutation<{ success: boolean }, PasswordChangeRequest>({
       query: ({ currentPassword, newPassword }) => ({
@@ -780,6 +787,103 @@ export const authApi = createApi({
           },
         };
       },
+    }),
+    getPublicProfile: builder.query<PublicUserProfile, number>({
+      async queryFn(userId, api) {
+        const result = await rawBaseQuery(`/users/profile/${userId}/`, api, {});
+
+        if (result.data) {
+          return { data: normalizePublicUserProfile(result.data as RawPublicUserProfile) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Profile request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+      providesTags: (_result, _error, userId) => [{ type: 'UserProfile', id: userId }],
+    }),
+    followUser: builder.mutation<void, number>({
+      async queryFn(userId, api) {
+        const result = await rawBaseQuery(
+          { url: `/users/${userId}/follow/`, method: 'POST' },
+          api,
+          {}
+        );
+
+        if (result.error) {
+          const error = result.error as FetchBaseQueryError;
+          const data = 'data' in error ? error.data : undefined;
+          return {
+            error: {
+              message: toMessage(data) ?? 'Follow request failed.',
+              fields: toFieldErrors(data),
+            },
+          };
+        }
+
+        return { data: undefined };
+      },
+      async onQueryStarted(userId, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          authApi.util.updateQueryData('getPublicProfile', userId, (draft) => {
+            if (!draft.isFollowing) {
+              draft.isFollowing = true;
+              draft.followersCount += 1;
+            }
+          })
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
+      invalidatesTags: (_result, _error, userId) => [{ type: 'UserProfile', id: userId }],
+    }),
+    unfollowUser: builder.mutation<void, number>({
+      async queryFn(userId, api) {
+        const result = await rawBaseQuery(
+          { url: `/users/${userId}/follow/`, method: 'DELETE' },
+          api,
+          {}
+        );
+
+        if (result.error) {
+          const error = result.error as FetchBaseQueryError;
+          const data = 'data' in error ? error.data : undefined;
+          return {
+            error: {
+              message: toMessage(data) ?? 'Unfollow request failed.',
+              fields: toFieldErrors(data),
+            },
+          };
+        }
+
+        return { data: undefined };
+      },
+      async onQueryStarted(userId, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          authApi.util.updateQueryData('getPublicProfile', userId, (draft) => {
+            if (draft.isFollowing) {
+              draft.isFollowing = false;
+              draft.followersCount = Math.max(0, draft.followersCount - 1);
+            }
+          })
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
+      invalidatesTags: (_result, _error, userId) => [{ type: 'UserProfile', id: userId }],
     }),
     getMediaReviews: builder.query<MediaReview[], number>({
       async queryFn(mediaId, api) {
@@ -954,17 +1058,21 @@ export const {
   useBanAdminUserMutation,
   useChangePasswordMutation,
   useCreateMediaReviewMutation,
+  useDeleteAccountMutation,
   useDeleteMediaReviewMutation,
   useGetAdminReportsQuery,
   useGetMeQuery,
   useGetMediaReviewsQuery,
   useGetMyPageDashboardQuery,
+  useGetPublicProfileQuery,
   useGetUserActivityQuery,
   useGoogleLoginMutation,
+  useFollowUserMutation,
   useLoginMutation,
   useLogoutMutation,
   useProcessAdminReportMutation,
   useSignupMutation,
+  useUnfollowUserMutation,
   useUpdateAvatarMutation,
   useUpdateMeMutation,
   useUpdateMediaReviewMutation,
