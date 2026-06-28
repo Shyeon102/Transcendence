@@ -1,4 +1,4 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNjQ5MjE0LCJpYXQiOjE3ODI2NDc0MTQsImp0aSI6ImRhNGU4ZTEyMjVkNTQyOWE5ZTljNzUxN2E1NDkxNjdmIiwidXNlcl9pZCI6IjIifQ.Xu_-cDoRKCQo7nNHrrsxuTTed7WNISv5MLoWBdxdgPI
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNjQ5ODU5LCJpYXQiOjE3ODI2NDgwNTksImp0aSI6IjE0Yjk3YzdmZTIyMzRlYjI5MmMzMmYxY2MwZTNkZWMyIiwidXNlcl9pZCI6IjMifQ.M_MRjYIIEgItCCNyfg2bws5wRQgm-0iJUmswbrtwVmY
 ###
 Curl -X POST https://localhost:8443/api/auth/register/ \
   -H "Content-Type: application/json" \
@@ -83,8 +83,8 @@ curl -X POST https://localhost:8443/api/community/posts/4/comments/ \
 curl -X POST https://localhost:8443/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "testuser",
-    "password": "ValidPass1!"
+    "username": "1234",
+    "password": "1234"
   }'
 
 ###
@@ -263,3 +263,8 @@ curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
     "old_password": "ValidPass1!",
     "new_password": "NewValid1!"
   }'
+
+###
+
+curl -X GET https://localhost:8443/api/users/admin/users/ \
+  -H "Authorization: Bearer {{token}}"
