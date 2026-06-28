@@ -54,6 +54,14 @@ export default function SignupPage() {
       return t("validation.passwordTooShort");
     }
 
+    if (
+      !/[a-z]/.test(formData.password) ||
+      !/[A-Z]/.test(formData.password) ||
+      !/\d/.test(formData.password)
+    ) {
+      return t("validation.passwordWeak");
+    }
+
     if (formData.password !== formData.passwordConfirm) {
       return t("validation.passwordMismatch");
     }
