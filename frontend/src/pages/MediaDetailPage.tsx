@@ -1,12 +1,16 @@
+/* eslint-disable */
 import { useI18n } from "../lib/i18n";
-import { useGetMediaReviewsQuery } from "../store/api/authApi";
-import { useState } from "react";
+import { useCreateMediaReviewMutation, useGetMediaReviewsQuery, useUpdateMediaReviewMutation } from "../store/api/authApi";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useGetMediaDetailQuery } from "../store/api/mediaApi";
+import { useGetMediaInteractionsQuery, useToggleMediaInteractionMutation, useDeleteMediaReviewMutation } from "../store/api/authApi";
 import { useSelector } from "react-redux";
 import type { Media, Genre } from "../types/media";
 import type { RootState } from "../store";
 import defaultPoster from '/src/assets/images/defaultposter.png';
+import type { MediaReview } from "../types";
+import { useNavigate } from "react-router-dom";
 
 // 임시 목업 데이터: 현재 백엔드가 없으므로 목업 데이터 임시 선언
 const genreCrime: Genre = { id: 1, name: "Crime" };
@@ -75,6 +79,7 @@ const mockMedia: Media = {
 };
 
 const MediaDetailPage = () => {
+  const navigate = useNavigate();
   const { t } = useI18n();
   const { id } = useParams();
   const mediaId = Number(id);
@@ -84,6 +89,13 @@ const MediaDetailPage = () => {
   const isDemo = user?.username === "demo";
   const media = isDemo ? mockMedia : data;
   const reviewList = isDemo ? mockMedia.reviews : (reviews ?? []);
+
+  const { data: interactions, refetch: refetchInteractions } = useGetMediaInteractionsQuery(mediaId);  // 추가
+  const [toggleInteraction] = useToggleMediaInteractionMutation();        // 추가
+  const [createReview] = useCreateMediaReviewMutation();                  // 추가
+  const [updateReview] = useUpdateMediaReviewMutation();   
+  const [deleteReview] = useDeleteMediaReviewMutation();
+
   //const navigate = useNavigate(); // 미디어 탭 이동
   //const { id } = useParams(); // React Router에서  URL 파라미터 읽는 훅. URL: /media/:id
   //useParams(); // // TODO: 백엔드 연동 후 useParams()로 id 받아서 API 호출
@@ -96,7 +108,37 @@ const MediaDetailPage = () => {
     dislike: false,
     wish: false,
   });
-  const [myRating, setMyRating] = useState(0); // star rating
+  useEffect(() => {
+    refetchInteractions();
+  }, [mediaId, refetchInteractions])
+
+
+  useEffect(() => {
+    if (!interactions) return;
+    setActiveIcon({
+      eye: interactions.some(i => i.action === 'watched'),
+      like: interactions.some(i => i.action === 'like'),
+      dislike: interactions.some(i => i.action === 'dislike'),
+    });
+  }, [interactions]);
+
+
+  const [myReview, setMyReview] = useState<MediaReview | null>(null);
+
+  useEffect(() => {
+    if (!reviews || !user) return;
+    setMyReview(
+      reviews.find((r) => r.username === user.username) ?? null
+    );
+  }, [reviews, user.username]);
+
+  const [myRating, setMyRating] = useState(0);
+  useEffect(() => {
+    if (myReview) {
+      setMyRating(myReview.rating);
+    }
+  }, [myReview?.rating]);
+
 
   if (!isDemo && isLoading) {
     return (
@@ -124,6 +166,14 @@ const MediaDetailPage = () => {
   
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white flex flex-col">
+      <div className="px-6 pt-4">
+        <button
+          onClick={() => navigate("/home")}
+          className="mb-4 text-sm text-gray-400 hover:text-white transition"
+        >
+          ←
+        </button>
+      </div>
       {/* 레이아웃: 가로로 3등분 */}
       <div className="flex mt-[7vh]">
         {/* 미디어 변환 탭: 제일 왼쪽 */}
@@ -183,7 +233,21 @@ const MediaDetailPage = () => {
                 <img
                   key={n}
                   src={n <= myRating ? "/star-full.png" : "/star-line.png"}
-                  onClick={() => setMyRating(prev => (prev === n ? 0 : n))}
+                  onClick={async () => {
+                    const newRating = myRating === n ? 0 : n;
+                    setMyRating(newRating);
+                    if (myReview) {
+                      if (newRating === 0) {
+                        await deleteReview({ mediaId, reviewId: myReview.id });
+                        setMyReview(null);  // 로컬 즉시 반영
+                      } else {
+                        await updateReview({ mediaId, reviewId: myReview.id, review: { rating: newRating, content: myReview.content } });
+                      }
+                    } else if (newRating > 0) {
+                      const result = await createReview({ mediaId, review: { rating: newRating, content: '' } }).unwrap();
+                      setMyReview(result);  // 생성된 리뷰 즉시 반영
+                    }
+                  }}
                   className="w-[1.6vw] h-[1.6vw] cursor-pointer"
                 />
               ))}
@@ -246,7 +310,11 @@ const MediaDetailPage = () => {
 
           {/* 아이콘 인터렉션 */}
           <div className="flex max-w-[31.5vw] justify-end gap-[0.3vw] mt-[2vh]">
-            <button onClick={() => setActiveIcon({ ...icon, eye: !icon.eye })}>
+            <button onClick={async () => {
+              const next = !icon.eye;
+              setActiveIcon({ ...icon, eye: next });
+              await toggleInteraction({ mediaId, action: 'watched', active: next });
+            }}>
               {/* 이미지 교체 (삼항연산자): 조건 ? 참일 때 : 거짓일 때 */}
               <img
                 src={icon.eye ? "/view.png" : "/non-view.png"}
@@ -254,7 +322,11 @@ const MediaDetailPage = () => {
               />
             </button>
             <button
-              onClick={() => setActiveIcon({ ...icon, like: !icon.like })}
+              onClick={async () => {
+                const next = !icon.like;
+                setActiveIcon({ ...icon, like: next });
+                await toggleInteraction({ mediaId, action: 'like', active: next });
+              }}
             >
               <img
                 src={icon.like ? "/like.png" : "/non-like.png"}
@@ -262,7 +334,11 @@ const MediaDetailPage = () => {
               />
             </button>
             <button
-              onClick={() => setActiveIcon({ ...icon, dislike: !icon.dislike })}
+              onClick={async () => {
+                const next = !icon.dislike;
+                setActiveIcon({ ...icon, dislike: next, like: next ? false : icon.like });
+                await toggleInteraction({ mediaId, action: 'dislike', active: next });
+              }}
             >
               <img
                 src={icon.dislike ? "/dislike.png" : "/non-dislike.png"}
@@ -270,7 +346,11 @@ const MediaDetailPage = () => {
               />
             </button>
             <button
-              onClick={() => setActiveIcon({ ...icon, wish: !icon.wish })}
+              onClick={async () => {
+                const next = !icon.wish;
+                setActiveIcon({ ...icon, wish: next });
+                await toggleInteraction({ mediaId, action: 'wish', active: next });
+              }}
             >
               <img
                 src={icon.wish ? "/wish.png" : "/non-wish.png"}
@@ -280,6 +360,7 @@ const MediaDetailPage = () => {
           </div>
 
           {/* 오른쪽: 리뷰 섹션: Reviews 제목 + 리뷰 목록 (가로정렬) */}
+          {/*지울수도 안지울수도 있음*/}
           <div className="flex gap-[3vw] mt-[3.6vh]">
             {/* 유저 리스트 div */}
             <div className="flex flex-col gap-[1vh]">
@@ -289,16 +370,8 @@ const MediaDetailPage = () => {
                   className="flex gap-4 text-[0.8vw] items-start"
                 >
                   {/* 유저명 */}
-                  <p className="w-[5vw]">{review.username}</p>
+                  <p className="w-[5vw] truncate whitespace-nowrap overflow-hidden">{review.username}</p>
 
-                  {/* visibility 뱃지 + 커멘트 세로로 */}
-                  <div className="flex flex-col">
-                    {/* TODO: 백엔드 연동 후 visibility 뱃지 표시 예정 */}
-                    {/*<p className="border border-teal-600 px-2 py-[0.2vh] text-[0.6vw] rounded-full w-fit">
-                      {review.visibility}
-                    </p>*/}
-                    <p>{review.content}</p>
-                  </div>
 
                   {/* 별점 + 숫자 */}
                   <div className="flex items-center ml-[7vw]">
