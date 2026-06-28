@@ -10,7 +10,9 @@ import type { RootState } from "../store";
 import { useI18n } from "../lib/i18n";
 
 const ChatRoomListPage = () => {
-  const { data, isLoading, error } = useGetChatRoomsQuery(); // const {RTK Query에서 제공}
+  const { data, isLoading, error } = useGetChatRoomsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteChatRoom] = useDeleteChatRoomMutation();
@@ -18,11 +20,11 @@ const ChatRoomListPage = () => {
   const { t } = useI18n();
 
   const handleDelete = async (roomId: number) => {
-    if (!confirm("Do you want to delete this room?")) return;
+    if (!confirm(t("chat.deleteRoomConfirm"))) return;
     try {
       await deleteChatRoom(roomId).unwrap();
     } catch {
-      alert("Failed to delete the room. Only the creator can delete it.");
+      alert(t("chat.deleteRoomError"))
     }
   };
 
@@ -32,8 +34,8 @@ const ChatRoomListPage = () => {
       <div className="px-[4.72vw] pt-[3vh]">
         {/* 페이지 내부 헤더 */}
         <div className="flex justify-between ">
-          <h1 className="font-bold">Chat Rooms</h1>
-          <button onClick={() => setIsModalOpen(true)}>+ New Room</button>
+          <h1 className="font-bold">{t("chat.roomList")}</h1>
+          <button onClick={() => setIsModalOpen(true)}>{t("chat.newRoom")}</button>
         </div>
         {/* 토론방 목록*/}
         <div className="space-y-3 mt-4">
@@ -52,7 +54,9 @@ const ChatRoomListPage = () => {
               className="cursor-pointer bg-[#151515] border border-white/10 rounded-xl p-4 transition hover:bg-[#1c1c1c] hover:border-white/20"
             >
               <h2 className="text-lg font-semibold text-white">{room.title}</h2>
-              <p className="text-sm text-gray-400 mt-1 line-clamp-2">{room.description || t("chat.nodescription")}</p>
+              <p className="text-sm text-gray-400 mt-1 line-clamp-2">
+                {room.description || t("chat.nodescription")}
+              </p>
               {room.created_by.id === user?.id && (
                 <button
                   onClick={(e) => {

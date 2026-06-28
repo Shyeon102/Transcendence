@@ -342,7 +342,7 @@
   },
   "chat": {
     "title": "채팅",
-    "nodescription" : "설명 없음",
+    "nodescription": "설명 없음",
     "eyebrow": "실시간 대화",
     "createRoom": "방 만들기",
     "joinRoom": "방 참여",
@@ -357,6 +357,14 @@
     "loadingRooms": "방 목록 불러오는 중...",
     "noRooms": "참여 가능한 방이 없습니다.",
     "enterRoomPassword": "비밀번호를 입력하세요.",
-    "passwordIncorrect": "비밀번호가 틀렸습니다."
+    "passwordIncorrect": "비밀번호가 틀렸습니다.",
+    "roomList": "채팅방 목록",
+    "newRoom": "새 방 만들기",
+    "inputPlaceholder": "메시지를 입력하세요",
+    "send": "전송",
+    "descriptionPlaceholder": "설명을 입력하세요",
+    "maxMembersPlaceholder": "최대 인원",
+    "creating": "생성 중...",
+    "maxMembersRange": "인원은 4~10명이어야 합니다."
   }
 }
