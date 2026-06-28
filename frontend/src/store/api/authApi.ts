@@ -1057,7 +1057,6 @@ export const authApi = createApi({
 export const {
   useBanAdminUserMutation,
   useChangePasswordMutation,
-  useDeleteAccountMutation,
   useCreateMediaReviewMutation,
   useDeleteAccountMutation,
   useDeleteMediaReviewMutation,
