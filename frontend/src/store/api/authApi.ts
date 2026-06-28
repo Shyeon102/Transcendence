@@ -5,7 +5,7 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
-import { logout, setCredentials, updateTokens } from '../../features/auth/authSlice';
+import { logout, setCredentials, updateProfile, updateTokens } from '../../features/auth/authSlice';
 import type { RootState } from '../index';
 import type {
   AuthErrorResponse,
@@ -479,7 +479,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery,
-  tagTypes: ['AdminReports', 'AdminUsers', 'MediaReviews', 'MediaInteractions'],
+  tagTypes: ['AdminReports', 'AdminUsers', 'MediaReviews', 'MediaInteractions', 'Me'],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials, api) {
