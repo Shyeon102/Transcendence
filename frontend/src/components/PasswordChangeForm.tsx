@@ -55,7 +55,8 @@ export default function PasswordChangeForm({
     if (
       !/[a-z]/.test(form.newPassword) ||
       !/[A-Z]/.test(form.newPassword) ||
-      !/\d/.test(form.newPassword)
+      !/\d/.test(form.newPassword) ||
+      !/[^a-zA-Z0-9]/.test(form.newPassword)
     ) {
       return t('validation.passwordWeak');
     }
