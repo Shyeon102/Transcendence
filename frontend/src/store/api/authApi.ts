@@ -6,7 +6,7 @@ import {
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
 import { mockLogin, mockUpdateProfile } from '../../features/auth/mockAuth';
-import { logout, setCredentials, updateTokens } from '../../features/auth/authSlice';
+import { logout, setCredentials, updateProfile, updateTokens } from '../../features/auth/authSlice';
 import type { RootState } from '../index';
 import type {
   AuthErrorResponse,
@@ -84,10 +84,19 @@ type GoogleLoginRequest = {
 
 type RawDashboardReview = {
   id: number;
-  title: string;
-  note: string;
-  when: string;
+  title?: string;
+  note?: string;
+  when?: string;
+  media_title?: string;
+  content?: string;
+  created_at?: string;
   rating: number;
+  visibility?: 'public' | 'followers' | 'private';
+};
+
+type RawDashboardInteraction = {
+  media_id?: number;
+  media_title?: string;
 };
 
 type RawDashboard = {
@@ -96,6 +105,12 @@ type RawDashboard = {
   reviews?: RawDashboardReview[];
   watchlist?: string[];
   activities?: string[];
+  interactions?: {
+    like?: RawDashboardInteraction[];
+    dislike?: RawDashboardInteraction[];
+    watchlist?: RawDashboardInteraction[];
+    watched?: RawDashboardInteraction[];
+  };
 };
 
 type RawReview = {
@@ -282,15 +297,19 @@ const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse 
 
 const normalizeDashboardReview = (review: RawDashboardReview): DashboardReview => ({
   id: review.id,
-  title: review.title,
-  note: review.note,
-  when: review.when,
+  title: review.title ?? review.media_title ?? `Review #${review.id}`,
+  note: review.note ?? review.content ?? '',
+  when: review.when ?? review.created_at ?? '',
   rating: review.rating,
+  visibility: review.visibility,
 });
 
 const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
   reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
-  watchlist: payload.watchlist ?? [],
+  watchlist:
+    payload.watchlist ??
+    payload.interactions?.watchlist?.map((item) => item.media_title ?? `Media #${item.media_id ?? '-'}`) ??
+    [],
   activities: payload.activities ?? payload.activity ?? payload.recent_activity ?? [],
 });
 
@@ -452,7 +471,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery,
-  tagTypes: ['AdminReports', 'AdminUsers', 'MediaReviews'],
+  tagTypes: ['AdminReports', 'AdminUsers', 'MediaInteractions', 'MediaReviews', 'Me'],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials, api) {
@@ -634,6 +653,7 @@ export const authApi = createApi({
           },
         };
       },
+      providesTags: ['Me'],
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
@@ -655,7 +675,9 @@ export const authApi = createApi({
         );
 
         if (result.data) {
-          return { data: normalizeUserPayload(result.data as RawUserPayload) };
+          const data = normalizeUserPayload(result.data as RawUserPayload);
+          api.dispatch(updateProfile(data));
+          return { data };
         }
 
         if (SHOULD_FALLBACK_TO_MOCK) {
@@ -665,6 +687,7 @@ export const authApi = createApi({
               throw new Error('Profile update failed.');
             }
             const data = await mockUpdateProfile(currentUser.id, payload);
+            api.dispatch(updateProfile(data));
             return { data };
           } catch (error) {
             return {
@@ -684,6 +707,7 @@ export const authApi = createApi({
           },
         };
       },
+      invalidatesTags: ['Me'],
     }),
     updateAvatar: builder.mutation<AuthUser, string>({
       async queryFn(avatarUrl, api) {

@@ -2,10 +2,13 @@ import { useSelector } from 'react-redux';
 import MyPageDashboard from '../components/MyPageDashboard';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
+import { useGetMyPageDashboardQuery } from '../store/api/authApi';
 
 export default function MyPagePage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
+  const isDemo = user?.username === 'demo';
+  const { data: dashboard } = useGetMyPageDashboardQuery(undefined, { skip: !user || isDemo });
 
   if (!user) {
     return null;
@@ -14,7 +17,6 @@ export default function MyPagePage() {
   const heading = user.firstName
     ? t('mypage.userSpace').replace('{{name}}', user.firstName.toUpperCase())
     : t('mypage.title');
-  const isDemo = user.username === 'demo';
 
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
@@ -32,13 +34,16 @@ export default function MyPagePage() {
         </div>
 
         <MyPageDashboard
+          activities={dashboard?.activities}
           emptyLabel={t('mypage.empty')}
           entriesLabel={t('mypage.entries')}
           isDemo={isDemo}
           logLabel={t('mypage.log')}
           queueLabel={t('mypage.queue')}
           recentActivityLabel={t('mypage.recentActivity')}
+          reviews={dashboard?.reviews}
           reviewSectionLabel={t('mypage.reviewSection')}
+          watchlist={dashboard?.watchlist}
           watchlistLabel={t('mypage.watchlistSection')}
         />
       </div>

@@ -72,6 +72,7 @@ export interface DashboardReview {
   note: string;
   when: string;
   rating: number;
+  visibility?: 'public' | 'followers' | 'private';
 }
 
 export interface MyPageDashboardData {

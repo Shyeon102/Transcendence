@@ -9,7 +9,7 @@ import EmptyState from '../components/ui/EmptyState';
 import type { ReviewItem } from '../components/ReviewCard';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
-import { useGetMeQuery, useUpdateMeMutation } from '../store/api/authApi';
+import { useGetMeQuery, useGetMyPageDashboardQuery, useUpdateMeMutation } from '../store/api/authApi';
 import { updateProfile } from '../store/slices/authSlice';
 
 const initialReviews: ReviewItem[] = [
@@ -96,6 +96,7 @@ export default function ProfilePage() {
   const [updateMe] = useUpdateMeMutation();
   const isDemo = user?.username === 'demo';
   const { data: latestUser } = useGetMeQuery(undefined, { skip: !user || isDemo });
+  const { data: dashboard } = useGetMyPageDashboardQuery(undefined, { skip: !user || isDemo });
   const displayUsername = user?.username?.trim() || '';
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || displayUsername || t('home.defaultDisplayName');
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
@@ -133,7 +134,21 @@ export default function ProfilePage() {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('') || displayUsername.slice(0, 2).toUpperCase();
-  const userWatchlist = isDemo ? watchlist : [];
+  const userReviews = isDemo
+    ? reviews
+    : (dashboard?.reviews ?? []).map((review): ReviewItem => ({
+        id: String(review.id),
+        title: review.title,
+        type: 'media',
+        date: review.when,
+        poster: '🎞️',
+        text: review.note,
+        rating: review.rating,
+        visibility: review.visibility,
+      }));
+  const userWatchlist = isDemo
+    ? watchlist
+    : (dashboard?.watchlist ?? []).map((title) => ['🎞️', title] as const);
   const joinedDate = formatJoinedDate(user.dateJoined, language);
   const joinedLabel = joinedDate ? `${t('home.joinedYear')} ${joinedDate}` : t('home.joinedYear');
   const profileDisplayName = isEditing
@@ -185,7 +200,7 @@ export default function ProfilePage() {
   };
 
   const profileStats = [
-    { label: t('home.reviews'), value: String(reviews.length) },
+    { label: t('home.reviews'), value: String(userReviews.length) },
     { label: t('home.watchlist'), value: String(userWatchlist.length) },
     { label: t('home.followers'), value: isDemo ? '31' : '0' },
   ];
@@ -257,7 +272,7 @@ export default function ProfilePage() {
           <div>
             <div className="mb-7 flex border-b border-[#f0ead0]/10">
               {[
-                ['reviews', t('home.reviews'), String(reviews.length)],
+                ['reviews', t('home.reviews'), String(userReviews.length)],
                 ['watchlist', t('home.watchlist'), String(userWatchlist.length)],
               ].map(([key, label, count]) => (
                 <button
@@ -277,9 +292,9 @@ export default function ProfilePage() {
               <>
                 {isOwnProfile ? <ReviewForm onSubmit={handleReviewSubmit} /> : null}
                 <ReviewList
-                  onDelete={isOwnProfile ? handleReviewDelete : undefined}
-                  onEdit={isOwnProfile ? handleReviewEdit : undefined}
-                  reviews={reviews}
+                  onDelete={isOwnProfile && isDemo ? handleReviewDelete : undefined}
+                  onEdit={isOwnProfile && isDemo ? handleReviewEdit : undefined}
+                  reviews={userReviews}
                 />
               </>
             ) : null}

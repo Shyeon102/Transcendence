@@ -1,18 +1,23 @@
+import type { DashboardReview } from '../types';
 import EmptyState from './ui/EmptyState';
 import SectionCard from './ui/SectionCard';
 
 const reviewItems = [
   {
+    id: 1,
     title: 'The Substance',
     note: 'Body horror, dark satire, and a finale that escalates without apology.',
     when: '2 hours ago',
+    rating: 4,
   },
   {
+    id: 2,
     title: 'Frieren',
     note: 'Quiet fantasy pacing done right. Episode arcs land with almost no wasted motion.',
     when: 'Yesterday',
+    rating: 5,
   },
-];
+] satisfies DashboardReview[];
 
 const watchlistItems = [
   'Perfect Blue',
@@ -35,7 +40,7 @@ type MyPageDashboardProps = {
   logLabel: string;
   queueLabel: string;
   recentActivityLabel: string;
-  reviews?: typeof reviewItems;
+  reviews?: DashboardReview[];
   reviewSectionLabel: string;
   watchlist?: string[];
   watchlistLabel: string;
