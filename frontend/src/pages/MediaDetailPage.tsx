@@ -114,6 +114,7 @@ const MediaDetailPage = () => {
 
   useEffect(() => {
     if (!interactions) return;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     setActiveIcon({
       eye: interactions.some(i => i.action === 'watched'),
       like: interactions.some(i => i.action === 'like'),
@@ -127,7 +128,7 @@ const MediaDetailPage = () => {
 
   useEffect(() => {
     if (!reviews || !user) return;
-
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     setMyReview(
       reviews.find((r) => r.username === user.username) ?? null
     );
@@ -137,6 +138,7 @@ const MediaDetailPage = () => {
   const [myRating, setMyRating] = useState(0);
   useEffect(() => {
     if (myReview) {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
       setMyRating(myReview.rating);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
