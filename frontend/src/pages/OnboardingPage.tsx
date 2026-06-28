@@ -131,17 +131,17 @@ export default function OnboardingPage() {
   };
 
   const persistOnboarding = async () => {
-    const payload = { onboardingCompleted: true };
-
     try {
-      const updatedUser = await updateMe(payload).unwrap();
-      dispatch(updateProfile(updatedUser));
+      // If you still need to save other onboarding fields,
+      // send ONLY those. Otherwise you can remove this entirely.
+
+      await updateMe({}).unwrap();
+
       navigate("/home");
     } catch (error) {
       const apiError = error as { message?: string };
 
       if (user?.username === "demo") {
-        dispatch(updateProfile(payload));
         navigate("/home");
         return;
       }

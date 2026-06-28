@@ -8,7 +8,6 @@ export interface AuthUser {
   bio?: string;
   favoriteGenres?: number[];
   favoriteTitles?: string[];
-  onboardingCompleted?: boolean;
   favoriteCountries?: string[];
   isStaff?: boolean;
 }
