@@ -9,6 +9,7 @@ import type { Media, Genre } from "../types/media";
 import type { RootState } from "../store";
 import defaultPoster from '/src/assets/images/defaultposter.png';
 import type { MediaReview } from "../types";
+import { useNavigate } from "react-router-dom";
 
 // 임시 목업 데이터: 현재 백엔드가 없으므로 목업 데이터 임시 선언
 const genreCrime: Genre = { id: 1, name: "Crime" };
@@ -77,6 +78,7 @@ const mockMedia: Media = {
 };
 
 const MediaDetailPage = () => {
+  const navigate = useNavigate();
   const { t } = useI18n();
   const { id } = useParams();
   const mediaId = Number(id);
@@ -158,6 +160,14 @@ const MediaDetailPage = () => {
   
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white flex flex-col">
+      <div className="px-6 pt-4">
+        <button
+          onClick={() => navigate("/home")}
+          className="mb-4 text-sm text-gray-400 hover:text-white transition"
+        >
+          ←
+        </button>
+      </div>
       {/* 레이아웃: 가로로 3등분 */}
       <div className="flex mt-[7vh]">
         {/* 미디어 변환 탭: 제일 왼쪽 */}
