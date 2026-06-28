@@ -99,7 +99,7 @@ def call_gemini_with_retry(prompt: str) -> ParsedQuery | None:
     }
     res = requests.post(url, json=payload, timeout=30)
     if res.status_code == 429:
-        return None 
+        return None
     res.raise_for_status()
     data = res.json()
     text = data["candidates"][0]["content"]["parts"][0]["text"]
