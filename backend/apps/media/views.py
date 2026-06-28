@@ -4,10 +4,6 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from django.db import models
-import logging
-logger = logging.getLogger(__name__)
-
-
 from apps.media.models import Media, MediaInteraction
 from apps.media.serializers import (
     MediaSerializer, ReviewSerializer, MediaInteractionSerializer
@@ -122,7 +118,6 @@ class ReviewCreateView(APIView):
 
 class MediaInteractionView(APIView):
     def post(self, request, media_id):
-        print("REQUEST DATA:", request.data)  # 추가
         serializer = MediaInteractionSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({'errors': serializer.errors},
@@ -165,7 +160,6 @@ class MediaInteractionView(APIView):
         response_status = (
             status.HTTP_201_CREATED if created else status.HTTP_200_OK
         )
-        print("SERIALIZER ERRORS:", serializer.errors)  # 추가
         return Response(
             {
                 'interaction': {
@@ -207,7 +201,7 @@ class MediaInteractionView(APIView):
                 for interaction in interactions
             ]
             return Response({'interactions': data}, status=status.HTTP_200_OK)
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
             return Response({'interactions': []}, status=status.HTTP_200_OK)
 

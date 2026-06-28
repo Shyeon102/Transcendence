@@ -131,7 +131,9 @@ const MediaDetailPage = () => {
   const [myRating, setMyRating] = useState(0);
 
   useEffect(() => {
-    if (myReview) setMyRating(myReview.rating);
+    if (!myReview) return;
+
+    setMyRating(myReview.rating);
   }, [myReview]);
 
   if (!isDemo && isLoading) {
