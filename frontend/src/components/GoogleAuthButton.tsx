@@ -95,9 +95,14 @@ export default function GoogleAuthButton({
   text = 'continue_with',
 }: GoogleAuthButtonProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-
-  // 🔥 IMPORTANT: prevents multiple initialize() calls
+  const onCredentialRef = useRef(onCredential);
+  const onErrorRef = useRef(onError);
   const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    onCredentialRef.current = onCredential;
+    onErrorRef.current = onError;
+  }, [onCredential, onError]);
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID || disabled) return;
@@ -115,11 +120,10 @@ export default function GoogleAuthButton({
           client_id: GOOGLE_CLIENT_ID,
           callback: (response) => {
             if (!response.credential) {
-              onError('Google did not return a credential.');
+              onErrorRef.current('Google did not return a credential.');
               return;
             }
-
-            onCredential(response.credential);
+            onCredentialRef.current(response.credential);
           },
           use_fedcm_for_prompt: false,
         });
@@ -136,7 +140,7 @@ export default function GoogleAuthButton({
         setIsReady(true);
       })
       .catch((error) => {
-        onError(
+        onErrorRef.current(
           error instanceof Error ? error.message : 'Google auth failed to load.',
         );
       });
@@ -144,7 +148,7 @@ export default function GoogleAuthButton({
     return () => {
       mounted = false;
     };
-  }, [disabled]);
+  }, [disabled, text]);
 
   if (!GOOGLE_CLIENT_ID) {
     return (
