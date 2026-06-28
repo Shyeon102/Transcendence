@@ -305,7 +305,8 @@
     "callbackErrorDescription": "Un probleme est survenu pendant le traitement de 42 OAuth. Verifiez l'URL de callback configuree et le flux de reponse du backend.",
     "callbackContinue": "Continuer",
     "callbackRetry": "Retour a la connexion",
-    "startUrlMissing": "L'URL backend 42 OAuth n'est pas encore configuree."
+    "startUrlMissing": "L'URL backend 42 OAuth n'est pas encore configuree.",
+    "googleClientMissing": "La connexion Google n'est pas encore configuree."
   },
   "footer": {
     "privacyPolicy": "Politique de confidentialité",

@@ -45,7 +45,6 @@ type RawAuthUser = {
   favorite_genres?: number[];
   favoriteTitles?: string[];
   favorite_titles?: string[];
-  onboardingCompleted?: boolean;
   onboarding_completed?: boolean;
   favoriteCountries?: string[];
   favorite_countries?: string[];
@@ -76,6 +75,10 @@ type RawUserPayload = RawAuthUser | RawAuthResponse;
 type RawTokenResponse = {
   access?: string;
   refresh?: string;
+};
+
+type GoogleLoginRequest = {
+  id_token: string;
 };
 
 type RawDashboardReview = {
@@ -164,6 +167,7 @@ type RawAdminUsersPayload = RawAdminUser[] | {
 };
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api').replace(/\/+$/, '');
+const GOOGLE_AUTH_ENDPOINT = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT ?? '/auth/login/google/';
 const SHOULD_FALLBACK_TO_MOCK = import.meta.env.VITE_USE_MOCK_AUTH !== 'false';
 const isDemoLogin = (credentials: LoginRequest) =>
   credentials.username === 'demo' || credentials.username === 'demo@demo.demo';
@@ -235,7 +239,6 @@ const normalizeUser = (user: RawAuthUser): AuthUser => ({
   bio: user.bio,
   favoriteGenres: user.favoriteGenres ?? user.favorite_genres,
   favoriteTitles: user.favoriteTitles ?? user.favorite_titles,
-  onboardingCompleted: user.onboardingCompleted ?? user.onboarding_completed,
   favoriteCountries: user.favoriteCountries ?? user.favorite_countries,
   isStaff: user.isStaff ?? user.is_staff,
 });
@@ -537,6 +540,56 @@ export const authApi = createApi({
         return {
           error: {
             message: toMessage(data) ?? 'Request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled;
+        dispatch(setCredentials(data));
+      },
+    }),
+    googleLogin: builder.mutation<LoginResponse, GoogleLoginRequest>({
+      async queryFn(payload, api) {
+        const result = await rawBaseQuery(
+          {
+            url: GOOGLE_AUTH_ENDPOINT,
+            method: 'POST',
+            body: { id_token: payload.id_token },
+          },
+          api,
+          {}
+        );
+
+        if (result.data) {
+          const rawData = result.data as RawAuthResponse;
+          const accessToken = rawData.access ?? rawData.access_token ?? rawData.token;
+
+          const userResult = await rawBaseQuery(
+            {
+              url: '/users/profile/',
+              headers: { Authorization: `Bearer ${accessToken}` },
+            },
+            api,
+            {}
+          );
+
+          if (userResult.data) {
+            return {
+              data: normalizeSession({
+                ...(userResult.data as RawAuthResponse),
+                access: accessToken,
+                refresh: rawData.refresh ?? rawData.refresh_token,
+              }),
+            };
+          }
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Google authentication failed.',
             fields: toFieldErrors(data),
           },
         };
@@ -927,6 +980,7 @@ export const {
   useGetMediaReviewsQuery,
   useGetMyPageDashboardQuery,
   useGetUserActivityQuery,
+  useGoogleLoginMutation,
   useLoginMutation,
   useLogoutMutation,
   useProcessAdminReportMutation,
