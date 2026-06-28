@@ -21,12 +21,10 @@ type ProfileCardProps = {
   isFollowing?: boolean;
   isEditing: boolean;
   joinedYearLabel: string;
-  onAvatarSelect: (file: File | null) => void;
   onToggleFollow?: () => void;
   onToggleEdit: () => void;
   stats: ProfileStat[];
   unfollowLabel?: string;
-  uploadAvatarLabel: string;
   verifiedLabel: string;
 };
 
