@@ -8,7 +8,9 @@ from django.contrib.auth import get_user_model
 from .services import login_user
 from .serializer import RegisterSerializer
 from apps.users.serializers import UserSerializer
+import os
 
+google_id = os.getenv("GOOGLE_CLIENT_ID")
 User = get_user_model()
 
 
@@ -98,7 +100,7 @@ def verify_google_token(token):
     return id_token.verify_oauth2_token(
         token,
         requests.Request(),
-        audience="YOUR_GOOGLE_CLIENT_ID"
+        audience=google_id
     )
 
 
@@ -137,3 +139,59 @@ class GoogleLoginView(APIView):
             "access": str(refresh.access_token),
             "refresh": str(refresh),
         })
+
+
+class GoogleRegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        token = request.data.get("id_token")
+
+        if not token:
+            return Response(
+                {"error": "id_token is required."},
+                status=400,
+            )
+
+        try:
+            user_info = verify_google_token(token)
+        except Exception:
+            return Response(
+                {"error": "Invalid Google token."},
+                status=400,
+            )
+
+        email = user_info["email"]
+
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {
+                    "error": "An account with this email already exists. "
+                    "Please login instead."
+                },
+                status=409,
+            )
+
+        user = User.objects.create(
+            email=email,
+            username=email.split("@")[0],
+            first_name=user_info.get("given_name", ""),
+            last_name=user_info.get("family_name", ""),
+            avatar_url=user_info.get("picture", ""),
+            google_id=user_info["sub"],
+            auth_provider="google",
+        )
+
+        user.set_unusable_password()
+        user.save()
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response(
+            {
+                "user": UserSerializer(user).data,
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            },
+            status=201,
+        )
