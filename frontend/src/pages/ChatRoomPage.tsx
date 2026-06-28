@@ -1,5 +1,4 @@
 import { useParams } from "react-router-dom";
-import Header from "../components/Header";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
 import { useWebSocket } from "../hooks/useWebSocket";
@@ -26,7 +25,6 @@ const ChatRoomPage = () => {
 
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white">
-      <Header />
       <div className="px-[4.72vw] pt-[3vh]">
         <h1 className="font-bold">Room #{roomId}</h1>
 

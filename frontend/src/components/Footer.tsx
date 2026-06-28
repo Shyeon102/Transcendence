@@ -18,7 +18,7 @@ const Footer = () => {
     storeLanguage(next);
   };
   return (
-    <div className="flex justify-between text-[0.80vw] px-[2vw] pt-[7vh]">
+    <div className="flex justify-between text-xs px-8 py-6 text-white/60">
       {/* 왼쪽 */}
       <div className="flex gap-[2vw]">
         <Link to="/privacy" className="transition hover:text-white">

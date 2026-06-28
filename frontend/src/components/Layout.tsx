@@ -1,14 +1,15 @@
 import { Outlet } from 'react-router-dom';
-//import Header from './Header';
-import SiteHeader from "./SiteHeader";
+import Header from './Header';
+import Footer from './Footer';
 
 export default function Layout() {
   return (
-    <div className="min-h-screen">
-      <SiteHeader />
-      <main>
+    <div className="min-h-screen bg-black flex flex-col">
+      <Header />
+      <main  className="flex-1 pb-1">
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 }

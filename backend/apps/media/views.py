@@ -55,10 +55,13 @@ class MediaSearchView(APIView):
 class ReviewCreateView(APIView):
     def get(self, request, media_id):
         media = get_object_or_404(Media, pk=media_id)
-        reviews = media.reviews.visible_to(request.user)
-        serializer = ReviewSerializer(reviews, many=True)
-        return Response({'reviews': serializer.data},
-                        status=status.HTTP_200_OK)
+        try:
+            reviews = media.reviews.visible_to(request.user)
+            serializer = ReviewSerializer(reviews, many=True)
+            return Response({'reviews': serializer.data},
+                            status=status.HTTP_200_OK)
+        except Exception:
+            return Response({'reviews': []}, status=status.HTTP_200_OK)
 
     def put(self, request, media_id, review_id):
         return self.patch(request, media_id, review_id)
