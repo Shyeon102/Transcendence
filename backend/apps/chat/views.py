@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import BasePermission
 
-from .models import ChatRoom, ChatMessage, ChatRoomMember
+from .models import ChatRoom, ChatMessage, ChatRoomMember, ChatRoomInvite
 from .serializers import (
     ChatRoomSerializer,
     ChatMessageSerializer,
@@ -19,8 +19,9 @@ User = get_user_model()
 
 class IsRoomMember(BasePermission):
     def has_object_permission(self, request, view, obj):
-        return ChatRoomMember.objects.filter(room=obj,
-                                             user=request.user).exists()
+        if obj.is_private:
+            return ChatRoomMember.objects.filter(room=obj, user=request.user).exists()
+        return True
 
 
 class ChatRoomCursorPagination(CursorPagination):
@@ -35,13 +36,49 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
     pagination_class = ChatRoomCursorPagination
 
     def perform_create(self, serializer):
-        room = serializer.save(created_by=self.request.user)
-
-        ChatRoomMember.objects.create(
-            room=room,
-            user=self.request.user,
-            role="owner"
+        is_private = self.request.data.get('is_private', False)
+        max_members = 2 if is_private else serializer.validated_data.get(
+            'max_members', 4)
+        room = serializer.save(
+            created_by=self.request.user,
+            is_private=is_private,
+            max_members=max_members
         )
+        ChatRoomMember.objects.create(room=room, user=self.request.user,
+                                      role="owner")
+
+    @action(detail=True, methods=["post"], url_path="invite")
+    def invite(self, request, pk=None):
+        room = self.get_object()
+
+        if not room.is_private:
+            return Response({"error": "Room is not private"}, status=400)
+
+        if room.created_by != request.user:
+            return Response({"error": "Only the owner can invite"}, status=403)
+
+        invited_user_id = request.data.get("user_id")
+        if not invited_user_id:
+            return Response({"error": "user_id is required"}, status=400)
+
+        try:
+            invited_user = User.objects.get(id=invited_user_id)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
+
+        current_members = ChatRoomMember.objects.filter(room=room).count()
+        if current_members >= room.max_members:
+            return Response({"error": "Room is full"}, status=400)
+
+        ChatRoomInvite.objects.get_or_create(
+            room=room,
+            invited_user=invited_user,
+            defaults={"invited_by": request.user}
+        )
+
+        ChatRoomMember.objects.get_or_create(room=room, user=invited_user)
+
+        return Response({"success": True})
 
     @staticmethod
     def is_member(room, user):
