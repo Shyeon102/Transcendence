@@ -59,11 +59,13 @@
     "welcomePrefix": "Welcome,",
     "welcomeSuffix": "",
     "verifiedMember": "Verified Member",
-    "joinedYear": "Joined 2025",
+    "joinedYear": "Joined",
     "editProfile": "Edit Profile",
     "closeEdit": "Close",
     "uploadAvatar": "Change Photo",
     "avatarAlt": "Profile avatar",
+    "avatarUrl": "Profile Photo URL",
+    "avatarUrlPlaceholder": "https://example.com/avatar.jpg",
     "reviews": "Reviews",
     "posts": "Posts",
     "communityPosts": "Community Posts",
@@ -90,10 +92,11 @@
     "passwordSameAsCurrent": "The new password must be different from the current password.",
     "deleteAccount": "Delete Account",
     "deleteAccountTitle": "Delete this account?",
-    "deleteAccountDescription": "This cannot be undone. The real deletion flow will be connected once the backend API is confirmed.",
+    "deleteAccountDescription": "This cannot be undone. Your account and related data will be permanently deleted.",
     "deleteAccountCancel": "Cancel",
     "deleteAccountConfirm": "Confirm delete",
-    "deleteAccountPending": "The confirmation flow is ready; the account deletion API is still pending.",
+    "deleteAccountPending": "Deleting your account...",
+    "deleteAccountError": "Failed to delete the account. Please try again later.",
     "publicProfilePlaceholder": "Once the public profile API is connected, this area will show user-specific reviews and profile details.",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - Currently obsessed with slow cinema and anything A24."
   },
@@ -222,36 +225,6 @@
       "copyright": "Copyright infringement"
     }
   },
-  "admin": {
-    "eyebrow": "Moderation workspace",
-    "title": "Admin console",
-    "description": "Review reported content and manage user account status.",
-    "connectedNotice": "Connected to admin API. Actions are sent to the server.",
-    "loading": "Loading...",
-    "reportsLoadError": "Failed to load reports.",
-    "usersLoadError": "Failed to load users.",
-    "emptyReports": "No reports match this filter.",
-    "emptyUsers": "No users match this filter.",
-    "noReason": "No report reason was provided.",
-    "reportsEyebrow": "Content moderation",
-    "reportsTitle": "Reports",
-    "usersEyebrow": "Account moderation",
-    "usersTitle": "Users",
-    "reportedBy": "Reported by",
-    "reportCount": "Reports: {{count}}",
-    "approve": "Approve",
-    "reject": "Reject",
-    "ban": "Ban",
-    "reactivate": "Reactivate",
-    "status": {
-      "all": "All",
-      "pending": "Pending",
-      "approved": "Approved",
-      "rejected": "Rejected",
-      "active": "Active",
-      "banned": "Banned"
-    }
-  },
   "mypage": {
     "eyebrow": "Personal Space",
     "title": "My Activity",
@@ -294,7 +267,8 @@
     "passwordTooShort": "Password must be at least 8 characters.",
     "passwordWeak": "Password must include at least one uppercase letter, one lowercase letter, and one number.",
     "passwordMismatch": "Passwords do not match.",
-    "usernameInvalid": "Username must be 3+ chars using letters, numbers, or underscores."
+    "usernameInvalid": "Username must be 3+ chars using letters, numbers, or underscores.",
+    "usernameRequired": "Username cannot be empty."
   },
   "oauth": {
     "callbackEyebrow": "42 OAuth",

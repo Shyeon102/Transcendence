@@ -10,6 +10,7 @@ export interface AuthUser {
   favoriteTitles?: string[];
   favoriteCountries?: string[];
   isStaff?: boolean;
+  dateJoined?: string;
 }
 
 export interface StoredUser extends AuthUser {
@@ -71,6 +72,7 @@ export interface DashboardReview {
   note: string;
   when: string;
   rating: number;
+  visibility?: 'public' | 'followers' | 'private';
 }
 
 export interface MyPageDashboardData {

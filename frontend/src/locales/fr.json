@@ -59,11 +59,13 @@
     "welcomePrefix": "Bienvenue,",
     "welcomeSuffix": "",
     "verifiedMember": "Membre verifie",
-    "joinedYear": "Inscrit en 2025",
+    "joinedYear": "Inscrit en",
     "editProfile": "Modifier le profil",
     "closeEdit": "Fermer",
     "uploadAvatar": "Changer la photo",
     "avatarAlt": "Avatar du profil",
+    "avatarUrl": "URL de la photo de profil",
+    "avatarUrlPlaceholder": "https://example.com/avatar.jpg",
     "reviews": "Critiques",
     "posts": "Posts",
     "communityPosts": "Posts de la communaute",
@@ -90,10 +92,11 @@
     "passwordSameAsCurrent": "Le nouveau mot de passe doit etre different du mot de passe actuel.",
     "deleteAccount": "Supprimer le compte",
     "deleteAccountTitle": "Supprimer ce compte ?",
-    "deleteAccountDescription": "Cette action est irreversible. Le vrai flux de suppression sera branche quand l'API backend sera confirmee.",
+    "deleteAccountDescription": "Cette action est irreversible. Votre compte et les donnees associees seront supprimes definitivement.",
     "deleteAccountCancel": "Annuler",
     "deleteAccountConfirm": "Confirmer",
-    "deleteAccountPending": "Le flux de confirmation est pret ; l'API de suppression reste a brancher.",
+    "deleteAccountPending": "Suppression de votre compte...",
+    "deleteAccountError": "Echec de la suppression du compte. Veuillez reessayer plus tard.",
     "publicProfilePlaceholder": "Quand l'API de profil public sera branchee, cette zone affichera les critiques et les informations de profil de l'utilisateur.",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - En ce moment, je suis absorbe par le slow cinema et tout ce qui touche a A24."
   },
@@ -222,36 +225,6 @@
       "copyright": "Atteinte aux droits d'auteur"
     }
   },
-  "admin": {
-    "eyebrow": "Espace de moderation",
-    "title": "Console admin",
-    "description": "Examinez les contenus signales et gerez le statut des comptes.",
-    "connectedNotice": "Connecte a l'API admin. Les actions sont envoyees au serveur.",
-    "loading": "Chargement...",
-    "reportsLoadError": "Impossible de charger les signalements.",
-    "usersLoadError": "Impossible de charger les utilisateurs.",
-    "emptyReports": "Aucun signalement ne correspond a ce filtre.",
-    "emptyUsers": "Aucun utilisateur ne correspond a ce filtre.",
-    "noReason": "Aucun motif de signalement n'a ete fourni.",
-    "reportsEyebrow": "Moderation du contenu",
-    "reportsTitle": "Signalements",
-    "usersEyebrow": "Moderation des comptes",
-    "usersTitle": "Utilisateurs",
-    "reportedBy": "Signale par",
-    "reportCount": "Signalements : {{count}}",
-    "approve": "Approuver",
-    "reject": "Rejeter",
-    "ban": "Bannir",
-    "reactivate": "Reactiver",
-    "status": {
-      "all": "Tous",
-      "pending": "En attente",
-      "approved": "Approuve",
-      "rejected": "Rejete",
-      "active": "Actif",
-      "banned": "Banni"
-    }
-  },
   "mypage": {
     "eyebrow": "Espace personnel",
     "title": "Mon activite",
@@ -294,7 +267,8 @@
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caracteres.",
     "passwordWeak": "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.",
     "passwordMismatch": "Les mots de passe ne correspondent pas.",
-    "usernameInvalid": "Le nom d'utilisateur doit contenir au moins 3 caracteres et utiliser lettres, chiffres ou tirets bas."
+    "usernameInvalid": "Le nom d'utilisateur doit contenir au moins 3 caracteres et utiliser lettres, chiffres ou tirets bas.",
+    "usernameRequired": "Le nom d'utilisateur ne peut pas etre vide."
   },
   "oauth": {
     "callbackEyebrow": "42 OAuth",
