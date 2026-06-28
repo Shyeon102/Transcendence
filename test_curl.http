@@ -1,16 +1,63 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNTYxNTQyLCJpYXQiOjE3ODI1NTk3NDIsImp0aSI6Ijk0OTlmNmFkNmNkYTQ0NzRiZjNmODI4OWYwZjczYTY4IiwidXNlcl9pZCI6IjIifQ.nyuVsMlB5-JBLH4SodyQ4j_juA0ywlCCyPXmj6EJG8E
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNjQ5MjE0LCJpYXQiOjE3ODI2NDc0MTQsImp0aSI6ImRhNGU4ZTEyMjVkNTQyOWE5ZTljNzUxN2E1NDkxNjdmIiwidXNlcl9pZCI6IjIifQ.Xu_-cDoRKCQo7nNHrrsxuTTed7WNISv5MLoWBdxdgPI
 ###
-Curl -X POST http://localhost:8000/api/auth/register/ \
+Curl -X POST https://localhost:8443/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "demo",
-    "email": "demo@example.com",
-    "password": "demo"
+    "username": "testuser",
+    "email": "testuser@example.com",
+    "password": "testpassword123"
   }'
 
 ###
 
-curl -X POST http://localhost:8000/api/community/posts/ \
+# Should fail - password too short
+curl -k -X POST https://localhost:8443/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "short"
+  }'
+###
+# Should fail - no uppercase
+curl -k -X POST https://localhost:8443/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "nouppercase1!"
+  }'
+###
+# Should fail - no number
+curl -k -X POST https://localhost:8443/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "NoNumber!"
+  }'
+
+### 
+# Should fail - no special character
+curl -k -X POST https://localhost:8443/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "NoSpecial1"
+  }'
+
+### 
+# Should succeed
+curl -k -X POST https://localhost:8443/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "ValidPass1!"
+  }'
+###
+curl -X POST https://localhost:8443/api/community/posts/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}" \
   -d '{
@@ -21,7 +68,7 @@ curl -X POST http://localhost:8000/api/community/posts/ \
 
 ###
 
-curl -X POST http://localhost:8000/api/community/posts/4/comments/ \
+curl -X POST https://localhost:8443/api/community/posts/4/comments/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}" \
   -d '{
@@ -33,36 +80,36 @@ curl -X POST http://localhost:8000/api/community/posts/4/comments/ \
 
 ###
 
-curl -X POST http://localhost:8000/api/auth/login/ \
+curl -X POST https://localhost:8443/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "test",
-    "password": "12341234"
+    "username": "testuser",
+    "password": "ValidPass1!"
   }'
 
 ###
 
-curl -X GET http://localhost:8000/api/community/posts/4/comments \
+curl -X GET https://localhost:8443/api/community/posts/4/comments \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}"
 
 
 ###
 
-curl -X GET http://localhost:8000/api/community/reports/ \
+curl -X GET https://localhost:8443/api/community/reports/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}"
 
 
 ###
 
-curl -X GET http://localhost:8000/api/community/posts/1/ \
+curl -X GET https://localhost:8443/api/community/posts/1/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}"
 
 ###
 
-curl -X POST http://localhost:8000/api/community/posts/2/comments/ \
+curl -X POST https://localhost:8443/api/community/posts/2/comments/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}" \
   -d '{
@@ -71,7 +118,7 @@ curl -X POST http://localhost:8000/api/community/posts/2/comments/ \
 
 ###
 
-curl -X POST http://localhost:8000/api/community/posts/4/comments/ \
+curl -X POST https://localhost:8443/api/community/posts/4/comments/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}" \
   -d '{
@@ -81,7 +128,7 @@ curl -X POST http://localhost:8000/api/community/posts/4/comments/ \
 
 ###
 
-curl -X PUT http://localhost:8000/api/community/comments/4/ \
+curl -X PUT https://localhost:8443/api/community/comments/4/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}" \
   -d '{
@@ -90,18 +137,18 @@ curl -X PUT http://localhost:8000/api/community/comments/4/ \
 
 ###
 
-curl -X DELETE http://localhost:8000/api/community/comments/2/ \
+curl -X DELETE https://localhost:8443/api/community/comments/2/ \
   -H "Authorization: Bearer {{token}}"
 
 ###
 
-curl -X POST http://localhost:8000/api/community/comments/1/like/ \
+curl -X POST https://localhost:8443/api/community/comments/1/like/ \
   -H "Authorization: Bearer {{token}}"
 
 
 ###
 
-curl -X DELETE http://localhost:8000/api/community/comments/1/like/ \
+curl -X DELETE https://localhost:8443/api/community/comments/1/like/ \
   -H "Authorization: Bearer {{token}}" \
   -d '{
     "report_type": "spam",
@@ -110,7 +157,7 @@ curl -X DELETE http://localhost:8000/api/community/comments/1/like/ \
 
 ###
 
-curl -X POST http://localhost:8000/api/community/comments/1/report/ \
+curl -X POST https://localhost:8443/api/community/comments/1/report/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}" \
   -d '{
@@ -120,7 +167,7 @@ curl -X POST http://localhost:8000/api/community/comments/1/report/ \
 
 ###
 
-curl -X POST http://localhost:8000/api/community/posts/1/report/ \
+curl -X POST https://localhost:8443/api/community/posts/1/report/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}" \
   -d '{
@@ -130,7 +177,7 @@ curl -X POST http://localhost:8000/api/community/posts/1/report/ \
 
 ###
 
-curl -X PATCH http://localhost:8000/api/community/reports/3/ \
+curl -X PATCH https://localhost:8443/api/community/reports/3/ \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer {{token}}" \
   -d '{
@@ -139,35 +186,80 @@ curl -X PATCH http://localhost:8000/api/community/reports/3/ \
 
 ###
 
-curl -X GET http://localhost:8000/api/users/2/reviews/ \
+curl -X GET https://localhost:8443/api/users/2/reviews/ \
   -H "Authorization: Bearer {{token}}"
 
 ###
 
-curl -X GET http://localhost:8000/api/users/2/activity/ \
+curl -X GET https://localhost:8443/api/users/2/activity/ \
   -H "Authorization: Bearer {{token}}"
 
 ###
 
-curl -X GET http://localhost:8000/api/users/2/followers/ \
+curl -X GET https://localhost:8443/api/users/2/followers/ \
   -H "Authorization: Bearer {{token}}"
 
 ###
 
-curl -X GET http://localhost:8000/api/users/2/following/ \
+curl -X GET https://localhost:8443/api/users/2/following/ \
   -H "Authorization: Bearer {{token}}"
 
 ###
 
-curl -X POST http://localhost:8000/api/users/2/follow/ \
+curl -X POST https://localhost:8443/api/users/2/follow/ \
   -H "Authorization: Bearer {{token}}"
 
 ###
 
-curl -X DELETE http://localhost:8000/api/users/2/follow/ \
+curl -X DELETE https://localhost:8443/api/users/2/follow/ \
   -H "Authorization: Bearer {{token}}"
 
 ###
 
-curl -X GET  http://localhost:8000/api/users/profile/7/ \
+curl -X GET  https://localhost:8443/api/users/profile/7/ \
   -H "Authorization: Bearer {{token}}"
+
+###
+# Get a token first
+curl -k -X POST https://localhost:8443/api/auth/token/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "ValidPass1!"
+  }'
+###
+# Should fail - new password too short
+curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "old_password": "ValidPass1!",
+    "new_password": "short"
+  }'
+###
+# Should fail - no uppercase
+curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "old_password": "ValidPass1!",
+    "new_password": "nouppercase1!"
+  }'
+###
+# Should fail - wrong old password
+curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "old_password": "wrongpassword",
+    "new_password": "NewValid1!"
+  }'
+###
+# Should succeed
+curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {{token}}" \
+  -d '{
+    "old_password": "ValidPass1!",
+    "new_password": "NewValid1!"
+  }'

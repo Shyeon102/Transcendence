@@ -16,7 +16,7 @@ export const connect = (roomId: number, token: string) => {
   lastToken = token;
 
   // 즉시 실행
-  const url = `ws://localhost:8000/ws/chat/${roomId}/?token=${token}`; // 백엔드 url 형식: ws://localhost:8000/ws/chat/{room_id}/?token=JWT토큰
+  const url = `wss://localhost:8443/ws/chat/${roomId}/?token=${token}`; // 백엔드 url 형식: wss://localhost:8443/ws/chat/{room_id}/?token=JWT토큰
   // 즉시 실행 (연결 시도 시작)
   ws = new WebSocket(url); // 브라우저가 백엔드와 연결 시도, 반환된 인스턴스를 모듈 변수 ws에 저장, 이후 이 ws로 메시지 보내고 받음
 
