@@ -2,12 +2,6 @@ import type { DashboardReview } from '../types';
 import EmptyState from './ui/EmptyState';
 import SectionCard from './ui/SectionCard';
 
-type DashboardReview = {
-  title: string;
-  note: string;
-  when: string;
-};
-
 type MyPageDashboardProps = {
   activities?: string[];
   entriesLabel: string;

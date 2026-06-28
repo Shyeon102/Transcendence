@@ -472,6 +472,8 @@ export default function ProfilePage() {
                   passwordSectionLabel={t('home.passwordSection')}
                   saveLabel={t('home.saveChanges')}
                   sectionTitle={t('home.editPanelTitle')}
+                  settingsTitle={t('home.accountSettings')}
+                  toggles={[]}
                   usernameLabel={t('home.username')}
                 />
               ) : (
