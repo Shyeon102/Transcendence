@@ -18,54 +18,6 @@ import {
 import { updateProfile } from '../store/slices/authSlice';
 import type { MediaReview } from '../types';
 
-const initialReviews: ReviewItem[] = [
-  {
-    id: 'poor-things',
-    title: 'Poor Things',
-    type: 'film',
-    date: '2025.03.12',
-    poster: '🎬',
-    text: 'A deliriously chaotic triumph. Lanthimos at full throttle - grotesque, gorgeous, and genuinely funny.',
-    rating: 4,
-    visibility: 'public',
-    isOwn: true,
-  },
-  {
-    id: 'dune-two',
-    title: 'Dune: Part Two',
-    type: 'film',
-    date: '2025.02.28',
-    poster: '📺',
-    text: "Villeneuve's scale is unmatched. The Harkonnen arena sequence alone is worth the price of admission.",
-    rating: 5,
-    visibility: 'followers',
-    isOwn: true,
-  },
-  {
-    id: 'past-lives',
-    title: 'Past Lives',
-    type: 'film',
-    date: '2024.12.05',
-    poster: '🎞️',
-    text: "Celine Song's debut is devastating in its restraint. The final scene will stay with you for weeks.",
-    rating: 5,
-    visibility: 'private',
-    isOwn: true,
-  },
-];
-
-const watchlist = [
-  ['🎬', 'Joker 2'],
-  ['📽️', 'The Zone'],
-  ['🎞️', 'Barbie'],
-  ['🎥', 'Past Lives'],
-  ['📺', 'Deadpool 3'],
-  ['🎬', 'It · Part 2'],
-  ['🎞️', 'Captain M.'],
-  ['📽️', 'Scream VII'],
-  ['🎥', '+80 more'],
-] as const;
-
 type TabKey = 'reviews' | 'watchlist';
 
 const toReviewItem = (review: MediaReview): ReviewItem => ({
@@ -87,12 +39,11 @@ export default function ProfilePage() {
   const [updateMe] = useUpdateMeMutation();
   const [followUser, followState] = useFollowUserMutation();
   const [unfollowUser, unfollowState] = useUnfollowUserMutation();
-  const isDemo = user?.username === 'demo';
   const displayUsername = user?.username?.trim() || '';
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
   const [isEditing, setIsEditing] = useState(false);
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
-  const [reviews, setReviews] = useState<ReviewItem[]>(isDemo ? initialReviews : []);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl ?? '');
   const [profileForm, setProfileForm] = useState({
     username: user?.username ?? '',
@@ -147,8 +98,8 @@ export default function ProfilePage() {
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('') || profileUsername.slice(0, 2).toUpperCase();
-  const userWatchlist = isDemo ? watchlist : [];
+    .join('') || displayUsername.slice(0, 2).toUpperCase();
+  const userWatchlist: readonly (readonly [string, string])[] = [];
 
   const handleToggleFollow = async () => {
     if (!routeUserId || !viewedProfile || isOwnProfile) {
@@ -176,9 +127,7 @@ export default function ProfilePage() {
       const updatedUser = await updateMe(payload).unwrap();
       dispatch(updateProfile(updatedUser));
     } catch {
-      if (isDemo) {
-        dispatch(updateProfile(payload));
-      }
+      // Keep the edit panel behavior consistent even when the API reports an error.
     } finally {
       setIsEditing(false);
     }

@@ -3,9 +3,9 @@
 Curl -X POST http://localhost:8000/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "demo",
-    "email": "demo@example.com",
-    "password": "demo"
+    "username": "testuser",
+    "email": "testuser@example.com",
+    "password": "testpassword123"
   }'
 
 ###

@@ -5,7 +5,6 @@ import {
   type FetchArgs,
   type FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
-import { mockLogin, mockUpdateProfile } from '../../features/auth/mockAuth';
 import { logout, setCredentials, updateTokens } from '../../features/auth/authSlice';
 import type { RootState } from '../index';
 import type {
@@ -180,9 +179,6 @@ type RawAdminUsersPayload = RawAdminUser[] | {
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000/api').replace(/\/+$/, '');
 const GOOGLE_AUTH_ENDPOINT = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT ?? '/auth/login/google/';
-const SHOULD_FALLBACK_TO_MOCK = import.meta.env.VITE_USE_MOCK_AUTH !== 'false';
-const isDemoLogin = (credentials: LoginRequest) =>
-  credentials.username === 'demo' || credentials.username === 'demo@demo.demo';
 
 const toMessage = (value: unknown): string | undefined => {
   if (typeof value === 'string' && value.trim()) {
@@ -547,19 +543,6 @@ export const authApi = createApi({
           }
         }
 
-        if (SHOULD_FALLBACK_TO_MOCK && isDemoLogin(credentials)) {
-          try {
-            const data = await mockLogin(credentials);
-            return { data };
-          } catch (error) {
-            return {
-              error: {
-                message: error instanceof Error ? error.message : 'Login failed.',
-              },
-            };
-          }
-        }
-
         const error = (tokenResult.error ?? {}) as FetchBaseQueryError;
         const data = 'data' in error ? error.data : undefined;
         return {
@@ -705,23 +688,6 @@ export const authApi = createApi({
 
         if (result.data) {
           return { data: normalizeUserPayload(result.data as RawUserPayload) };
-        }
-
-        if (SHOULD_FALLBACK_TO_MOCK) {
-          try {
-            const currentUser = (api.getState() as RootState).auth.user;
-            if (!currentUser || currentUser.username !== 'demo') {
-              throw new Error('Profile update failed.');
-            }
-            const data = await mockUpdateProfile(currentUser.id, payload);
-            return { data };
-          } catch (error) {
-            return {
-              error: {
-                message: error instanceof Error ? error.message : 'Profile update failed.',
-              },
-            };
-          }
         }
 
         const error = result.error as FetchBaseQueryError;
