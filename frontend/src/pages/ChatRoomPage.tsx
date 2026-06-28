@@ -1,13 +1,18 @@
+import { useI18n } from "../lib/i18n";
+import {
+  useGetChatRoomsQuery,
+  useInviteToRoomMutation,
+} from "../store/api/chatApi";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { useState, useRef, useEffect } from "react";
 import { sendMessage } from "../services/websocketService";
-import { useGetChatRoomsQuery } from "../store/api/chatApi";
 import { useNavigate } from "react-router-dom";
 
 const ChatRoomPage = () => {
+  const { t } = useI18n();
   const { id } = useParams(); // ex) URL: /chat/rooms/3 -> id = "3" (문자열)
   const token = useSelector((state: RootState) => state.auth.accessToken);
   const roomId = Number(id); // "3" -> 3 (문자열 -> 숫자)
@@ -15,8 +20,22 @@ const ChatRoomPage = () => {
   const room = rooms?.find((r) => r.id === roomId);
   useWebSocket(roomId, token ?? ""); // 우리가 만든 useWebSocket 훅을 두 인자로 호출 / A ?? B : 왼쪽 값이 null or undefined이면 오른쪽 값 사용
   const messages = useSelector((state: RootState) => state.chat.messages);
+  const user = useSelector((state: RootState) => state.auth.user);
   const [input, setInput] = useState("");
   const navigate = useNavigate();
+  const [inviteToRoom] = useInviteToRoomMutation();
+  const [inviteUserId, setInviteUserId] = useState("");
+  const handleInvite = async () => {
+    const userId = Number(inviteUserId);
+    if (!userId) return;
+    try {
+      await inviteToRoom({ roomId, userId }).unwrap();
+      alert(t("chat.inviteSuccess"));
+      setInviteUserId("");
+    } catch {
+      alert(t("chat.inviteError"));
+    }
+  };
   const handleSend = () => {
     if (!input.trim()) return;
     sendMessage(input);
@@ -38,7 +57,17 @@ const ChatRoomPage = () => {
           ←
         </button>
         <h1 className="font-bold">{room?.title ?? `Room #${roomId}`}</h1>
-
+        {room?.is_private && room?.created_by.id === user?.id && (
+          <div>
+            <input
+              type="number"
+              value={inviteUserId}
+              onChange={(e) => setInviteUserId(e.target.value)}
+              placeholder={t("chat.inviteUserIdPlaceholder")}
+            />
+            <button onClick={handleInvite}>{t("chat.invite")}</button>
+          </div>
+        )}
         <div>
           {messages.map((msg) => (
             <div key={msg.id}>

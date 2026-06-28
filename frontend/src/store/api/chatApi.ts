@@ -33,7 +33,12 @@ export const chatApi = createApi({
     // 추후 추가: createChatRoom, getChatMessages 등
     createChatRoom: builder.mutation<
       ChatRoom,
-      { title: string; description: string; max_members: number }
+      {
+        title: string;
+        description: string;
+        max_members: number;
+        is_private: boolean;
+      }
     >({
       query: (body) => ({
         url: "/chat/rooms/",
@@ -49,7 +54,19 @@ export const chatApi = createApi({
       }),
       invalidatesTags: ["ChatRoom"],
     }),
+    inviteToRoom: builder.mutation<void, { roomId: number; userId: number }>({
+      query: ({ roomId, userId }) => ({
+        url: `/chat/rooms/${roomId}/invite/`,
+        method: "POST",
+        body: { user_id: userId },
+      }),
+    }),
   }),
 });
 
-export const { useGetChatRoomsQuery, useCreateChatRoomMutation, useDeleteChatRoomMutation, } = chatApi; // 훅 노출: 이 훅을 컴포넌트에서 호출하면 데이터/로딩/에러 다 받아짐
+export const {
+  useGetChatRoomsQuery,
+  useCreateChatRoomMutation,
+  useDeleteChatRoomMutation,
+  useInviteToRoomMutation
+} = chatApi; // 훅 노출: 이 훅을 컴포넌트에서 호출하면 데이터/로딩/에러 다 받아짐

@@ -312,7 +312,7 @@
   "chat": {
     "eyebrow": "Chat Rooms",
     "title": "Join a Room",
-    "nodescription" : "No description",
+    "nodescription": "No description",
     "description": "Connect with others in real-time. Create or join a chat room to start chatting.",
     "createRoom": "Create Room",
     "delete": "Delete",
@@ -320,6 +320,12 @@
     "deleteError": "Failed to delete the room. Only the creator can delete it.",
     "loading": "Loading chat rooms...",
     "loadError": "Failed to load chat rooms.",
-    "empty": "No chat rooms available. Create one to get started!"
+    "empty": "No chat rooms available. Create one to get started!",
+    "public": "Public",
+    "private": "Private",
+    "invite": "Invite",
+    "inviteUserIdPlaceholder": "Enter User ID",
+    "inviteSuccess": "Invited!",
+    "inviteError": "Invite failed"
   }
 }
