@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import type { RootState } from "../store";
-import { updateProfile } from "../store/slices/authSlice";
 import { useUpdateMeMutation } from "../store/api/authApi";
 import {
   useLazySearchMediaQuery,
@@ -104,7 +103,6 @@ function OnboardingSearchInput({
 }
 
 export default function OnboardingPage() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
