@@ -5,7 +5,7 @@ import GoogleAuthButton from '../components/GoogleAuthButton';
 import Button from '../components/ui/Button';
 import StatusMessage from '../components/ui/StatusMessage';
 import { useI18n } from '../lib/i18n';
-import { beginOAuth42Login } from '../lib/oauth';
+// import { beginOAuth42Login } from '../lib/oauth';
 import { useGoogleLoginMutation, useLoginMutation } from '../store/api/authApi';
 import type { AuthErrorResponse } from '../store';
 
@@ -130,7 +130,7 @@ export default function LoginPage() {
           <div className="h-px flex-1 bg-[#f0ead0]/10" />
         </div>
 
-        <Button
+        {/* <Button
           onClick={() => {
             if (!beginOAuth42Login()) {
               setErrorMsg(t('oauth.startUrlMissing'));
@@ -141,7 +141,7 @@ export default function LoginPage() {
         >
           <span className="font-['Bebas_Neue'] text-base tracking-[0.05em] text-[#f0ead0]">42</span>
           {t('login.oauth42')}
-        </Button>
+        </Button> */}
 
         <GoogleAuthButton
           disabled={isGoogleLoading}
