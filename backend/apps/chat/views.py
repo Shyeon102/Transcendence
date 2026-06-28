@@ -18,7 +18,7 @@ User = get_user_model()
 
 
 class IsRoomMember(BasePermission):
-    def has_object_permission(self, request, obj):
+    def has_object_permission(self, request, view, obj):
         return ChatRoomMember.objects.filter(room=obj,
                                              user=request.user).exists()
 
