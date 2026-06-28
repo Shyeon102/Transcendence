@@ -11,6 +11,7 @@ export interface AuthUser {
   onboardingCompleted?: boolean;
   favoriteCountries?: string[];
   isStaff?: boolean;
+  dateJoined?: string;
 }
 
 export interface StoredUser extends AuthUser {

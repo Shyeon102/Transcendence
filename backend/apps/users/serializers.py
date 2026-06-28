@@ -29,6 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "avatar_url",
             "bio",
+            "date_joined",
             "onboarding_completed",
             "is_staff",
             "favorite_genres",

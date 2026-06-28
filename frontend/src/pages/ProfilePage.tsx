@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import ProfileCard from '../components/ProfileCard';
@@ -9,7 +9,7 @@ import EmptyState from '../components/ui/EmptyState';
 import type { ReviewItem } from '../components/ReviewCard';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
-import { useUpdateMeMutation } from '../store/api/authApi';
+import { useGetMeQuery, useUpdateMeMutation } from '../store/api/authApi';
 import { updateProfile } from '../store/slices/authSlice';
 
 const initialReviews: ReviewItem[] = [
@@ -62,13 +62,40 @@ const watchlist = [
 
 type TabKey = 'reviews' | 'watchlist';
 
+const dateLocaleByLanguage = {
+  ko: 'ko-KR',
+  en: 'en-US',
+  fr: 'fr-FR',
+} as const;
+
+const formatJoinedDate = (
+  value: string | undefined,
+  language: keyof typeof dateLocaleByLanguage
+) => {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleDateString(dateLocaleByLanguage[language], {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+};
+
 export default function ProfilePage() {
   const dispatch = useDispatch();
-  const { t } = useI18n();
+  const { language, t } = useI18n();
   const { id: profileId } = useParams();
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateMe] = useUpdateMeMutation();
   const isDemo = user?.username === 'demo';
+  const { data: latestUser } = useGetMeQuery(undefined, { skip: !user || isDemo });
   const displayUsername = user?.username?.trim() || '';
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || displayUsername || t('home.defaultDisplayName');
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
@@ -83,6 +110,12 @@ export default function ProfilePage() {
     bio: user?.bio ?? t('home.profileBioDefault'),
   });
   const displayName = [profileForm.firstName, profileForm.lastName].filter(Boolean).join(' ') || displayUsername;
+
+  useEffect(() => {
+    if (latestUser) {
+      dispatch(updateProfile(latestUser));
+    }
+  }, [dispatch, latestUser]);
 
   if (!user) {
     return null;
@@ -101,6 +134,8 @@ export default function ProfilePage() {
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('') || displayUsername.slice(0, 2).toUpperCase();
   const userWatchlist = isDemo ? watchlist : [];
+  const joinedDate = formatJoinedDate(user.dateJoined, language);
+  const joinedLabel = joinedDate ? `${t('home.joinedYear')} ${joinedDate}` : t('home.joinedYear');
 
   const handleProfileSave = async () => {
     const payload = {
@@ -191,7 +226,7 @@ export default function ProfilePage() {
           editProfileLabel={t('home.editProfile')}
           initials={initials}
           isEditing={isEditing}
-          joinedYearLabel={t('home.joinedYear')}
+          joinedYearLabel={joinedLabel}
           onAvatarSelect={handleAvatarSelect}
           onToggleEdit={() => setIsEditing((prev) => !prev)}
           stats={profileStats}
