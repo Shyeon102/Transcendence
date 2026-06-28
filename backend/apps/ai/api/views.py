@@ -72,7 +72,7 @@ class RAGRecommendationView(APIView):
             if rag_series.empty:
                 return Response({"media": []},
                                 status=status.HTTP_200_OK)
-            score_dict = rag_series.to_dict()
+            score_dict = {int(k): v for k, v in rag_series.to_dict().items()}
             medias = list(
                     Media.objects
                     .filter(id__in=score_dict.keys())
