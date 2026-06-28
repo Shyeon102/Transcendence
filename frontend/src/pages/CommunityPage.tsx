@@ -14,12 +14,19 @@ const postDate = (value: string) =>
 export default function CommunityPage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
-  const [search] = useState('');
+  const [search, setSearch] = useState('');
   const [sort, setSort] = useState<PostSort>('recent');
   const [composerOpen, setComposerOpen] = useState(false);
-  const { data, isLoading, isError } = useGetPostsQuery({ search, sort });
+  const { data, isLoading, isError } = useGetPostsQuery({ sort });
   const { data: trending, isError: trendingError } = useGetTrendingPostsQuery();
   const posts = data?.posts ?? [];
+  // 백엔드 목록이 전체 글을 한 번에 주므로 검색은 클라이언트에서 제목/본문 필터링.
+  const query = search.trim().toLowerCase();
+  const visiblePosts = query
+    ? posts.filter((post) =>
+        `${post.title} ${post.content}`.toLowerCase().includes(query)
+      )
+    : posts;
 
   return (
     <div className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] text-[#f0ead0]">
@@ -82,6 +89,14 @@ export default function CommunityPage() {
               </button>
             ))}
           </div>
+
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('community.searchPlaceholder')}
+            className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[12px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25 sm:w-64"
+          />
         </div>
 
         {/* 메인 그리드 */}
@@ -92,11 +107,11 @@ export default function CommunityPage() {
               <p className="text-[10px] uppercase tracking-[0.15em] text-[#8a8474]">{t('community.loading')}</p>
             ) : isError ? (
               <StatusMessage>{t('community.loadError')}</StatusMessage>
-            ) : posts.length === 0 ? (
+            ) : visiblePosts.length === 0 ? (
               <p className="font-['IBM_Plex_Serif'] text-sm italic text-[#8a8474]">{t('community.empty')}</p>
             ) : (
               <div className="space-y-2">
-                {posts.map((post, index) => (
+                {visiblePosts.map((post, index) => (
                   <Link
                     key={post.id}
                     to={`/community/${post.id}`}
@@ -114,7 +129,7 @@ export default function CommunityPage() {
                         {post.content}
                       </p>
                       <div className="mt-3 flex items-center gap-3 text-[9px] uppercase tracking-[0.12em] text-[#8a8474]/60">
-                        <span>{t('community.user')} {post.user}</span>
+                        <span>{post.username ?? `${t('community.user')} #${post.user}`}</span>
                         <span>·</span>
                         <span>{postDate(post.created_at)}</span>
                         <span className="ml-auto flex gap-3">

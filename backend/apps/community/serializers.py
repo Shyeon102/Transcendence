@@ -3,15 +3,18 @@ from .models import Post, Comment, Report
 
 
 class PostSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="user.username", read_only=True)
+
     class Meta:
         model = Post
         fields = ["id", "title", "content", "media_files", "created_at",
-                  "user", "like_count", "report_count", "is_hidden"]
+                  "user", "username", "like_count", "report_count", "is_hidden"]
         read_only_fields = ["id", "user", "created_at"]
 
 
 class CommentSerializer(serializers.ModelSerializer):
     replies = serializers.SerializerMethodField()
+    username = serializers.CharField(source="user.username", read_only=True)
 
     class Meta:
         model = Comment
@@ -19,6 +22,7 @@ class CommentSerializer(serializers.ModelSerializer):
             "id",
             "post",
             "user",
+            "username",
             "parent_comment",
             "content",
             "media_files",
