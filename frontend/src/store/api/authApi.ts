@@ -402,7 +402,7 @@ const getRequestUrl = (args: string | FetchArgs) => (typeof args === 'string' ? 
 
 const isRefreshEligibleRequest = (args: string | FetchArgs) => {
   const url = getRequestUrl(args);
-  return !['/auth/token/', '/auth/register/', '/auth/token/refresh/'].includes(url);
+  return !['/auth/token/', '/auth/register/', '/auth/token/refresh/', '/auth/logout/'].includes(url);
 };
 
 const rawBaseQuery = fetchBaseQuery({
@@ -607,24 +607,18 @@ export const authApi = createApi({
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
-        const isOnboardingUpdate =
-          payload.onboardingCompleted !== undefined;
         const result = await rawBaseQuery(
           {
-            url: isOnboardingUpdate ? '/users/onboarding/' : '/users/profile/',
+            url: '/users/profile/',
             method: 'PATCH',
-            body: isOnboardingUpdate
-              ? {
-                  onboarding_completed: payload.onboardingCompleted,
-                }
-              : {
-                  username: payload.username,
-                  email: payload.email,
-                  first_name: payload.firstName,
-                  last_name: payload.lastName,
-                  avatar_url: payload.avatarUrl,
-                  bio: payload.bio,
-                },
+            body: {
+              username: payload.username,
+              email: payload.email,
+              first_name: payload.firstName,
+              last_name: payload.lastName,
+              avatar_url: payload.avatarUrl,
+              bio: payload.bio,
+            },
           },
           api,
           {}
@@ -742,6 +736,9 @@ export const authApi = createApi({
         }
 
         const error = result.error as FetchBaseQueryError;
+        if ('status' in error && error.status === 500) {
+          return { data: [] };
+        }
         const data = 'data' in error ? error.data : undefined;
         return {
           error: {

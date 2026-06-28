@@ -63,7 +63,7 @@ export default function SignupPage() {
     if (!formData.username) return t('signup.nicknameHintDefault');
     if (formData.username.length < 3) return `✗ ${t('signup.nicknameHintShort')}`;
     if (!USERNAME_REGEX.test(formData.username)) return `✗ ${t('signup.nicknameHintInvalid')}`;
-    return `✓ ${t('signup.nicknameHintAvailable')}`;
+    return `✓ ${t('signup.nicknameHintFormatValid')}`;
   };
 
   const getNicknameHintClass = () => {
@@ -92,7 +92,7 @@ export default function SignupPage() {
 
     try {
       await signup(formData).unwrap();
-      navigate('/onboarding');
+      navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
       setErrorMsg(apiError.message ?? t('common.error'));

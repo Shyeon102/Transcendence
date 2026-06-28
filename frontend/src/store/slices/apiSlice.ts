@@ -129,7 +129,7 @@ export const apiSlice = createApi({
       transformResponse: (response: MediaSearchResponse) => response.media ?? [],
     }),
     //rag search
-    ragSearchMedia: builder.query<MediaSearchResult[], string>({
+    ragMedia: builder.query<MediaSearchResult[], string>({
       query: (query) => ({
         url: '/ai/rag/',
         params: { q: query },
@@ -147,4 +147,4 @@ export const apiSlice = createApi({
   }),
 })
 
-export const { useLazySearchMediaQuery, useLazyRagMediaQuery, useLoginMutation, useRefreshTokenMutation } = apiSlice
+export const { useLazySearchMediaQuery, useLoginMutation, useRefreshTokenMutation } = apiSlice
