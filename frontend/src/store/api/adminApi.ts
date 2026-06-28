@@ -13,15 +13,6 @@ export type AdminReport = {
   status: AdminReportStatus;
 };
 
-export type AdminUser = {
-  id: number;
-  username: string;
-  email: string;
-  status: AdminAccountStatus;
-  reportCount: number;
-  isStaff: boolean;
-};
-
 type ListResponse<T> = T[] | { results?: T[]; reports?: T[]; users?: T[] };
 
 type RawAdminReport = {
@@ -44,21 +35,6 @@ type RawAdminReport = {
   created_at?: string;
   createdAt?: string;
   status?: AdminReportStatus;
-};
-
-type RawAdminUser = {
-  id?: number;
-  username?: string;
-  email?: string;
-  status?: AdminAccountStatus;
-  report_count?: number;
-  reportCount?: number;
-  is_banned?: boolean;
-  isBanned?: boolean;
-  is_active?: boolean;
-  isActive?: boolean;
-  is_staff?: boolean;
-  isStaff?: boolean;
 };
 
 const toList = <T>(response: ListResponse<T>): T[] => {
@@ -140,12 +116,6 @@ export const adminApi = apiSlice.injectEndpoints({
       transformResponse: (response: RawAdminReport) => normalizeReport(response),
       invalidatesTags: ["AdminReports"],
     }),
-    getAdminUsers: builder.query<AdminUser[], void>({
-      query: () => "/users/",
-      transformResponse: (response: ListResponse<RawAdminUser>) =>
-        toList(response).map(normalizeUser),
-      providesTags: ["AdminUsers"],
-    }),
     banAdminUser: builder.mutation<void, number>({
       query: (id) => ({
         url: `/users/${id}/ban/`,
@@ -166,7 +136,6 @@ export const adminApi = apiSlice.injectEndpoints({
 export const {
   useBanAdminUserMutation,
   useGetAdminReportsQuery,
-  useGetAdminUsersQuery,
   useProcessAdminReportMutation,
   useUnbanAdminUserMutation,
 } = adminApi;

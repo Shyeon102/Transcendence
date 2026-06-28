@@ -14,7 +14,7 @@ const postDate = (value: string) =>
 export default function CommunityPage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
-  const [search, setSearch] = useState('');
+  const [search] = useState('');
   const [sort, setSort] = useState<PostSort>('recent');
   const [composerOpen, setComposerOpen] = useState(false);
   const { data, isLoading, isError } = useGetPostsQuery({ search, sort });
@@ -64,19 +64,8 @@ export default function CommunityPage() {
           </div>
         ) : null}
 
-        {/* 검색 + 정렬 컨트롤 */}
+        {/* 정렬 컨트롤 */}
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <label className="mb-2 block text-[9px] uppercase tracking-[0.18em] text-[#8a8474]">
-              {t('community.searchPlaceholder')}
-            </label>
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[13px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25 sm:w-72"
-            />
-          </div>
           <div className="flex items-end gap-2">
             {(['recent', 'trending'] as PostSort[]).map((s) => (
               <button

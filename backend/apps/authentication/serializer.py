@@ -1,8 +1,24 @@
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
+import re
 # from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
+
+
+def validate_password_strength(password):
+    if len(password) < 8:
+        raise serializers.ValidationError("Password must be "
+                                          "at least 8 characters.")
+    if not re.search(r'[A-Z]', password):
+        raise serializers.ValidationError("Password must contain at"
+                                          "least one uppercase letter.")
+    if not re.search(r'[0-9]', password):
+        raise serializers.ValidationError("Password must contain"
+                                          " at least one number.")
+    if not re.search(r'[^a-zA-Z0-9]', password):
+        raise serializers.ValidationError("Password must contain at "
+                                          "least one special character.")
 
 
 class LoginSerializer(serializers.Serializer):
@@ -36,7 +52,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ["email", "username", "password", "passwordConfirm"]
 
+    def validate_password(self, value):
+        validate_password_strength(value)
+        return value
+
     def create(self, validated_data):
+        validated_data.pop("passwordConfirm", None)
         user = User.objects.create_user(
             email=validated_data["email"],
             username=validated_data["username"],

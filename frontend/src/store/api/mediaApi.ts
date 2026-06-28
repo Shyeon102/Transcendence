@@ -40,7 +40,7 @@ export const mediaApi = createApi({
     // baseUrl: 모든 요청 앞에 자동으로 붙는 기본 주소: 추후에 endpoint에서 "/media/"만 써도 -> baseUrl + "/media/"로 합쳐짐
     // import.meta.env.VITE_API_BASE_URL = .env 파일에 적어둔 환경변수 읽기 (Vite가 제공)
     // || "http://..." = 그 환경변수가 없으면(undefined면) 뒤의 기본값 사용
-    baseUrl: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api",
+    baseUrl: import.meta.env.VITE_API_BASE_URL || "https://localhost:8443/api",
     // getState: 현재 Redux store 전체 상태를 돌려주는 함수
     // (getState as () => RootState): 타입 캐스팅 -> TS한테 "이건 RootState를 반환하는 함수야"라고 알려주는 거
     // 전체 요약 -> "store에서 현재 로그인 토큰을 꺼낸다."

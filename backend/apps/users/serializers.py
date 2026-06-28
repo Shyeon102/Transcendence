@@ -27,8 +27,11 @@ class UserSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "email",
+            "first_name",
+            "last_name",
             "avatar_url",
             "bio",
+            "date_joined",
             "onboarding_completed",
             "is_staff",
             "favorite_genres",
@@ -38,7 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
             "followers_count",
             "following_count",
         ]
-        read_only_fields = ["is_staff"]
+        read_only_fields = ["date_joined", "is_staff"]
 
 
 class SimpleUserSerializer(serializers.ModelSerializer):
