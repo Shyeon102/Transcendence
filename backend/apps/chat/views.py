@@ -143,4 +143,5 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
             return Response({"error": "Forbidden"}, status=403)
 
         room.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)  # super().destroy(request, *args, **kwargs)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    # super().destroy(request, *args, **kwargs)
