@@ -83,7 +83,7 @@ const MediaDetailPage = () => {
   const { id } = useParams();
   const mediaId = Number(id);
   const { data, isLoading } = useGetMediaDetailQuery(mediaId);
-  const { data: reviews, refetch: refetchReviews } = useGetMediaReviewsQuery(mediaId);
+  const { data: reviews } = useGetMediaReviewsQuery(mediaId);
   const user = useSelector((state: RootState) => state.auth.user);
   const isDemo = user?.username === "demo";
   const media = isDemo ? mockMedia : data;
@@ -109,7 +109,7 @@ const MediaDetailPage = () => {
   });
   useEffect(() => {
     refetchInteractions();
-  }, [mediaId])
+  }, [mediaId, refetchInteractions])
 
   useEffect(() => {
     if (!interactions) return;
