@@ -125,7 +125,7 @@ export default function ProfileEditForm({
           <div className="h-px flex-1 bg-[#f0ead0]/10" />
         </div>
 
-        {toggles.map((toggle) => (
+        {/* {toggles.map((toggle) => (
           <div
             key={toggle.label}
             className="flex items-center justify-between gap-3 border-b border-[#f0ead0]/10 py-4"
@@ -148,7 +148,7 @@ export default function ProfileEditForm({
               />
             </button>
           </div>
-        ))}
+        ))} */}
 
         <div className="mt-7">
           <div className="mb-5 flex items-center gap-4">

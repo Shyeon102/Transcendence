@@ -24,7 +24,6 @@ export default function ProfilePage() {
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || displayUsername || t('home.defaultDisplayName');
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
   const [isEditing, setIsEditing] = useState(false);
-  const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl ?? '');
   const [profileForm, setProfileForm] = useState({
@@ -83,15 +82,6 @@ export default function ProfilePage() {
     { label: t('home.reviews'), value: String(reviews.length) },
     { label: t('home.watchlist'), value: String(userWatchlist.length) },
     { label: t('home.followers'), value: '0' },
-  ];
-
-  const settingsToggles = [
-    {
-      label: t('home.emailNotifications'),
-      description: t('home.emailNotificationsDesc'),
-      value: emailNotificationsEnabled,
-      onToggle: setEmailNotificationsEnabled,
-    },
   ];
 
   const handleReviewSubmit = (review: ReviewItem) => {
@@ -218,8 +208,6 @@ export default function ProfilePage() {
               passwordSectionLabel={t('home.passwordSection')}
               saveLabel={t('home.saveChanges')}
               sectionTitle={t('home.editPanelTitle')}
-              settingsTitle={t('home.accountSettings')}
-              toggles={settingsToggles}
               usernameLabel={t('home.username')}
             />
           ) : (
