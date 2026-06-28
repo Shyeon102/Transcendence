@@ -10,68 +10,38 @@
     "info": "소개"
   },
   "admin": {
-    "eyebrow": "관리자 모드",
-    "title": "ADMIN DASHBOARD",
-    "forbiddenTitle": "관리자 권한이 필요합니다.",
-    "forbiddenDescription": "이 페이지는 staff 권한이 있는 사용자만 접근할 수 있습니다.",
-    "tabs": {
-      "reports": "신고 처리",
-      "users": "유저 관리"
-    },
-    "stats": {
-      "pending": "대기 중 신고",
-      "approved": "승인된 신고",
-      "activeUsers": "활성 유저",
-      "bannedUsers": "정지 유저"
-    },
-    "reportStatus": {
+    "eyebrow": "운영 관리",
+    "title": "관리자 콘솔",
+    "description": "신고된 콘텐츠를 검토하고 사용자 계정 상태를 관리합니다.",
+    "connectedNotice": "관리자 API에 연결되었습니다. 동작은 서버로 전송됩니다.",
+    "loading": "관리자 데이터를 불러오는 중입니다...",
+    "reportsLoadError": "서버에서 신고 목록을 불러오지 못했습니다.",
+    "usersLoadError": "서버에서 사용자 목록을 불러오지 못했습니다.",
+    "emptyReports": "조건에 맞는 신고가 없습니다.",
+    "emptyUsers": "조건에 맞는 사용자가 없습니다.",
+    "reportsEyebrow": "콘텐츠 관리",
+    "reportsTitle": "신고 목록",
+    "usersEyebrow": "계정 관리",
+    "usersTitle": "사용자",
+    "reportedBy": "신고자",
+    "reportCount": "신고 {{count}}건",
+    "approve": "승인",
+    "reject": "반려",
+    "ban": "차단",
+    "reactivate": "정지 해제",
+    "status": {
       "all": "전체",
       "pending": "대기",
       "approved": "승인",
-      "rejected": "반려"
+      "rejected": "반려",
+      "active": "활성",
+      "banned": "차단"
     },
     "reportTypes": {
       "spam": "스팸",
       "abuse": "욕설/괴롭힘",
       "nsfw": "부적절한 콘텐츠",
       "copyright": "저작권"
-    },
-    "targets": {
-      "post": "게시글",
-      "comment": "댓글"
-    },
-    "actions": {
-      "approve": "승인",
-      "reject": "반려",
-      "ban": "정지",
-      "cancel": "취소",
-      "confirmBan": "정지 확인"
-    },
-    "reports": {
-      "title": "신고 목록",
-      "error": "신고 목록을 불러오지 못했습니다.",
-      "empty": "표시할 신고가 없습니다.",
-      "emptyDescription": "선택한 상태에 해당하는 신고가 없습니다.",
-      "untitledTarget": "제목 없는 신고 대상",
-      "noReason": "신고 사유가 없습니다.",
-      "reporter": "신고자",
-      "processed": "처리 완료",
-      "processedBy": "처리자"
-    },
-    "users": {
-      "title": "유저 목록",
-      "error": "유저 목록을 불러오지 못했습니다.",
-      "empty": "표시할 유저가 없습니다.",
-      "emptyDescription": "관리 대상 유저 데이터가 없습니다.",
-      "username": "사용자명",
-      "email": "이메일",
-      "status": "상태",
-      "joined": "가입일",
-      "actions": "작업",
-      "active": "활성",
-      "banned": "정지",
-      "banTitle": "이 유저를 정지할까요?",
-      "banDescription": "정지 대상:"
     }
   },
   "infoPage": {
@@ -160,13 +130,12 @@
     "email": "이메일",
     "nickname": "닉네임",
     "nicknamePlaceholder": "2자 이상 입력",
-    "nicknameDefaultPlaceholder": "cinephile_77",
     "firstName": "이름",
     "lastName": "성",
     "nicknameHintDefault": "3-20자, 영문자와 숫자만 사용",
     "nicknameHintShort": "너무 짧습니다",
     "nicknameHintInvalid": "영문자, 숫자, 밑줄만 사용할 수 있습니다",
-    "nicknameHintAvailable": "사용 가능합니다",
+    "nicknameHintFormatValid": "사용 가능한 형식입니다",
     "password": "비밀번호",
     "passwordPlaceholder": "8자 이상 입력",
     "passwordConfirm": "비밀번호 확인",
@@ -286,15 +255,16 @@
   },
   "mypage": {
     "eyebrow": "내 공간",
-    "title": "MY PAGE",
-    "description": "내 리뷰, 찜한 작품, 최근 활동을 한 화면에서 정리하는 개인 대시보드 초안입니다.",
+    "title": "내 활동",
+    "description": "내 리뷰, 찜한 작품, 최근 활동을 한 화면에서 확인합니다.",
     "reviewSection": "내 리뷰",
     "watchlistSection": "찜 목록",
     "recentActivity": "최근 활동",
     "entries": "개",
     "queue": "대기열",
     "log": "로그",
-    "empty": "아직 표시할 데이터가 없습니다."
+    "empty": "아직 표시할 데이터가 없습니다.",
+    "userSpace": "{{name}}의 공간"
   },
   "review": {
     "formEyebrow": "리뷰 작성",
