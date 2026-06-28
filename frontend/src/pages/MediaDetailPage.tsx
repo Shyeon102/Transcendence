@@ -1,13 +1,12 @@
 import { useI18n } from "../lib/i18n";
-import Header from "../components/Header";
 import { useGetMediaReviewsQuery } from "../store/api/authApi";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetMediaDetailQuery } from "../store/api/mediaApi";
 import { useSelector } from "react-redux";
-import Footer from "../components/Footer";
 import type { Media, Genre } from "../types/media";
 import type { RootState } from "../store";
+import defaultPoster from '/src/assets/images/defaultposter.png';
 
 // 임시 목업 데이터: 현재 백엔드가 없으므로 목업 데이터 임시 선언
 const genreCrime: Genre = { id: 1, name: "Crime" };
@@ -107,7 +106,6 @@ const MediaDetailPage = () => {
             {t("detail.loading")}
           </p>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -120,14 +118,12 @@ const MediaDetailPage = () => {
             {t("detail.noData")}
           </p>
         </div>
-        <Footer />
       </div>
     );
   }
-
+  
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white flex flex-col">
-      <Header />
       {/* 레이아웃: 가로로 3등분 */}
       <div className="flex mt-[7vh]">
         {/* 미디어 변환 탭: 제일 왼쪽 */}
@@ -167,6 +163,9 @@ const MediaDetailPage = () => {
             {/* 2. 포스터 (중간) */}
             <img
               src={media.frontPosterUrl}
+              onError={(e) => {
+                e.currentTarget.src = defaultPoster;
+              }}
               className="absolute inset-0 w-full h-full object-fill brightness-95 contrast-110"
             />
             {/* 3. 낡은 질감 커버 (맨 위) */}
@@ -184,7 +183,7 @@ const MediaDetailPage = () => {
                 <img
                   key={n}
                   src={n <= myRating ? "/star-full.png" : "/star-line.png"}
-                  onClick={() => setMyRating(n)}
+                  onClick={() => setMyRating(prev => (prev === n ? 0 : n))}
                   className="w-[1.6vw] h-[1.6vw] cursor-pointer"
                 />
               ))}
@@ -203,17 +202,6 @@ const MediaDetailPage = () => {
               <p className="text-[1.2vw] font-semibold self-end mb-[0.2vh] ml-[-0.8vw]">
                 / 5
               </p>
-              {/* 내 리뷰 */}
-              <button
-                onClick={() =>
-                  alert(
-                    "The review writing feature is scheduled to be developed later.",
-                  )
-                }
-                className="border border-teal-600 bg-teal-600 text-white px-[0.5vw] py-[0.1vh] text-[0.9vw] rounded-xl"
-              >
-                {t("detail.myReview")}
-              </button>
             </div>
           </div>
         </div>
@@ -252,7 +240,7 @@ const MediaDetailPage = () => {
               {t("detail.story")}
             </p>
             <p className="font-ibm text-[0.9vw] max-w-[23vw] leading-relaxed">
-              {media.story}
+              {media.story.replace(/<br\s*\/?>/gi, "\n")}
             </p>
           </div>
 
@@ -293,10 +281,6 @@ const MediaDetailPage = () => {
 
           {/* 오른쪽: 리뷰 섹션: Reviews 제목 + 리뷰 목록 (가로정렬) */}
           <div className="flex gap-[3vw] mt-[3.6vh]">
-            <p className="font-thin text-[1.8vw] w-[5vw] leading-tight">
-              {t("detail.reviews")}
-            </p>
-
             {/* 유저 리스트 div */}
             <div className="flex flex-col gap-[1vh]">
               {reviewList.map((review) => (
@@ -332,7 +316,7 @@ const MediaDetailPage = () => {
                 </div>
               ))}
               {/* TODO: 추후 리뷰 전체 리뷰 목록 모달 or 페이지로 교체 */}
-              <button
+              {/* <button
                 onClick={() =>
                   alert(
                     "The feature to view all reviews is scheduled to be developed later.",
@@ -342,14 +326,12 @@ const MediaDetailPage = () => {
               >
                 {t("detail.readMore")}
                 <span className="font-black">⟶</span>
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
       </div>
 
-      {/* 푸터 */}
-      <Footer />
     </div>
   );
 };
