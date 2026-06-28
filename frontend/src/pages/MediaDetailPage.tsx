@@ -111,36 +111,34 @@ const MediaDetailPage = () => {
     refetchInteractions();
   }, [mediaId, refetchInteractions])
 
+
   useEffect(() => {
     if (!interactions) return;
     setActiveIcon({
-      eye: interactions.some((i) => i.action === 'watched'),
-      like: interactions.some((i) => i.action === 'like'),
-      dislike: interactions.some((i) => i.action === 'dislike'),
-      wish: interactions.some((i) => i.action === 'watchlist'),
+      eye: interactions.some(i => i.action === 'watched'),
+      like: interactions.some(i => i.action === 'like'),
+      dislike: interactions.some(i => i.action === 'dislike'),
     });
+
   }, [interactions]);
 
-  // const [myReview, setMyReview] = useState<MediaReview | null>(null);
 
-  // useEffect(() => {
-  //   if (!reviews || !user) return;
-  //   setMyReview(reviews.find((r) => r.username === user.username) ?? null);
-  // }, [reviews, user]);
+  const [myReview, setMyReview] = useState<MediaReview | null>(null);
 
-  const myReview = reviews?.find(
-    (r) => r.username === user?.username
-  );
+  useEffect(() => {
+    if (!reviews || !user) return;
 
-  const myRating = myReview?.rating ?? 0;
+    setMyReview(
+      reviews.find((r) => r.username === user.username) ?? null
+    );
+  }, [reviews, user.username]);
 
-  // const [myRating, setMyRating] = useState(0);
-  // useEffect(() => {
-  //   if (!myReview) return;
-
-  //   setMyRating(myReview.rating);
-  // }, [myReview]);
-
+  const [myRating, setMyRating] = useState(0);
+  useEffect(() => {
+    if (myReview) {
+      setMyRating(myReview.rating);
+    }
+  }, [myReview?.rating]);
 
 
   if (!isDemo && isLoading) {
