@@ -121,12 +121,16 @@ const MediaDetailPage = () => {
     });
   }, [interactions]);
 
-  const [myReview, setMyReview] = useState<MediaReview | null>(null);
+  // const [myReview, setMyReview] = useState<MediaReview | null>(null);
 
-  useEffect(() => {
-    if (!reviews || !user) return;
-    setMyReview(reviews.find((r) => r.username === user.username) ?? null);
-  }, [reviews, user]);
+  // useEffect(() => {
+  //   if (!reviews || !user) return;
+  //   setMyReview(reviews.find((r) => r.username === user.username) ?? null);
+  // }, [reviews, user]);
+
+  const myReview = reviews?.find(
+    (r) => r.username === user?.username
+  );
 
   const myRating = myReview?.rating ?? 0;
 
