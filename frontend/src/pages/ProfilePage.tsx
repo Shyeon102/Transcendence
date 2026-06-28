@@ -10,12 +10,27 @@ import type { ReviewItem } from '../components/ReviewCard';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
 import {
+  useFollowUserMutation,
+  useGetPublicProfileQuery,
+  useUnfollowUserMutation,
   useGetMyPageDashboardQuery,
   useUpdateMeMutation,
 } from '../store/api/authApi';
 import { updateProfile } from '../store/slices/authSlice';
+import type { MediaReview } from '../types';
 
 type TabKey = 'reviews' | 'watchlist';
+
+const toReviewItem = (review: MediaReview): ReviewItem => ({
+  id: String(review.id),
+  title: review.mediaTitle || 'Review',
+  type: 'review',
+  date: review.createdAt,
+  poster: '🎬',
+  text: review.content,
+  rating: review.rating,
+  visibility: review.visibility,
+});
 
 type AuthUser = NonNullable<RootState['auth']['user']>;
 
@@ -81,17 +96,42 @@ export default function ProfilePage() {
   const { id: profileId } = useParams();
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateMe] = useUpdateMeMutation();
+  const [followUser, followState] = useFollowUserMutation();
+  const [unfollowUser, unfollowState] = useUnfollowUserMutation();
 
   const defaultProfileBio = t('home.profileBioDefault');
 
-  const isOwnProfileRequest =
+  const isOwnProfile =
     !profileId ||
     profileId === 'me' ||
     profileId === String(user?.id) ||
     profileId === user?.username;
 
+  const isPublicProfile = !isOwnProfile;
+
+  const routeUserId =
+    profileId && /^\d+$/.test(profileId) ? Number(profileId) : undefined;
+
+  const cannotLoadPublicProfile = isPublicProfile && !routeUserId;
+
+  const shouldFetchViewedProfile = Boolean(
+    user && isPublicProfile && routeUserId
+  );
+
+  const {
+    data: viewedProfile,
+    isError: isViewedProfileError,
+    isLoading: isViewedProfileLoading,
+  } = useGetPublicProfileQuery(routeUserId ?? 0, {
+    pollingInterval: 3000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+    refetchOnReconnect: true,
+    skip: !shouldFetchViewedProfile,
+  });
+
   const { data: dashboard } = useGetMyPageDashboardQuery(undefined, {
-    skip: !user || !isOwnProfileRequest,
+    skip: !user || !isOwnProfile,
   });
 
   const dashboardData = dashboard as DashboardShape | undefined;
@@ -116,7 +156,7 @@ export default function ProfilePage() {
     return null;
   }
 
-  const profileUser = user;
+  const profileUser = dashboardUser ?? user;
   const profileUserWithDates = profileUser as AuthUserWithDates;
 
   const safeLanguage = Object.prototype.hasOwnProperty.call(
@@ -146,29 +186,58 @@ export default function ProfilePage() {
     formDisplayUsername ||
     t('home.defaultDisplayName');
 
-  const displayUsername = isEditing
+  const ownDisplayUsername = isEditing
     ? formDisplayUsername
     : savedDisplayUsername;
 
-  const profileDisplayName = isEditing ? formDisplayName : savedDisplayName;
+  const publicDisplayUsername = viewedProfile?.username?.trim() || '';
 
-  const profileBio = isEditing
-    ? profileForm.bio || defaultProfileBio
-    : profileUser.bio || defaultProfileBio;
+  const displayUsername = isPublicProfile
+    ? publicDisplayUsername
+    : ownDisplayUsername;
 
-  const profileAvatarUrl =
-    (isEditing ? avatarPreview : null) ?? profileUser.avatarUrl ?? '';
+  const ownDisplayName = isEditing ? formDisplayName : savedDisplayName;
 
-  const joinedLabel = formatJoinedDate(
-    profileUserWithDates.createdAt ?? profileUserWithDates.joinedAt,
-    safeLanguage
-  );
+  const publicDisplayName =
+    publicDisplayUsername || t('home.defaultDisplayName');
 
-  const isOwnProfile =
-    !profileId ||
-    profileId === 'me' ||
-    profileId === String(user.id) ||
-    profileId === user.username;
+  const profileDisplayName = isPublicProfile
+    ? publicDisplayName
+    : ownDisplayName;
+
+  const profileBio = isPublicProfile
+    ? viewedProfile?.bio ?? ''
+    : isEditing
+      ? profileForm.bio || defaultProfileBio
+      : profileUser.bio || defaultProfileBio;
+
+  const profileAvatarUrl = isPublicProfile
+    ? viewedProfile?.avatarUrl ?? ''
+    : (isEditing ? avatarPreview : null) ?? profileUser.avatarUrl ?? '';
+
+  const joinedLabel = isPublicProfile
+    ? t('home.joinedYear')
+    : formatJoinedDate(
+        profileUserWithDates.createdAt ?? profileUserWithDates.joinedAt,
+        safeLanguage
+      );
+
+  const userReviews = localReviews ?? dashboardReviews;
+
+  const visibleReviews = isPublicProfile
+    ? viewedProfile?.reviews.map(toReviewItem) ?? []
+    : userReviews;
+
+  const userWatchlist: readonly (readonly [string, string])[] = [];
+
+  const shouldBlockForProfileLoad = isPublicProfile && isViewedProfileLoading;
+
+  const shouldBlockForProfileError =
+    cannotLoadPublicProfile || (isPublicProfile && isViewedProfileError);
+
+  const displayedFollowersCount = isPublicProfile
+    ? viewedProfile?.followersCount ?? 0
+    : profileUserWithDates.followersCount ?? 0;
 
   const initials =
     profileDisplayName
@@ -178,8 +247,18 @@ export default function ProfilePage() {
       .map((part) => part[0]?.toUpperCase() ?? '')
       .join('') || displayUsername.slice(0, 2).toUpperCase();
 
-  const userReviews = localReviews ?? dashboardReviews;
-  const userWatchlist: readonly (readonly [string, string])[] = [];
+  const handleToggleFollow = async () => {
+    if (!routeUserId || !viewedProfile || isOwnProfile) {
+      return;
+    }
+
+    if (viewedProfile.isFollowing) {
+      await unfollowUser(routeUserId);
+      return;
+    }
+
+    await followUser(routeUserId);
+  };
 
   const handleToggleEdit = () => {
     if (isEditing) {
@@ -229,11 +308,10 @@ export default function ProfilePage() {
   };
 
   const profileStats = [
-    { label: t('home.reviews'), value: String(userReviews.length) },
+    { label: t('home.reviews'), value: String(visibleReviews.length) },
     { label: t('home.watchlist'), value: String(userWatchlist.length) },
-    { label: t('home.followers'), value: '0' },
+    { label: t('home.followers'), value: String(displayedFollowersCount) },
   ];
-
 
   const handleReviewSubmit = (review: ReviewItem) => {
     setLocalReviews((prev) => [review, ...(prev ?? dashboardReviews)]);
@@ -258,119 +336,137 @@ export default function ProfilePage() {
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
-        <ProfileCard
-          avatarAlt={t('home.avatarAlt')}
-          avatarUrl={profileAvatarUrl || undefined}
-          bio={profileBio}
-          canEdit={isOwnProfile}
-          closeEditLabel={t('home.closeEdit')}
-          displayName={profileDisplayName}
-          displayUsername={displayUsername}
-          editProfileLabel={t('home.editProfile')}
-          initials={initials}
-          isEditing={isEditing}
-          joinedYearLabel={joinedLabel}
-          onToggleEdit={handleToggleEdit}
-          stats={profileStats}
-          verifiedLabel={t('home.verifiedMember')}
-        />
+        {shouldBlockForProfileLoad ? (
+          <EmptyState title={t('main.loading')} />
+        ) : null}
 
-        <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_320px]">
-          <div>
-            <div className="mb-7 flex border-b border-[#f0ead0]/10">
-              {[
-                ['reviews', t('home.reviews'), String(userReviews.length)],
-                ['watchlist', t('home.watchlist'), String(userWatchlist.length)],
-              ].map(([key, label, count]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setActiveTab(key as TabKey)}
-                  className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
-                    activeTab === key
-                      ? 'border-[#d63e2a] text-[#f0ead0]'
-                      : 'border-transparent text-[#8a8474] hover:text-[#c8c2a8]'
-                  }`}
-                >
-                  {label}{' '}
-                  <span
-                    className={
-                      activeTab === key ? 'text-[#d63e2a]' : 'text-[#8a8474]'
-                    }
-                  >
-                    {count}
-                  </span>
-                </button>
-              ))}
-            </div>
+        {shouldBlockForProfileError ? (
+          <EmptyState title={t('home.profileLoadError')} />
+        ) : null}
 
-            {activeTab === 'reviews' ? (
-              <>
-                {isOwnProfile ? <ReviewForm onSubmit={handleReviewSubmit} /> : null}
-
-                <ReviewList
-                  onDelete={isOwnProfile ? handleReviewDelete : undefined}
-                  onEdit={isOwnProfile ? handleReviewEdit : undefined}
-                  reviews={userReviews}
-                />
-              </>
-            ) : null}
-
-            {activeTab === 'watchlist' ? (
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {userWatchlist.length ? (
-                  userWatchlist.map(([icon, label]) => (
-                    <div
-                      key={label}
-                      className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] text-[22px] transition hover:border-[#f0ead0]/25"
-                    >
-                      <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_4px,rgba(240,234,210,0.02)_4px,rgba(240,234,210,0.02)_8px)]" />
-
-                      <span className="relative z-10">{icon}</span>
-
-                      <span className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-1 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
-                        {label}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <EmptyState title={t('mypage.empty')} />
-                )}
-              </div>
-            ) : null}
-          </div>
-
-          {isOwnProfile ? (
-            <ProfileEditForm
-              avatarUrl={avatarPreview ?? ''}
-              avatarUrlLabel={t('home.avatarUrl')}
-              avatarUrlPlaceholder={t('home.avatarUrlPlaceholder')}
-              bioLabel={t('home.bio')}
-              changePasswordLabel={t('home.changePassword')}
-              confirmNewPasswordLabel={t('home.confirmNewPassword')}
-              currentPasswordLabel={t('home.currentPassword')}
-              deleteAccountLabel={t('home.deleteAccount')}
-              firstNameLabel={t('signup.firstName')}
-              form={profileForm}
+        {!shouldBlockForProfileLoad && !shouldBlockForProfileError ? (
+          <>
+            <ProfileCard
+              avatarAlt={t('home.avatarAlt')}
+              avatarUrl={profileAvatarUrl || undefined}
+              bio={profileBio}
+              canEdit={isOwnProfile}
+              canFollow={isPublicProfile && Boolean(viewedProfile)}
+              closeEditLabel={t('home.closeEdit')}
+              displayName={profileDisplayName}
+              displayUsername={displayUsername}
+              editProfileLabel={t('home.editProfile')}
+              followLabel={t('home.follow')}
+              initials={initials}
               isEditing={isEditing}
-              lastNameLabel={t('signup.lastName')}
-              newPasswordLabel={t('home.newPassword')}
-              onAvatarUrlChange={(value) => setAvatarPreview(value)}
-              onChange={handleProfileFormChange}
-              onSave={handleProfileSave}
-              passwordSectionLabel={t('home.passwordSection')}
-              saveLabel={t('home.saveChanges')}
-              sectionTitle={t('home.editPanelTitle')}
-              settingsTitle={t('home.accountSettings')}
-              toggles={[]}
-              usernameLabel={t('home.username')}
+              isFollowLoading={followState.isLoading || unfollowState.isLoading}
+              isFollowing={viewedProfile?.isFollowing ?? false}
+              joinedYearLabel={joinedLabel}
+              onToggleEdit={handleToggleEdit}
+              onToggleFollow={handleToggleFollow}
+              stats={profileStats}
+              unfollowLabel={t('home.following')}
+              verifiedLabel={t('home.verifiedMember')}
             />
-          ) : (
-            <aside className="border border-[#f0ead0]/10 bg-[#141412] p-6 text-sm leading-6 text-[#8a8474]">
-              {t('home.publicProfilePlaceholder')}
-            </aside>
-          )}
-        </div>
+
+            <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_320px]">
+              <div>
+                <div className="mb-7 flex border-b border-[#f0ead0]/10">
+                  {[
+                    ['reviews', t('home.reviews'), String(visibleReviews.length)],
+                    ['watchlist', t('home.watchlist'), String(userWatchlist.length)],
+                  ].map(([key, label, count]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setActiveTab(key as TabKey)}
+                      className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
+                        activeTab === key
+                          ? 'border-[#d63e2a] text-[#f0ead0]'
+                          : 'border-transparent text-[#8a8474] hover:text-[#c8c2a8]'
+                      }`}
+                    >
+                      {label}{' '}
+                      <span
+                        className={
+                          activeTab === key ? 'text-[#d63e2a]' : 'text-[#8a8474]'
+                        }
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {activeTab === 'reviews' ? (
+                  <>
+                    {isOwnProfile ? (
+                      <ReviewForm onSubmit={handleReviewSubmit} />
+                    ) : null}
+
+                    <ReviewList
+                      onDelete={isOwnProfile ? handleReviewDelete : undefined}
+                      onEdit={isOwnProfile ? handleReviewEdit : undefined}
+                      reviews={visibleReviews}
+                    />
+                  </>
+                ) : null}
+
+                {activeTab === 'watchlist' ? (
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {userWatchlist.length ? (
+                      userWatchlist.map(([icon, label]) => (
+                        <div
+                          key={label}
+                          className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] text-[22px] transition hover:border-[#f0ead0]/25"
+                        >
+                          <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_4px,rgba(240,234,210,0.02)_4px,rgba(240,234,210,0.02)_8px)]" />
+                          <span className="relative z-10">{icon}</span>
+                          <span className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-1 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
+                            {label}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <EmptyState title={t('mypage.empty')} />
+                    )}
+                  </div>
+                ) : null}
+              </div>
+
+              {isOwnProfile ? (
+                <ProfileEditForm
+                  avatarUrl={avatarPreview ?? ''}
+                  avatarUrlLabel={t('home.avatarUrl')}
+                  avatarUrlPlaceholder={t('home.avatarUrlPlaceholder')}
+                  bioLabel={t('home.bio')}
+                  changePasswordLabel={t('home.changePassword')}
+                  confirmNewPasswordLabel={t('home.confirmNewPassword')}
+                  currentPasswordLabel={t('home.currentPassword')}
+                  deleteAccountLabel={t('home.deleteAccount')}
+                  firstNameLabel={t('signup.firstName')}
+                  form={profileForm}
+                  isEditing={isEditing}
+                  lastNameLabel={t('signup.lastName')}
+                  newPasswordLabel={t('home.newPassword')}
+                  onAvatarUrlChange={(value) => setAvatarPreview(value)}
+                  onChange={handleProfileFormChange}
+                  onSave={handleProfileSave}
+                  passwordSectionLabel={t('home.passwordSection')}
+                  saveLabel={t('home.saveChanges')}
+                  sectionTitle={t('home.editPanelTitle')}
+                  settingsTitle={t('home.accountSettings')}
+                  toggles={[]}
+                  usernameLabel={t('home.username')}
+                />
+              ) : (
+                <aside className="border border-[#f0ead0]/10 bg-[#141412] p-6 text-sm leading-6 text-[#8a8474]">
+                  {t('home.publicProfilePlaceholder')}
+                </aside>
+              )}
+            </div>
+          </>
+        ) : null}
       </div>
     </section>
   );

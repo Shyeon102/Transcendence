@@ -23,6 +23,7 @@ import type {
   MediaInteraction,
   MyPageDashboardData,
   PasswordChangeRequest,
+  PublicUserProfile,
   RefreshTokenResponse,
   SignupRequest,
   SignupResponse,
@@ -48,6 +49,10 @@ type RawAuthUser = {
   favorite_countries?: string[];
   isStaff?: boolean;
   is_staff?: boolean;
+  followersCount?: number;
+  followers_count?: number;
+  followingCount?: number;
+  following_count?: number;
   dateJoined?: string;
   date_joined?: string;
 };
@@ -129,6 +134,13 @@ type RawReview = {
 
 type RawReviewPayload = RawReview | {
   review?: RawReview;
+  reviews?: RawReview[];
+};
+
+type RawPublicUserProfile = RawAuthUser & {
+  followers_count?: number;
+  following_count?: number;
+  is_following?: boolean;
   reviews?: RawReview[];
 };
 
@@ -253,6 +265,8 @@ const normalizeUser = (user: RawAuthUser): AuthUser => ({
   favoriteTitles: user.favoriteTitles ?? user.favorite_titles,
   favoriteCountries: user.favoriteCountries ?? user.favorite_countries,
   isStaff: user.isStaff ?? user.is_staff,
+  followersCount: user.followersCount ?? user.followers_count,
+  followingCount: user.followingCount ?? user.following_count,
   dateJoined: user.dateJoined ?? user.date_joined,
 });
 
@@ -351,6 +365,17 @@ const normalizeReviewList = (payload: RawReviewPayload): MediaReview[] => {
   return [];
 };
 
+const normalizePublicUserProfile = (profile: RawPublicUserProfile): PublicUserProfile => ({
+  id: profile.id ?? 0,
+  username: profile.username ?? '',
+  avatarUrl: profile.avatarUrl ?? profile.avatar_url,
+  bio: profile.bio,
+  followersCount: profile.followers_count ?? 0,
+  followingCount: profile.following_count ?? 0,
+  isFollowing: profile.is_following ?? false,
+  reviews: (profile.reviews ?? []).map(normalizeReview),
+});
+
 const toReviewRequestBody = (review: MediaReviewRequest) => ({
   rating: review.rating,
   content: review.content,
@@ -439,10 +464,10 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
       api.dispatch(logout());
     } else {
       const refreshResult = await rawBaseQuery(
-          {
-            url: '/auth/token/refresh/',
-            method: 'POST',
-            body: { refresh: refreshToken },
+        {
+          url: '/auth/token/refresh/',
+          method: 'POST',
+          body: { refresh: refreshToken },
         },
         api,
         extraOptions
@@ -452,13 +477,15 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
         try {
           const tokens = normalizeRefreshTokens(refreshResult.data as RawAuthResponse);
           api.dispatch(updateTokens(tokens));
-          result = await rawBaseQuery(args, api, extraOptions);
         } catch {
           api.dispatch(logout());
         }
       } else {
         api.dispatch(logout());
       }
+
+      // refresh 후 재시도
+      result = await rawBaseQuery(args, api, extraOptions);
     }
   }
 
@@ -479,7 +506,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery,
-  tagTypes: ['AdminReports', 'AdminUsers', 'MediaReviews', 'MediaInteractions', 'Me'],
+  tagTypes: ['AdminReports', 'AdminUsers', 'MediaReviews', 'MediaInteractions', 'Me', 'UserProfile'],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials, api) {
@@ -764,6 +791,103 @@ export const authApi = createApi({
         };
       },
     }),
+    getPublicProfile: builder.query<PublicUserProfile, number>({
+      async queryFn(userId, api) {
+        const result = await rawBaseQuery(`/users/profile/${userId}/`, api, {});
+
+        if (result.data) {
+          return { data: normalizePublicUserProfile(result.data as RawPublicUserProfile) };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Profile request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+      providesTags: (_result, _error, userId) => [{ type: 'UserProfile', id: userId }],
+    }),
+    followUser: builder.mutation<void, number>({
+      async queryFn(userId, api) {
+        const result = await rawBaseQuery(
+          { url: `/users/${userId}/follow/`, method: 'POST' },
+          api,
+          {}
+        );
+
+        if (result.error) {
+          const error = result.error as FetchBaseQueryError;
+          const data = 'data' in error ? error.data : undefined;
+          return {
+            error: {
+              message: toMessage(data) ?? 'Follow request failed.',
+              fields: toFieldErrors(data),
+            },
+          };
+        }
+
+        return { data: undefined };
+      },
+      async onQueryStarted(userId, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          authApi.util.updateQueryData('getPublicProfile', userId, (draft) => {
+            if (!draft.isFollowing) {
+              draft.isFollowing = true;
+              draft.followersCount += 1;
+            }
+          })
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
+      invalidatesTags: (_result, _error, userId) => [{ type: 'UserProfile', id: userId }],
+    }),
+    unfollowUser: builder.mutation<void, number>({
+      async queryFn(userId, api) {
+        const result = await rawBaseQuery(
+          { url: `/users/${userId}/follow/`, method: 'DELETE' },
+          api,
+          {}
+        );
+
+        if (result.error) {
+          const error = result.error as FetchBaseQueryError;
+          const data = 'data' in error ? error.data : undefined;
+          return {
+            error: {
+              message: toMessage(data) ?? 'Unfollow request failed.',
+              fields: toFieldErrors(data),
+            },
+          };
+        }
+
+        return { data: undefined };
+      },
+      async onQueryStarted(userId, { dispatch, queryFulfilled }) {
+        const patch = dispatch(
+          authApi.util.updateQueryData('getPublicProfile', userId, (draft) => {
+            if (draft.isFollowing) {
+              draft.isFollowing = false;
+              draft.followersCount = Math.max(0, draft.followersCount - 1);
+            }
+          })
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patch.undo();
+        }
+      },
+      invalidatesTags: (_result, _error, userId) => [{ type: 'UserProfile', id: userId }],
+    }),
     getMediaReviews: builder.query<MediaReview[], number>({
       async queryFn(mediaId, api) {
         const result = await rawBaseQuery(`/media/${mediaId}/reviews/`, api, {});
@@ -943,12 +1067,15 @@ export const {
   useGetMeQuery,
   useGetMediaReviewsQuery,
   useGetMyPageDashboardQuery,
+  useGetPublicProfileQuery,
   useGetUserActivityQuery,
   useGoogleLoginMutation,
+  useFollowUserMutation,
   useLoginMutation,
   useLogoutMutation,
   useProcessAdminReportMutation,
   useSignupMutation,
+  useUnfollowUserMutation,
   useUpdateAvatarMutation,
   useUpdateMeMutation,
   useUpdateMediaReviewMutation,
