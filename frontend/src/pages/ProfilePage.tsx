@@ -136,6 +136,25 @@ export default function ProfilePage() {
   const userWatchlist = isDemo ? watchlist : [];
   const joinedDate = formatJoinedDate(user.dateJoined, language);
   const joinedLabel = joinedDate ? `${t('home.joinedYear')} ${joinedDate}` : t('home.joinedYear');
+  const profileDisplayName = isEditing
+    ? displayName
+    : [user.firstName, user.lastName].filter(Boolean).join(' ') || displayUsername;
+  const profileBio = isEditing ? profileForm.bio : user.bio ?? t('home.profileBioDefault');
+  const profileAvatarUrl = isEditing ? avatarPreview : user.avatarUrl ?? '';
+
+  const handleToggleEdit = () => {
+    if (!isEditing) {
+      setAvatarPreview(user.avatarUrl ?? '');
+      setProfileForm({
+        username: user.username ?? '',
+        firstName: user.firstName ?? '',
+        lastName: user.lastName ?? '',
+        bio: user.bio ?? t('home.profileBioDefault'),
+      });
+    }
+
+    setIsEditing((prev) => !prev);
+  };
 
   const handleProfileSave = async () => {
     const payload = {
@@ -217,18 +236,18 @@ export default function ProfilePage() {
       <div className="mx-auto max-w-7xl">
         <ProfileCard
           avatarAlt={t('home.avatarAlt')}
-          avatarUrl={avatarPreview || undefined}
-          bio={profileForm.bio}
+          avatarUrl={profileAvatarUrl || undefined}
+          bio={profileBio}
           canEdit={isOwnProfile}
           closeEditLabel={t('home.closeEdit')}
-          displayName={displayName}
+          displayName={profileDisplayName}
           displayUsername={displayUsername}
           editProfileLabel={t('home.editProfile')}
           initials={initials}
           isEditing={isEditing}
           joinedYearLabel={joinedLabel}
           onAvatarSelect={handleAvatarSelect}
-          onToggleEdit={() => setIsEditing((prev) => !prev)}
+          onToggleEdit={handleToggleEdit}
           stats={profileStats}
           uploadAvatarLabel={t('home.uploadAvatar')}
           verifiedLabel={t('home.verifiedMember')}
