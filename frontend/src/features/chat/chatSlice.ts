@@ -1,11 +1,11 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 interface ChatMessage {
   id: number;
   userId: number;
   username: string;
   content: string;
-  messageType: 'message' | 'join' | 'leave';
+  messageType: "message" | "join" | "leave";
   createdAt: string;
 }
 
@@ -24,13 +24,12 @@ const initialState: ChatState = {
 };
 
 const chatSlice = createSlice({
-  name: 'chat',
+  name: "chat",
   initialState,
   reducers: {
     wsConnected: (state, action: PayloadAction<number>) => {
       state.connected = true;
       state.currentRoomId = action.payload;
-      state.messages = [];
     },
     wsDisconnected: (state) => {
       state.connected = false;
@@ -41,11 +40,20 @@ const chatSlice = createSlice({
     messageReceived: (state, action: PayloadAction<ChatMessage>) => {
       state.messages.push(action.payload);
     },
+    historyLoaded: (state, action: PayloadAction<ChatMessage[]>) => {
+      state.messages = action.payload;
+    },
     setTypingUsers: (state, action: PayloadAction<string[]>) => {
       state.typingUsers = action.payload;
     },
   },
 });
 
-export const { wsConnected, wsDisconnected, messageReceived, setTypingUsers } = chatSlice.actions;
+export const {
+  wsConnected,
+  wsDisconnected,
+  messageReceived,
+  setTypingUsers,
+  historyLoaded,
+} = chatSlice.actions;
 export default chatSlice.reducer;
