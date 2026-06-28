@@ -102,11 +102,11 @@ export default function ProfilePage() {
   const defaultProfileBio = t('home.profileBioDefault');
 
   const isOwnProfile =
-   !profileId ||
-   profileId === 'me' ||
-   profileId === String(user?.id) ||
-   profileId === user?.username;
- 
+    !profileId ||
+    profileId === 'me' ||
+    profileId === String(user?.id) ||
+    profileId === user?.username;
+
   const isPublicProfile = !isOwnProfile;
 
   const routeUserId =
@@ -140,8 +140,6 @@ export default function ProfilePage() {
 
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
   const [isEditing, setIsEditing] = useState(false);
-  const [emailNotificationsEnabled, setEmailNotificationsEnabled] =
-    useState(true);
   const [localReviews, setLocalReviews] = useState<ReviewItem[] | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [profileForm, setProfileForm] = useState<ProfileFormState>(() =>
@@ -158,90 +156,88 @@ export default function ProfilePage() {
     return null;
   }
 
-const profileUser = dashboardUser ?? user;
-const profileUserWithDates = profileUser as AuthUserWithDates;
+  const profileUser = dashboardUser ?? user;
+  const profileUserWithDates = profileUser as AuthUserWithDates;
 
-const safeLanguage = Object.prototype.hasOwnProperty.call(
-  dateLocaleByLanguage,
-  language
-)
-  ? (language as keyof typeof dateLocaleByLanguage)
-  : 'en';
+  const safeLanguage = Object.prototype.hasOwnProperty.call(
+    dateLocaleByLanguage,
+    language
+  )
+    ? (language as keyof typeof dateLocaleByLanguage)
+    : 'en';
 
-const savedDisplayUsername = profileUser.username?.trim() || '';
-const formDisplayUsername =
-  profileForm.username.trim() || savedDisplayUsername;
+  const savedDisplayUsername = profileUser.username?.trim() || '';
+  const formDisplayUsername =
+    profileForm.username.trim() || savedDisplayUsername;
 
-const savedDisplayName =
-  [profileUser.firstName, profileUser.lastName]
-    .filter(Boolean)
-    .join(' ')
-    .trim() ||
-  savedDisplayUsername ||
-  t('home.defaultDisplayName');
+  const savedDisplayName =
+    [profileUser.firstName, profileUser.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .trim() ||
+    savedDisplayUsername ||
+    t('home.defaultDisplayName');
 
-const formDisplayName =
-  [profileForm.firstName, profileForm.lastName]
-    .filter(Boolean)
-    .join(' ')
-    .trim() ||
-  formDisplayUsername ||
-  t('home.defaultDisplayName');
+  const formDisplayName =
+    [profileForm.firstName, profileForm.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .trim() ||
+    formDisplayUsername ||
+    t('home.defaultDisplayName');
 
-const ownDisplayUsername = isEditing
-  ? formDisplayUsername
-  : savedDisplayUsername;
+  const ownDisplayUsername = isEditing
+    ? formDisplayUsername
+    : savedDisplayUsername;
 
-const publicDisplayUsername = viewedProfile?.username?.trim() || '';
+  const publicDisplayUsername = viewedProfile?.username?.trim() || '';
 
-const displayUsername = isPublicProfile
-  ? publicDisplayUsername
-  : ownDisplayUsername;
+  const displayUsername = isPublicProfile
+    ? publicDisplayUsername
+    : ownDisplayUsername;
 
-const ownDisplayName = isEditing ? formDisplayName : savedDisplayName;
+  const ownDisplayName = isEditing ? formDisplayName : savedDisplayName;
 
-const publicDisplayName =
-  publicDisplayUsername || t('home.defaultDisplayName');
+  const publicDisplayName =
+    publicDisplayUsername || t('home.defaultDisplayName');
 
-const profileDisplayName = isPublicProfile
-  ? publicDisplayName
-  : ownDisplayName;
+  const profileDisplayName = isPublicProfile
+    ? publicDisplayName
+    : ownDisplayName;
 
-const profileBio = isPublicProfile
-  ? viewedProfile?.bio ?? ''
-  : isEditing
-    ? profileForm.bio || defaultProfileBio
-    : profileUser.bio || defaultProfileBio;
+  const profileBio = isPublicProfile
+    ? viewedProfile?.bio ?? ''
+    : isEditing
+      ? profileForm.bio || defaultProfileBio
+      : profileUser.bio || defaultProfileBio;
 
-const profileAvatarUrl = isPublicProfile
-  ? viewedProfile?.avatarUrl ?? ''
-  : (isEditing ? avatarPreview : null) ?? profileUser.avatarUrl ?? '';
+  const profileAvatarUrl = isPublicProfile
+    ? viewedProfile?.avatarUrl ?? ''
+    : (isEditing ? avatarPreview : null) ?? profileUser.avatarUrl ?? '';
 
-const joinedLabel = isPublicProfile
-  ? t('home.joinedYear')
-  : formatJoinedDate(
-      profileUserWithDates.createdAt ?? profileUserWithDates.joinedAt,
-      safeLanguage
-    );
+  const joinedLabel = isPublicProfile
+    ? t('home.joinedYear')
+    : formatJoinedDate(
+        profileUserWithDates.createdAt ?? profileUserWithDates.joinedAt,
+        safeLanguage
+      );
 
-const userReviews = localReviews ?? dashboardReviews;
+  const userReviews = localReviews ?? dashboardReviews;
 
-const visibleReviews = isPublicProfile
-  ? viewedProfile?.reviews.map(toReviewItem) ?? []
-  : userReviews;
+  const visibleReviews = isPublicProfile
+    ? viewedProfile?.reviews.map(toReviewItem) ?? []
+    : userReviews;
 
-const userWatchlist: readonly (readonly [string, string])[] = [];
+  const userWatchlist: readonly (readonly [string, string])[] = [];
 
-const shouldBlockForProfileLoad =
-  isPublicProfile && isViewedProfileLoading;
+  const shouldBlockForProfileLoad = isPublicProfile && isViewedProfileLoading;
 
-const shouldBlockForProfileError =
-  cannotLoadPublicProfile ||
-  (isPublicProfile && isViewedProfileError);
+  const shouldBlockForProfileError =
+    cannotLoadPublicProfile || (isPublicProfile && isViewedProfileError);
 
-const displayedFollowersCount = isPublicProfile
-  ? viewedProfile?.followersCount ?? 0
-  : profileUserWithDates.followersCount ?? 0;
+  const displayedFollowersCount = isPublicProfile
+    ? viewedProfile?.followersCount ?? 0
+    : profileUserWithDates.followersCount ?? 0;
 
   const initials =
     profileDisplayName
@@ -262,7 +258,8 @@ const displayedFollowersCount = isPublicProfile
     }
 
     await followUser(routeUserId);
-  }
+  };
+
   const handleToggleEdit = () => {
     if (isEditing) {
       setProfileForm(buildProfileForm(profileUser, defaultProfileBio));
@@ -319,15 +316,6 @@ const displayedFollowersCount = isPublicProfile
     { label: t('home.followers'), value: String(displayedFollowersCount) },
   ];
 
-  const settingsToggles = [
-    {
-      label: t('home.emailNotifications'),
-      description: t('home.emailNotificationsDesc'),
-      value: emailNotificationsEnabled,
-      onToggle: setEmailNotificationsEnabled,
-    },
-  ];
-
   const handleReviewSubmit = (review: ReviewItem) => {
     setLocalReviews((prev) => [review, ...(prev ?? dashboardReviews)]);
   };
@@ -363,17 +351,18 @@ const displayedFollowersCount = isPublicProfile
 
     reader.readAsDataURL(file);
   };
+
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
         {shouldBlockForProfileLoad ? (
           <EmptyState title={t('main.loading')} />
         ) : null}
-  
+
         {shouldBlockForProfileError ? (
           <EmptyState title={t('home.profileLoadError')} />
         ) : null}
-  
+
         {!shouldBlockForProfileLoad && !shouldBlockForProfileError ? (
           <>
             <ProfileCard
@@ -400,7 +389,7 @@ const displayedFollowersCount = isPublicProfile
               uploadAvatarLabel={t('home.uploadAvatar')}
               verifiedLabel={t('home.verifiedMember')}
             />
-  
+
             <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_320px]">
               <div>
                 <div className="mb-7 flex border-b border-[#f0ead0]/10">
@@ -429,11 +418,13 @@ const displayedFollowersCount = isPublicProfile
                     </button>
                   ))}
                 </div>
-  
+
                 {activeTab === 'reviews' ? (
                   <>
-                    {isOwnProfile ? <ReviewForm onSubmit={handleReviewSubmit} /> : null}
-  
+                    {isOwnProfile ? (
+                      <ReviewForm onSubmit={handleReviewSubmit} />
+                    ) : null}
+
                     <ReviewList
                       onDelete={isOwnProfile ? handleReviewDelete : undefined}
                       onEdit={isOwnProfile ? handleReviewEdit : undefined}
@@ -441,7 +432,7 @@ const displayedFollowersCount = isPublicProfile
                     />
                   </>
                 ) : null}
-  
+
                 {activeTab === 'watchlist' ? (
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {userWatchlist.length ? (
@@ -463,7 +454,7 @@ const displayedFollowersCount = isPublicProfile
                   </div>
                 ) : null}
               </div>
-  
+
               {isOwnProfile ? (
                 <ProfileEditForm
                   bioLabel={t('home.bio')}
@@ -481,8 +472,6 @@ const displayedFollowersCount = isPublicProfile
                   passwordSectionLabel={t('home.passwordSection')}
                   saveLabel={t('home.saveChanges')}
                   sectionTitle={t('home.editPanelTitle')}
-                  settingsTitle={t('home.accountSettings')}
-                  toggles={settingsToggles}
                   usernameLabel={t('home.username')}
                 />
               ) : (
@@ -495,5 +484,5 @@ const displayedFollowersCount = isPublicProfile
         ) : null}
       </div>
     </section>
-  )
-};
+  );
+}
