@@ -105,10 +105,15 @@ export default function AdminPage() {
 
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard label={t("admin.reportsTitle")} value={reports.length} />
-          <StatCard label={t("admin.status.pending")} value={reportCounts.pending} accent={reportCounts.pending > 0 ? "text-[#f2b84b]" : "text-[#f0ead0]"} />
+          <StatCard
+            label={t("admin.status.pending")}
+            value={reportCounts.pending}
+            accent={reportCounts.pending > 0 ? "text-[#f2b84b]" : "text-[#f0ead0]"}
+          />
           <StatCard label={t("admin.status.approved")} value={reportCounts.approved} />
           <StatCard label={t("admin.status.rejected")} value={reportCounts.rejected} />
         </div>
+
         <div>
             <div className="mb-5 flex flex-wrap gap-2">
               {reportFilterOptions.map((option) => (
@@ -123,6 +128,7 @@ export default function AdminPage() {
                   }`}
                 >
                   {t(`admin.status.${option}`)}
+                  {option !== "all" ? ` ${reportCounts[option]}` : ""}
                 </button>
               ))}
             </div>
@@ -141,16 +147,20 @@ export default function AdminPage() {
 
             <div className="space-y-3">
               {reportsQuery.isLoading ? null : filteredReports.length ? (
-                filteredReports.map((report) => {
-                  const reportTypeLabel = t(`admin.reportTypes.${report.type}`);
-
-                  return (
-                  <article key={report.id} className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/20">
+                filteredReports.map((report) => (
+                  <article
+                    key={report.id}
+                    className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/20"
+                  >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className={`inline-block border px-2 py-0.5 text-[8px] uppercase tracking-[0.14em] ${reportTypeColor[report.type] ?? "border-[#f0ead0]/10 text-[#8a8474]"}`}>
-                            {reportTypeLabel === `admin.reportTypes.${report.type}` ? report.type : reportTypeLabel}
+                          <span
+                            className={`inline-block border px-2 py-0.5 text-[8px] uppercase tracking-[0.14em] ${
+                              reportTypeColor[report.type] ?? "border-[#f0ead0]/10 text-[#8a8474]"
+                            }`}
+                          >
+                            {report.type}
                           </span>
                           <StatusBadge status={report.status} />
                         </div>
@@ -158,12 +168,12 @@ export default function AdminPage() {
                           {report.target}
                         </h3>
                         <p className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-[#8a8474]">
-                          #{report.id} · {formatDate(report.createdAt)} · {t("admin.reportedBy")} {report.reporter}
+                          #{report.id} - {formatDate(report.createdAt)} - {t("admin.reportedBy")} {report.reporter}
                         </p>
                       </div>
                     </div>
                     <p className="mt-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#c8c2a8]">
-                      {report.reason}
+                      {report.reason || t("admin.noReason")}
                     </p>
                     {report.status === "pending" ? (
                       <div className="mt-4 flex flex-wrap gap-2">
@@ -186,8 +196,7 @@ export default function AdminPage() {
                       </div>
                     ) : null}
                   </article>
-                  );
-                })
+                ))
               ) : (
                 <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
                   {t("admin.emptyReports")}

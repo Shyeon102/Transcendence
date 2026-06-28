@@ -40,7 +40,7 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         user = self.request.user
         return ChatRoom.objects.filter(
             models.Q(is_private=False) |  # all public rooms
-            models.Q(is_private=True, members__user=user)  # private rooms user is in
+            models.Q(is_private=True, members__user=user)
         ).distinct()
 
     def perform_create(self, serializer):

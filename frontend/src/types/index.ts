@@ -12,6 +12,7 @@ export interface AuthUser {
   isStaff?: boolean;
   followersCount?: number;
   followingCount?: number;
+  dateJoined?: string; 
 }
 
 export interface PublicUserProfile {

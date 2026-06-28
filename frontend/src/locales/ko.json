@@ -19,6 +19,7 @@
     "usersLoadError": "서버에서 사용자 목록을 불러오지 못했습니다.",
     "emptyReports": "조건에 맞는 신고가 없습니다.",
     "emptyUsers": "조건에 맞는 사용자가 없습니다.",
+    "noReason": "신고 사유가 없습니다.",
     "reportsEyebrow": "콘텐츠 관리",
     "reportsTitle": "신고 목록",
     "usersEyebrow": "계정 관리",

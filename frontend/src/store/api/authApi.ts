@@ -20,7 +20,6 @@ import type {
   LoginResponse,
   MediaReview,
   MediaReviewRequest,
-  MediaInteraction,
   MyPageDashboardData,
   PasswordChangeRequest,
   PublicUserProfile,

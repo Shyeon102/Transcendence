@@ -19,6 +19,7 @@
     "usersLoadError": "Impossible de charger les utilisateurs depuis le serveur.",
     "emptyReports": "Aucun signalement ne correspond a ce filtre.",
     "emptyUsers": "Aucun utilisateur ne correspond a ce filtre.",
+    "noReason": "Aucun motif de signalement n'a ete fourni.",
     "reportsEyebrow": "Moderation du contenu",
     "reportsTitle": "Signalements",
     "usersEyebrow": "Moderation des comptes",
