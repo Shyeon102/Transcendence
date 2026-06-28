@@ -30,6 +30,8 @@ const toReviewItem = (review: MediaReview): ReviewItem => ({
   text: review.content,
   rating: review.rating,
   visibility: review.visibility,
+});
+
 type AuthUser = NonNullable<RootState['auth']['user']>;
 
 type AuthUserWithDates = AuthUser & {
@@ -222,14 +224,6 @@ const joinedLabel = isPublicProfile
       safeLanguage
     );
 
-const initials =
-  profileDisplayName
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('') || displayUsername.slice(0, 2).toUpperCase();
-
 const userReviews = localReviews ?? dashboardReviews;
 
 const visibleReviews = isPublicProfile
@@ -257,9 +251,6 @@ const displayedFollowersCount = isPublicProfile
       .map((part) => part[0]?.toUpperCase() ?? '')
       .join('') || displayUsername.slice(0, 2).toUpperCase();
 
-  const userReviews = localReviews ?? dashboardReviews;
-  const userWatchlist: readonly (readonly [string, string])[] = [];
-
   const handleToggleFollow = async () => {
     if (!routeUserId || !viewedProfile || isOwnProfile) {
       return;
@@ -271,6 +262,7 @@ const displayedFollowersCount = isPublicProfile
     }
 
     await followUser(routeUserId);
+  }
   const handleToggleEdit = () => {
     if (isEditing) {
       setProfileForm(buildProfileForm(profileUser, defaultProfileBio));
@@ -320,10 +312,6 @@ const displayedFollowersCount = isPublicProfile
   ) => {
     setProfileForm((prev) => ({ ...prev, [field]: value }));
   };
-
-  const displayedFollowersCount = isPublicProfile
-    ? viewedProfile?.followersCount ?? 0
-    : viewedProfile?.followersCount ?? user.followersCount ?? (isDemo ? 31 : 0);
 
   const profileStats = [
     { label: t('home.reviews'), value: String(visibleReviews.length) },
@@ -375,18 +363,17 @@ const displayedFollowersCount = isPublicProfile
 
     reader.readAsDataURL(file);
   };
-
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
         {shouldBlockForProfileLoad ? (
           <EmptyState title={t('main.loading')} />
         ) : null}
-
+  
         {shouldBlockForProfileError ? (
           <EmptyState title={t('home.profileLoadError')} />
         ) : null}
-
+  
         {!shouldBlockForProfileLoad && !shouldBlockForProfileError ? (
           <>
             <ProfileCard
@@ -413,92 +400,7 @@ const displayedFollowersCount = isPublicProfile
               uploadAvatarLabel={t('home.uploadAvatar')}
               verifiedLabel={t('home.verifiedMember')}
             />
-
-        <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_320px]">
-          <div>
-            <div className="mb-7 flex border-b border-[#f0ead0]/10">
-              {[
-                ['reviews', t('home.reviews'), String(visibleReviews.length)],
-                ['watchlist', t('home.watchlist'), String(userWatchlist.length)],
-              ].map(([key, label, count]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setActiveTab(key as TabKey)}
-                  className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
-                    activeTab === key
-                      ? 'border-[#d63e2a] text-[#f0ead0]'
-                      : 'border-transparent text-[#8a8474] hover:text-[#c8c2a8]'
-                  }`}
-                >
-                  {label}{' '}
-                  <span
-                    className={
-                      activeTab === key ? 'text-[#d63e2a]' : 'text-[#8a8474]'
-                    }
-                  >
-                    {count}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            {activeTab === 'reviews' ? (
-              <>
-                {isOwnProfile ? <ReviewForm onSubmit={handleReviewSubmit} /> : null}
-
-                <ReviewList
-                  onDelete={isOwnProfile ? handleReviewDelete : undefined}
-                  onEdit={isOwnProfile ? handleReviewEdit : undefined}
-                  reviews={visibleReviews}
-                />
-              </>
-            ) : null}
-
-            {activeTab === 'watchlist' ? (
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {userWatchlist.length ? (
-                  userWatchlist.map(([icon, label]) => (
-                    <div
-                      key={label}
-                      className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] text-[22px] transition hover:border-[#f0ead0]/25"
-                    >
-                      <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_4px,rgba(240,234,210,0.02)_4px,rgba(240,234,210,0.02)_8px)]" />
-
-                      <span className="relative z-10">{icon}</span>
-
-                      <span className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-1 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
-                        {label}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <EmptyState title={t('mypage.empty')} />
-                )}
-              </div>
-            ) : null}
-          </div>
-
-          {isOwnProfile ? (
-            <ProfileEditForm
-              bioLabel={t('home.bio')}
-              changePasswordLabel={t('home.changePassword')}
-              confirmNewPasswordLabel={t('home.confirmNewPassword')}
-              currentPasswordLabel={t('home.currentPassword')}
-              deleteAccountLabel={t('home.deleteAccount')}
-              firstNameLabel={t('signup.firstName')}
-              form={profileForm}
-              isEditing={isEditing}
-              joinedYearLabel={t('home.joinedYear')}
-              onAvatarSelect={handleAvatarSelect}
-              onToggleFollow={handleToggleFollow}
-              onToggleEdit={() => setIsEditing((prev) => !prev)}
-              stats={profileStats}
-              unfollowLabel={t('home.following')}
-              uploadAvatarLabel={t('home.uploadAvatar')}
-              verifiedLabel={t('home.verifiedMember')}
-            />
-
+  
             <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_320px]">
               <div>
                 <div className="mb-7 flex border-b border-[#f0ead0]/10">
@@ -511,17 +413,27 @@ const displayedFollowersCount = isPublicProfile
                       type="button"
                       onClick={() => setActiveTab(key as TabKey)}
                       className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
-                        activeTab === key ? 'border-[#d63e2a] text-[#f0ead0]' : 'border-transparent text-[#8a8474] hover:text-[#c8c2a8]'
+                        activeTab === key
+                          ? 'border-[#d63e2a] text-[#f0ead0]'
+                          : 'border-transparent text-[#8a8474] hover:text-[#c8c2a8]'
                       }`}
                     >
-                      {label} <span className={activeTab === key ? 'text-[#d63e2a]' : 'text-[#8a8474]'}>{count}</span>
+                      {label}{' '}
+                      <span
+                        className={
+                          activeTab === key ? 'text-[#d63e2a]' : 'text-[#8a8474]'
+                        }
+                      >
+                        {count}
+                      </span>
                     </button>
                   ))}
                 </div>
-
+  
                 {activeTab === 'reviews' ? (
                   <>
                     {isOwnProfile ? <ReviewForm onSubmit={handleReviewSubmit} /> : null}
+  
                     <ReviewList
                       onDelete={isOwnProfile ? handleReviewDelete : undefined}
                       onEdit={isOwnProfile ? handleReviewEdit : undefined}
@@ -529,7 +441,7 @@ const displayedFollowersCount = isPublicProfile
                     />
                   </>
                 ) : null}
-
+  
                 {activeTab === 'watchlist' ? (
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {userWatchlist.length ? (
@@ -551,7 +463,7 @@ const displayedFollowersCount = isPublicProfile
                   </div>
                 ) : null}
               </div>
-
+  
               {isOwnProfile ? (
                 <ProfileEditForm
                   bioLabel={t('home.bio')}
@@ -583,5 +495,5 @@ const displayedFollowersCount = isPublicProfile
         ) : null}
       </div>
     </section>
-  );
-}
+  )
+};
