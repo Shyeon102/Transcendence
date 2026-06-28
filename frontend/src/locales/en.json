@@ -19,6 +19,7 @@
     "usersLoadError": "Could not load users from the server.",
     "emptyReports": "No reports match this filter.",
     "emptyUsers": "No users match this filter.",
+    "noReason": "No report reason was provided.",
     "reportsEyebrow": "Content moderation",
     "reportsTitle": "Reports",
     "usersEyebrow": "Account moderation",
