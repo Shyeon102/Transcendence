@@ -1,89 +1,33 @@
+/* eslint-disable */
 import { useI18n } from "../lib/i18n";
-import { useGetMediaReviewsQuery } from "../store/api/authApi";
-import { useState } from "react";
+import { useCreateMediaReviewMutation, useGetMediaReviewsQuery, useUpdateMediaReviewMutation } from "../store/api/authApi";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useGetMediaDetailQuery } from "../store/api/mediaApi";
+import { useGetMediaInteractionsQuery, useToggleMediaInteractionMutation, useDeleteMediaReviewMutation } from "../store/api/authApi";
 import { useSelector } from "react-redux";
-import type { Media, Genre } from "../types/media";
 import type { RootState } from "../store";
 import defaultPoster from '/src/assets/images/defaultposter.png';
-
-// 임시 목업 데이터: 현재 백엔드가 없으므로 목업 데이터 임시 선언
-const genreCrime: Genre = { id: 1, name: "Crime" };
-const genreThriller: Genre = { id: 2, name: "Thriller" };
-
-// review는 목업 데이터 추후 백엔드 연동
-const mockMedia: Media = {
-  id: 1,
-  title: "Pulp Fiction",
-  director: "Quentin Tarantino",
-  genre: [genreCrime, genreThriller],
-  releaseDate: "1994-10-26",
-  country: "USA",
-  language: "English",
-  cast: ["John Travolta", "Samuel L. Jackson", "Uma Thurman", "..."],
-  story:
-    "The bloody and ridiculous journey of petty thieves roaming the Hollywood jungle unfolds as three intertwined stories. At a restaurant, a young robbery couple, Pumpkin and Yolanda, discuss the dangers of their profession",
-  ageRating: "PG-15",
-  starRating: 5,
-  runtime: "2h 34m",
-  type: "Movie",
-  frontPosterUrl: "/pulp-fiction.jpg",
-  sidePosterUrl: "/pulp-fiction-side.png",
-  reviews: [
-    {
-      id: 1, //리뷰 자체 고유번호: DB에 저장될 때 순서대로 번호
-      userId: 1, //목업이라 그냥 숫자, 추후 유저 정보 필요
-      username: "seong-ki",
-      content: "good blah blah",
-      rating: 5,
-      visibility: "public",
-      createdAt: "2026-05-18",
-      updatedAt: "2026-05-18",
-    },
-    {
-      id: 2,
-      userId: 2,
-      username: "jaoh",
-      content: "good blah blah",
-      rating: 5,
-      visibility: "public",
-      createdAt: "2026-05-18",
-      updatedAt: "2026-05-18",
-    },
-    {
-      id: 3,
-      userId: 3,
-      username: "thelee42",
-      content: "good blah blah",
-      rating: 5,
-      visibility: "public",
-      createdAt: "2026-05-18",
-      updatedAt: "2026-05-18",
-    },
-    {
-      id: 4,
-      userId: 4,
-      username: "llarrey",
-      content: "good blah blah",
-      rating: 5,
-      visibility: "public",
-      createdAt: "2026-05-18",
-      updatedAt: "2026-05-18",
-    },
-  ],
-};
+import type { MediaReview } from "../types";
+import { useNavigate } from "react-router-dom";
 
 const MediaDetailPage = () => {
+  const navigate = useNavigate();
   const { t } = useI18n();
   const { id } = useParams();
   const mediaId = Number(id);
   const { data, isLoading } = useGetMediaDetailQuery(mediaId);
   const { data: reviews } = useGetMediaReviewsQuery(mediaId);
   const user = useSelector((state: RootState) => state.auth.user);
-  const isDemo = user?.username === "demo";
-  const media = isDemo ? mockMedia : data;
-  const reviewList = isDemo ? mockMedia.reviews : (reviews ?? []);
+  const media = data;
+  const reviewList = reviews ?? [];
+
+  const { data: interactions, refetch: refetchInteractions } = useGetMediaInteractionsQuery(mediaId);  // 추가
+  const [toggleInteraction] = useToggleMediaInteractionMutation();        // 추가
+  const [createReview] = useCreateMediaReviewMutation();                  // 추가
+  const [updateReview] = useUpdateMediaReviewMutation();   
+  const [deleteReview] = useDeleteMediaReviewMutation();
+
   //const navigate = useNavigate(); // 미디어 탭 이동
   //const { id } = useParams(); // React Router에서  URL 파라미터 읽는 훅. URL: /media/:id
   //useParams(); // // TODO: 백엔드 연동 후 useParams()로 id 받아서 API 호출
@@ -96,9 +40,40 @@ const MediaDetailPage = () => {
     dislike: false,
     wish: false,
   });
-  const [myRating, setMyRating] = useState(0); // star rating
+  useEffect(() => {
+    refetchInteractions();
+  }, [mediaId, refetchInteractions])
 
-  if (!isDemo && isLoading) {
+
+  useEffect(() => {
+    if (!interactions) return;
+    setActiveIcon({
+      eye: interactions.some(i => i.action === 'watched'),
+      like: interactions.some(i => i.action === 'like'),
+      dislike: interactions.some(i => i.action === 'dislike'),
+      wish: interactions.some(i => i.action === 'watchlist'),
+    });
+  }, [interactions]);
+
+
+  const [myReview, setMyReview] = useState<MediaReview | null>(null);
+
+  useEffect(() => {
+    if (!reviews || !user) return;
+    setMyReview(
+      reviews.find((r) => r.username === user.username) ?? null
+    );
+  }, [reviews, user]);
+
+  const [myRating, setMyRating] = useState(0);
+  useEffect(() => {
+    if (myReview) {
+      setMyRating(myReview.rating);
+    }
+  }, [myReview?.rating]);
+
+
+  if (isLoading) {
     return (
       <div className="flex min-h-screen flex-col bg-[#0c0c0b] text-white">
         <div className="flex flex-1 items-center justify-center px-6 text-center">
@@ -124,6 +99,14 @@ const MediaDetailPage = () => {
   
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white flex flex-col">
+      <div className="px-6 pt-4">
+        <button
+          onClick={() => navigate("/home")}
+          className="mb-4 text-sm text-gray-400 hover:text-white transition"
+        >
+          ←
+        </button>
+      </div>
       {/* 레이아웃: 가로로 3등분 */}
       <div className="flex mt-[7vh]">
         {/* 미디어 변환 탭: 제일 왼쪽 */}
@@ -183,7 +166,21 @@ const MediaDetailPage = () => {
                 <img
                   key={n}
                   src={n <= myRating ? "/star-full.png" : "/star-line.png"}
-                  onClick={() => setMyRating(prev => (prev === n ? 0 : n))}
+                  onClick={async () => {
+                    const newRating = myRating === n ? 0 : n;
+                    setMyRating(newRating);
+                    if (myReview) {
+                      if (newRating === 0) {
+                        await deleteReview({ mediaId, reviewId: myReview.id });
+                        setMyReview(null);  // 로컬 즉시 반영
+                      } else {
+                        await updateReview({ mediaId, reviewId: myReview.id, review: { rating: newRating, content: myReview.content } });
+                      }
+                    } else if (newRating > 0) {
+                      const result = await createReview({ mediaId, review: { rating: newRating, content: '' } }).unwrap();
+                      setMyReview(result);  // 생성된 리뷰 즉시 반영
+                    }
+                  }}
                   className="w-[1.6vw] h-[1.6vw] cursor-pointer"
                 />
               ))}
@@ -246,7 +243,11 @@ const MediaDetailPage = () => {
 
           {/* 아이콘 인터렉션 */}
           <div className="flex max-w-[31.5vw] justify-end gap-[0.3vw] mt-[2vh]">
-            <button onClick={() => setActiveIcon({ ...icon, eye: !icon.eye })}>
+            <button onClick={async () => {
+              const next = !icon.eye;
+              setActiveIcon({ ...icon, eye: next });
+              await toggleInteraction({ mediaId, action: 'watched', active: next });
+            }}>
               {/* 이미지 교체 (삼항연산자): 조건 ? 참일 때 : 거짓일 때 */}
               <img
                 src={icon.eye ? "/view.png" : "/non-view.png"}
@@ -254,7 +255,11 @@ const MediaDetailPage = () => {
               />
             </button>
             <button
-              onClick={() => setActiveIcon({ ...icon, like: !icon.like })}
+              onClick={async () => {
+                const next = !icon.like;
+                setActiveIcon({ ...icon, like: next, dislike: next ? false : icon.dislike });
+                await toggleInteraction({ mediaId, action: 'like', active: next });
+              }}
             >
               <img
                 src={icon.like ? "/like.png" : "/non-like.png"}
@@ -262,24 +267,21 @@ const MediaDetailPage = () => {
               />
             </button>
             <button
-              onClick={() => setActiveIcon({ ...icon, dislike: !icon.dislike })}
+              onClick={async () => {
+                const next = !icon.dislike;
+                setActiveIcon({ ...icon, dislike: next, like: next ? false : icon.like });
+                await toggleInteraction({ mediaId, action: 'dislike', active: next });
+              }}
             >
               <img
                 src={icon.dislike ? "/dislike.png" : "/non-dislike.png"}
                 className="w-[1.4vw] h-[1.4vw]"
               />
             </button>
-            <button
-              onClick={() => setActiveIcon({ ...icon, wish: !icon.wish })}
-            >
-              <img
-                src={icon.wish ? "/wish.png" : "/non-wish.png"}
-                className="w-[1.2vw] h-[1.2vw] ml-[0.1vw]"
-              />
-            </button>
           </div>
 
           {/* 오른쪽: 리뷰 섹션: Reviews 제목 + 리뷰 목록 (가로정렬) */}
+          {/*지울수도 안지울수도 있음*/}
           <div className="flex gap-[3vw] mt-[3.6vh]">
             {/* 유저 리스트 div */}
             <div className="flex flex-col gap-[1vh]">
@@ -289,16 +291,8 @@ const MediaDetailPage = () => {
                   className="flex gap-4 text-[0.8vw] items-start"
                 >
                   {/* 유저명 */}
-                  <p className="w-[5vw]">{review.username}</p>
+                  <p className="w-[5vw] truncate whitespace-nowrap overflow-hidden">{review.username}</p>
 
-                  {/* visibility 뱃지 + 커멘트 세로로 */}
-                  <div className="flex flex-col">
-                    {/* TODO: 백엔드 연동 후 visibility 뱃지 표시 예정 */}
-                    {/*<p className="border border-teal-600 px-2 py-[0.2vh] text-[0.6vw] rounded-full w-fit">
-                      {review.visibility}
-                    </p>*/}
-                    <p>{review.content}</p>
-                  </div>
 
                   {/* 별점 + 숫자 */}
                   <div className="flex items-center ml-[7vw]">

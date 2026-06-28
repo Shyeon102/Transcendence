@@ -115,7 +115,6 @@
     "oauth42": "Continuer avec 42 OAuth",
     "oauthPending": "La connexion 42 OAuth sera branchee en semaine 2.",
     "oauthDivider": "ou continuer avec",
-    "demoHint": "demo@demo.demo / demo1234",
     "noAccount": "Pas encore de compte ?",
     "toSignup": "Inscription",
     "toSignupCta": "Creer un compte gratuitement"
@@ -275,7 +274,8 @@
     "callbackErrorDescription": "Un probleme est survenu pendant le traitement de 42 OAuth. Verifiez l'URL de callback configuree et le flux de reponse du backend.",
     "callbackContinue": "Continuer",
     "callbackRetry": "Retour a la connexion",
-    "startUrlMissing": "L'URL backend 42 OAuth n'est pas encore configuree."
+    "startUrlMissing": "L'URL backend 42 OAuth n'est pas encore configuree.",
+    "googleClientMissing": "La connexion Google n'est pas encore configuree."
   },
   "footer": {
     "privacyPolicy": "Politique de confidentialité",

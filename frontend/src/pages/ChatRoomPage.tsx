@@ -32,11 +32,11 @@ const ChatRoomPage = () => {
     <div className="bg-[#0c0c0b] min-h-screen text-white">
       <div className="px-[4.72vw] pt-[3vh]">
         <button
-        onClick={() => navigate("/chat/rooms")}
-        className="mb-4 text-sm text-gray-400 hover:text-white transition"
-      >
-        ←
-      </button>
+          onClick={() => navigate("/chat/rooms")}
+          className="mb-4 text-sm text-gray-400 hover:text-white transition"
+        >
+          ←
+        </button>
         <h1 className="font-bold">{room?.title ?? `Room #${roomId}`}</h1>
 
         <div>

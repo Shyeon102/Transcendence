@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthShell from '../components/AuthShell';
+import GoogleAuthButton from '../components/GoogleAuthButton';
 import Button from '../components/ui/Button';
 import StatusMessage from '../components/ui/StatusMessage';
 import { useI18n } from '../lib/i18n';
-import { useLoginMutation } from '../store/api/authApi';
+// import { beginOAuth42Login } from '../lib/oauth';
+import { useGoogleLoginMutation, useLoginMutation } from '../store/api/authApi';
 import type { AuthErrorResponse } from '../store';
 
 export default function LoginPage() {
@@ -15,6 +17,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [login, { isLoading }] = useLoginMutation();
+  const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation();
 
   const validateForm = () => {
     if (!username.trim() || !password.trim()) {
@@ -29,14 +32,38 @@ export default function LoginPage() {
     const validationError = validateForm();
     setErrorMsg(validationError);
 
-    if (validationError) {
-      return;
-    }
+    if (validationError) return;
 
     try {
       const session = await login({ username, password }).unwrap();
-      const isDemo = session.user.username === 'demo';
-      navigate(isDemo || session.user.onboardingCompleted ? '/home' : '/onboarding');
+
+      if (!session?.user) {
+        setErrorMsg("Login failed");
+        return;
+      }
+
+      navigate('/home');
+    } catch (err) {
+      const apiError = err as AuthErrorResponse;
+      setErrorMsg(apiError.message ?? t('common.error'));
+    }
+  };
+
+ const handleGoogleCredential = async (credential: string) => {
+    setErrorMsg('');
+
+    try {
+      const session = await googleLogin({ id_token: credential }).unwrap();
+
+      const user = session?.user;
+
+      if (!user) {
+        console.log("Invalid session:", session);
+        setErrorMsg("Login failed: missing user");
+        return;
+      }
+
+      navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
       setErrorMsg(apiError.message ?? t('common.error'));
@@ -103,7 +130,26 @@ export default function LoginPage() {
           <div className="h-px flex-1 bg-[#f0ead0]/10" />
         </div>
 
-      
+        {/* <Button
+          onClick={() => {
+            if (!beginOAuth42Login()) {
+              setErrorMsg(t('oauth.startUrlMissing'));
+            }
+          }}
+          variant="secondary"
+          className="w-full py-[13px] text-[11px]"
+        >
+          <span className="font-['Bebas_Neue'] text-base tracking-[0.05em] text-[#f0ead0]">42</span>
+          {t('login.oauth42')}
+        </Button> */}
+
+        <GoogleAuthButton
+          disabled={isGoogleLoading}
+          missingConfigLabel={t('oauth.googleClientMissing')}
+          onCredential={(credential) => void handleGoogleCredential(credential)}
+          onError={setErrorMsg}
+          text="signin_with"
+        />
       </form>
 
       <p className="mt-7 text-center text-[11px] tracking-[0.05em] text-[#8a8474]">
@@ -113,9 +159,6 @@ export default function LoginPage() {
         </Link>
       </p>
 
-      <p className="mt-4 border border-[#f0ead0]/10 bg-[#141412] px-4 py-3 text-center text-[10px] tracking-[0.08em] text-[#8a8474]">
-        {t('login.demoHint')}
-      </p>
     </AuthShell>
   );
 }
