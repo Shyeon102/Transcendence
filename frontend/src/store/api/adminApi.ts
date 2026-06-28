@@ -19,7 +19,6 @@ export type AdminUser = {
   username: string;
   email: string;
   status: AdminAccountStatus;
-  reportCount: number;
   isStaff: boolean;
 };
 
@@ -51,15 +50,8 @@ type RawAdminUser = {
   id?: number;
   username?: string;
   email?: string;
-  status?: AdminAccountStatus;
-  report_count?: number;
-  reportCount?: number;
   is_banned?: boolean;
-  isBanned?: boolean;
-  is_active?: boolean;
-  isActive?: boolean;
   is_staff?: boolean;
-  isStaff?: boolean;
 };
 
 const toList = <T>(response: ListResponse<T>): T[] => {
@@ -102,24 +94,13 @@ const normalizeReport = (report: RawAdminReport): AdminReport => {
   };
 };
 
-const normalizeUser = (user: RawAdminUser): AdminUser => {
-  const isBanned =
-    user.isBanned ??
-    user.is_banned ??
-    (user.isActive !== undefined
-      ? user.isActive === false
-      : user.is_active === false);
-  const status = user.status ?? (isBanned ? "banned" : "active");
-
-  return {
-    id: user.id ?? 0,
-    username: user.username ?? "-",
-    email: user.email ?? "-",
-    status,
-    reportCount: user.reportCount ?? user.report_count ?? 0,
-    isStaff: user.isStaff ?? user.is_staff ?? false,
-  };
-};
+const normalizeUser = (user: RawAdminUser): AdminUser => ({
+  id: user.id ?? 0,
+  username: user.username ?? "-",
+  email: user.email ?? "-",
+  status: user.is_banned ? "banned" : "active",
+  isStaff: user.is_staff ?? false,
+});
 
 const actionByStatus: Record<Exclude<AdminReportStatus, "pending">, AdminReportAction> = {
   approved: "approve",
