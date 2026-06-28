@@ -59,7 +59,6 @@ export default function ProfileEditForm({
   saveLabel,
   sectionTitle,
   settingsTitle,
-  toggles,
   usernameLabel,
 }: ProfileEditFormProps) {
   const { t } = useI18n();

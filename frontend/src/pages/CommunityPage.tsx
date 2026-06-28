@@ -14,7 +14,7 @@ const postDate = (value: string) =>
 export default function CommunityPage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
-  const [search, setSearch] = useState('');
+  const [search] = useState('');
   const [sort, setSort] = useState<PostSort>('recent');
   const [composerOpen, setComposerOpen] = useState(false);
   const { data, isLoading, isError } = useGetPostsQuery({ search, sort });
