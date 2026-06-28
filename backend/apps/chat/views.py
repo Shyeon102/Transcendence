@@ -4,6 +4,7 @@ from rest_framework.pagination import CursorPagination
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import BasePermission
+from django.db import models
 
 from .models import ChatRoom, ChatMessage, ChatRoomMember, ChatRoomInvite
 from .serializers import (
@@ -36,7 +37,11 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
     pagination_class = ChatRoomCursorPagination
 
     def get_queryset(self):
-        return ChatRoom.objects.filter(members__user=self.request.user)
+        user = self.request.user
+        return ChatRoom.objects.filter(
+            models.Q(is_private=False) |  # all public rooms
+            models.Q(is_private=True, members__user=user)  # private rooms user is in
+        ).distinct()
 
     def perform_create(self, serializer):
         is_private = self.request.data.get('is_private', False)
