@@ -19,6 +19,7 @@
     "usersLoadError": "Impossible de charger les utilisateurs depuis le serveur.",
     "emptyReports": "Aucun signalement ne correspond a ce filtre.",
     "emptyUsers": "Aucun utilisateur ne correspond a ce filtre.",
+    "noReason": "Aucun motif de signalement n'a ete fourni.",
     "reportsEyebrow": "Moderation du contenu",
     "reportsTitle": "Signalements",
     "usersEyebrow": "Moderation des comptes",
@@ -69,6 +70,9 @@
     "communityPosts": "Posts de la communaute",
     "watchlist": "Liste a voir",
     "followers": "Abonnes",
+    "follow": "Suivre",
+    "following": "Abonne",
+    "profileLoadError": "Impossible de charger le profil.",
     "defaultDisplayName": "Utilisateur",
     "editPanelTitle": "Modifier le profil",
     "displayName": "Nom affiche",
@@ -331,6 +335,18 @@
     "invite": "Inviter",
     "inviteUserIdPlaceholder": "ID utilisateur",
     "inviteSuccess": "Invité !",
-    "inviteError": "Échec de l'invitation"
+    "inviteError": "Échec de l'invitation",
+    "roomList": "Salons de discussion",
+    "newRoom": "+ Nouveau salon",
+    "inputPlaceholder": "Tapez un message",
+    "send": "Envoyer",
+    "deleteRoomConfirm": "Supprimer cette salle ?",
+    "deleteRoomError": "Échec de la suppression de la salle. Seul le créateur peut la supprimer.",
+    "descriptionPlaceholder": "Description",
+    "maxMembersPlaceholder": "Membres max",
+    "creating": "Création...",
+    "create": "Créer",
+    "cancel": "Annuler",
+    "maxMembersRange": "Le nombre de membres doit être entre 4 et 10."
   }
 }

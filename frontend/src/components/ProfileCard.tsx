@@ -10,16 +10,22 @@ type ProfileCardProps = {
   avatarUrl?: string;
   bio: string;
   canEdit?: boolean;
+  canFollow?: boolean;
   closeEditLabel: string;
   displayName: string;
   displayUsername: string;
   editProfileLabel: string;
+  followLabel?: string;
   initials: string;
+  isFollowLoading?: boolean;
+  isFollowing?: boolean;
   isEditing: boolean;
   joinedYearLabel: string;
   onAvatarSelect: (file: File | null) => void;
+  onToggleFollow?: () => void;
   onToggleEdit: () => void;
   stats: ProfileStat[];
+  unfollowLabel?: string;
   uploadAvatarLabel: string;
   verifiedLabel: string;
 };
@@ -29,16 +35,22 @@ export default function ProfileCard({
   avatarUrl,
   bio,
   canEdit = true,
+  canFollow = false,
   closeEditLabel,
   displayName,
   displayUsername,
   editProfileLabel,
+  followLabel = 'Follow',
   initials,
+  isFollowLoading = false,
+  isFollowing = false,
   isEditing,
   joinedYearLabel,
   onAvatarSelect,
+  onToggleFollow,
   onToggleEdit,
   stats,
+  unfollowLabel = 'Following',
   uploadAvatarLabel,
   verifiedLabel,
 }: ProfileCardProps) {
@@ -101,6 +113,18 @@ export default function ProfileCard({
             className="px-5"
           >
             {isEditing ? `✕ ${closeEditLabel}` : editProfileLabel}
+          </Button>
+        ) : null}
+
+        {!canEdit && canFollow ? (
+          <Button
+            disabled={isFollowLoading}
+            onClick={onToggleFollow}
+            size="sm"
+            variant={isFollowing ? 'secondary' : 'primary'}
+            className="px-5"
+          >
+            {isFollowing ? unfollowLabel : followLabel}
           </Button>
         ) : null}
 

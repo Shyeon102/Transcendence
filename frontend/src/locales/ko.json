@@ -19,6 +19,7 @@
     "usersLoadError": "서버에서 사용자 목록을 불러오지 못했습니다.",
     "emptyReports": "조건에 맞는 신고가 없습니다.",
     "emptyUsers": "조건에 맞는 사용자가 없습니다.",
+    "noReason": "신고 사유가 없습니다.",
     "reportsEyebrow": "콘텐츠 관리",
     "reportsTitle": "신고 목록",
     "usersEyebrow": "계정 관리",
@@ -69,6 +70,9 @@
     "communityPosts": "커뮤니티 게시글",
     "watchlist": "워치리스트",
     "followers": "팔로워",
+    "follow": "팔로우",
+    "following": "팔로잉",
+    "profileLoadError": "프로필을 불러올 수 없습니다.",
     "defaultDisplayName": "사용자",
     "editPanelTitle": "프로필 수정",
     "displayName": "표시 이름",
@@ -332,6 +336,14 @@
     "invite": "초대",
     "inviteUserIdPlaceholder": "User ID 입력",
     "inviteSuccess": "초대했습니다",
-    "inviteError": "초대 실패"
+    "inviteError": "초대 실패",
+    "roomList": "채팅방 목록",
+    "newRoom": "새 방 만들기",
+    "inputPlaceholder": "메시지를 입력하세요",
+    "send": "전송",
+    "descriptionPlaceholder": "설명을 입력하세요",
+    "maxMembersPlaceholder": "최대 인원",
+    "creating": "생성 중...",
+    "maxMembersRange": "인원은 4~10명이어야 합니다."
   }
 }

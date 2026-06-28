@@ -10,6 +10,20 @@ export interface AuthUser {
   favoriteTitles?: string[];
   favoriteCountries?: string[];
   isStaff?: boolean;
+  followersCount?: number;
+  followingCount?: number;
+  dateJoined?: string; 
+}
+
+export interface PublicUserProfile {
+  id: number;
+  username: string;
+  avatarUrl?: string;
+  bio?: string;
+  followersCount: number;
+  followingCount: number;
+  isFollowing: boolean;
+  reviews: MediaReview[];
   dateJoined?: string;
 }
 

@@ -19,6 +19,7 @@
     "usersLoadError": "Could not load users from the server.",
     "emptyReports": "No reports match this filter.",
     "emptyUsers": "No users match this filter.",
+    "noReason": "No report reason was provided.",
     "reportsEyebrow": "Content moderation",
     "reportsTitle": "Reports",
     "usersEyebrow": "Account moderation",
@@ -69,6 +70,9 @@
     "communityPosts": "Community Posts",
     "watchlist": "Watchlist",
     "followers": "Followers",
+    "follow": "Follow",
+    "following": "Following",
+    "profileLoadError": "Profile could not be loaded.",
     "defaultDisplayName": "User",
     "editPanelTitle": "Edit Profile",
     "displayName": "Display Name",
@@ -326,6 +330,17 @@
     "invite": "Invite",
     "inviteUserIdPlaceholder": "Enter User ID",
     "inviteSuccess": "Invited!",
-    "inviteError": "Invite failed"
+    "inviteError": "Invite failed",
+    "roomList": "Chat Rooms",
+    "newRoom": "+ New Room",
+    "inputPlaceholder": "Type a message",
+    "send": "Send",
+    "descriptionPlaceholder": "Description",
+    "maxMembersPlaceholder": "Max members",
+    "creating": "Creating...",
+    "roomNamePlaceholder": "Title",
+    "create": "Create",
+    "cancel": "Cancel",
+    "maxMembersRange": "Members must be between 4 and 10."
   }
 }

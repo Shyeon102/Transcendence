@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"; // RTK Query 도구
-import type { ChatRoom } from "../../types/chat";
+import type { ChatRoom, ChatMessage } from "../../types/chat";
 import type { RootState } from "../index";
 
 export const chatApi = createApi({
@@ -30,7 +30,6 @@ export const chatApi = createApi({
         response.results,
       providesTags: ["ChatRoom"],
     }),
-    // 추후 추가: createChatRoom, getChatMessages 등
     createChatRoom: builder.mutation<
       ChatRoom,
       {
@@ -61,6 +60,32 @@ export const chatApi = createApi({
         body: { user_id: userId },
       }),
     }),
+    joinChatRoom: builder.mutation<void, number>({
+      query: (roomId) => ({
+        url: `/chat/rooms/${roomId}/members/`,
+        method: "POST",
+      }),
+    }),
+    getChatMessages: builder.query<ChatMessage[], number>({
+      query: (roomId) => `/chat/rooms/${roomId}/messages/`,
+      transformResponse: (
+        response: {
+          id: number;
+          user: { id: number; username: string };
+          content: string;
+          message_type: string;
+          created_at: string;
+        }[],
+      ) =>
+        response.map((m) => ({
+          id: m.id,
+          userId: m.user.id,
+          username: m.user.username,
+          content: m.content,
+          messageType: "message" as const,
+          createdAt: m.created_at,
+        })),
+    }),
   }),
 });
 
@@ -68,5 +93,7 @@ export const {
   useGetChatRoomsQuery,
   useCreateChatRoomMutation,
   useDeleteChatRoomMutation,
-  useInviteToRoomMutation
+  useInviteToRoomMutation,
+  useGetChatMessagesQuery,
+  useJoinChatRoomMutation,
 } = chatApi; // 훅 노출: 이 훅을 컴포넌트에서 호출하면 데이터/로딩/에러 다 받아짐

@@ -8,17 +8,21 @@ type Props = {
 };
 
 const NewRoomModal = ({ isOpen, onClose }: Props) => {
+  const { t } = useI18n();
   const [title, setTitle] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const [description, setDescription] = useState("");
   const [maxMembers, setMaxMembers] = useState(4);
   const [createChatRoom, { isLoading }] = useCreateChatRoomMutation(); // createChatRoom: trigger:호출하면 백엔드에 POST 요청, isLoading: 결과상태(로딩, 에러 등): 요청 중인지
-  const { t } = useI18n();
 
   if (!isOpen) return null; // 모달 닫힌 상태면 아무것도 안 그림
 
   const handleSubmit = async () => {
     if (!title.trim()) return;
+    if (maxMembers < 4 || maxMembers > 10) {
+      alert(t("chat.maxMembersRange"));
+      return;
+    }
     try {
       await createChatRoom({
         title,
