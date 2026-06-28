@@ -97,7 +97,16 @@ export default function AdminPage() {
     await unbanUser(id);
   };
 
-  const pendingCount = reports.filter((report) => report.status === "pending").length;
+  const reportCounts: Record<AdminReportStatus, number> = {
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+  };
+
+  reports.forEach((report) => {
+    reportCounts[report.status] += 1;
+  });
+
   const bannedCount = users.filter((managedUser) => managedUser.status === "banned").length;
   const filteredReports =
     reportFilter === "all" ? reports : reports.filter((report) => report.status === reportFilter);
@@ -134,9 +143,9 @@ export default function AdminPage() {
           />
           <StatCard label={t("admin.usersTitle")} value={users.length} />
           <StatCard
-            label={`${t("admin.status.suspended")} / ${t("admin.status.banned")}`}
-            value={`${suspendedCount} / ${bannedCount}`}
-            accent={suspendedCount + bannedCount > 0 ? "text-[#ff9c8e]" : "text-[#f0ead0]"}
+            label={t("admin.status.banned")}
+            value={bannedCount}
+            accent={bannedCount > 0 ? "text-[#ff9c8e]" : "text-[#f0ead0]"}
           />
         </div>
 
@@ -210,11 +219,6 @@ export default function AdminPage() {
                             {report.type}
                           </span>
                           <StatusBadge status={report.status} />
-                          {report.hidden ? (
-                            <span className="inline-block border border-[#ff4f38]/30 bg-[#ff4f38]/10 px-2 py-0.5 text-[8px] uppercase tracking-[0.14em] text-[#ff9c8e]">
-                              Hidden
-                            </span>
-                          ) : null}
                         </div>
                         <h3 className="mt-2.5 text-[13px] font-bold leading-6 tracking-[0.04em] text-[#f0ead0]">
                           {report.target}
@@ -227,32 +231,26 @@ export default function AdminPage() {
                     <p className="mt-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#c8c2a8]">
                       {report.reason || t("admin.noReason")}
                     </p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => void handleReportStatus(report.id, "approved")}
-                        disabled={report.status === "approved" || isProcessingReport}
-                        className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10 disabled:opacity-30 disabled:hover:bg-transparent"
-                      >
-                        {t("admin.approve")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void handleReportStatus(report.id, "rejected")}
-                        disabled={report.status === "rejected" || isProcessingReport}
-                        className="border border-[#f0ead0]/15 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#f0ead0]/30 disabled:opacity-30 disabled:hover:border-[#f0ead0]/15"
-                      >
-                        {t("admin.reject")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void handleContentVisibility(report)}
-                        disabled={isProcessingReport}
-                        className="border border-[#ff4f38]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#ff9c8e] transition hover:bg-[#ff4f38]/10 disabled:opacity-30"
-                      >
-                        {report.hidden ? t("admin.unhide") : t("admin.hide")}
-                      </button>
-                    </div>
+                    {report.status === "pending" ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void handleReportStatus(report.id, "approved")}
+                          disabled={isProcessingReport}
+                          className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                        >
+                          {t("admin.approve")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleReportStatus(report.id, "rejected")}
+                          disabled={isProcessingReport}
+                          className="border border-[#f0ead0]/15 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#f0ead0]/30 disabled:opacity-30 disabled:hover:border-[#f0ead0]/15"
+                        >
+                          {t("admin.reject")}
+                        </button>
+                      </div>
+                    ) : null}
                   </article>
                 ))
               ) : (
@@ -328,16 +326,6 @@ export default function AdminPage() {
                       </div>
                     </div>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      {managedUser.status !== "suspended" ? (
-                        <button
-                          type="button"
-                          onClick={() => void handleUserStatus(managedUser.id, "suspended")}
-                          disabled={isUpdatingUser}
-                          className="border border-[#f2b84b]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#f2d496] transition hover:bg-[#f2b84b]/10 disabled:opacity-30"
-                        >
-                          {t("admin.suspend")}
-                        </button>
-                      ) : null}
                       {managedUser.status !== "banned" ? (
                         <button
                           type="button"
