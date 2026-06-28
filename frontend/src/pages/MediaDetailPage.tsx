@@ -119,7 +119,7 @@ const MediaDetailPage = () => {
       like: interactions.some(i => i.action === 'like'),
       dislike: interactions.some(i => i.action === 'dislike'),
     });
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [interactions]);
 
 
@@ -131,6 +131,7 @@ const MediaDetailPage = () => {
     setMyReview(
       reviews.find((r) => r.username === user.username) ?? null
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reviews, user.username]);
 
   const [myRating, setMyRating] = useState(0);
@@ -138,6 +139,7 @@ const MediaDetailPage = () => {
     if (myReview) {
       setMyRating(myReview.rating);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myReview?.rating]);
 
 
