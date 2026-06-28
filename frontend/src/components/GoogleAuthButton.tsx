@@ -35,7 +35,9 @@ declare global {
 const GOOGLE_SCRIPT_ID = 'google-identity-services';
 const GOOGLE_SCRIPT_SRC = 'https://accounts.google.com/gsi/client';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
-let googleInitialized = false; 
+let googleInitialized = false;
+let activeOnCredential: ((credential: string) => void) | null = null;
+let activeOnError: ((message: string) => void) | null = null;
 
 let googleScriptPromise: Promise<void> | null = null;
 
@@ -105,8 +107,19 @@ export default function GoogleAuthButton({
   }, [onCredential, onError]);
 
   useEffect(() => {
-    if (!GOOGLE_CLIENT_ID || disabled) return;
-    if (googleInitialized) return;
+    activeOnCredential = (credential) => onCredentialRef.current(credential);
+    activeOnError = (message) => onErrorRef.current(message);
+
+    return () => {
+      activeOnCredential = null;
+      activeOnError = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID || disabled) {
+      return;
+    }
 
     let mounted = true;
 
@@ -114,19 +127,20 @@ export default function GoogleAuthButton({
       .then(() => {
         if (!mounted || !containerRef.current || !window.google?.accounts) return;
 
-        googleInitialized = true;
-
-        window.google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: (response) => {
-            if (!response.credential) {
-              onErrorRef.current('Google did not return a credential.');
-              return;
-            }
-            onCredentialRef.current(response.credential);
-          },
-          use_fedcm_for_prompt: false,
-        });
+        if (!googleInitialized) {
+          window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: (response) => {
+              if (!response.credential) {
+                activeOnError?.('Google did not return a credential.');
+                return;
+              }
+              activeOnCredential?.(response.credential);
+            },
+            use_fedcm_for_prompt: false,
+          });
+          googleInitialized = true;
+        }
 
         containerRef.current.innerHTML = '';
 
@@ -162,7 +176,7 @@ export default function GoogleAuthButton({
     <div
       ref={containerRef}
       className={`min-h-[44px] w-full overflow-hidden ${
-        disabled || !isReady ? 'opacity-60' : ''
+        disabled || !isReady ? 'pointer-events-none opacity-60' : ''
       }`}
     />
   );
