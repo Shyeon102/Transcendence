@@ -367,5 +367,23 @@
     "readMore": "Voir plus",
     "noData": "Aucune info média pour le moment.",
     "loading": "Chargement..."
+  },
+  "chat": {
+    "title": "Salles de discussion",
+    "nodescription" : "Aucune description",
+    "createRoom": "Créer une salle",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer cette salle ?",
+    "deleteError": "Échec de la suppression de la salle. Seul le créateur peut la supprimer.",
+    "loading": "Chargement des salles...",
+    "loadError": "Échec du chargement des salles.",
+    "empty": "Aucune salle de discussion pour le moment.",
+    "roomNamePlaceholder": "Nom de la salle",
+    "roomTypeLabel": "Type de salle",
+    "roomTypePublic": "Publique",
+    "roomTypePrivate": "Privée",
+    "createRoomSubmit": "Créer la salle",
+    "createRoomValidation": "Veuillez saisir un nom et choisir un type pour la salle.",
+    "createRoomError": "Échec de la création de la salle. Réessayez."
   }
 }
