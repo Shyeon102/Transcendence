@@ -147,7 +147,7 @@ export const adminApi = apiSlice.injectEndpoints({
       invalidatesTags: ["AdminReports"],
     }),
     getAdminUsers: builder.query<AdminUser[], void>({
-      query: () => "/users/",
+      query: () => "/users/admin/users/",
       transformResponse: (response: ListResponse<RawAdminUser>) =>
         toList(response).map(normalizeUser),
       providesTags: ["AdminUsers"],
