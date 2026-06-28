@@ -31,7 +31,7 @@ class Command(BaseCommand):
             self.stdout.write("[*] SVD 재학습 시작...")
             chain(
                 train_svd_task.si(),
-                compute_cf_scores_all_task.si(),
+                compute_cf_scores_all_task.s(),
             ).delay()
             self.stdout.write(self.style.SUCCESS("[+] SVD 태스크 enqueue 완료"))
 
@@ -59,5 +59,5 @@ python manage.py refresh_recommend --svd
 python manage.py refresh_recommend --all-users
 
 # 복합 실행도 가능
-python manage.py refresh_recommend --user-id 42 --svd
+python manage.py refresh_recommend --all-users --svd
 """

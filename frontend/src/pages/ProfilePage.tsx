@@ -12,54 +12,6 @@ import type { RootState } from '../store';
 import { useGetMeQuery, useGetMyPageDashboardQuery, useUpdateMeMutation } from '../store/api/authApi';
 import { updateProfile } from '../store/slices/authSlice';
 
-const initialReviews: ReviewItem[] = [
-  {
-    id: 'poor-things',
-    title: 'Poor Things',
-    type: 'film',
-    date: '2025.03.12',
-    poster: '🎬',
-    text: 'A deliriously chaotic triumph. Lanthimos at full throttle - grotesque, gorgeous, and genuinely funny.',
-    rating: 4,
-    visibility: 'public',
-    isOwn: true,
-  },
-  {
-    id: 'dune-two',
-    title: 'Dune: Part Two',
-    type: 'film',
-    date: '2025.02.28',
-    poster: '📺',
-    text: "Villeneuve's scale is unmatched. The Harkonnen arena sequence alone is worth the price of admission.",
-    rating: 5,
-    visibility: 'followers',
-    isOwn: true,
-  },
-  {
-    id: 'past-lives',
-    title: 'Past Lives',
-    type: 'film',
-    date: '2024.12.05',
-    poster: '🎞️',
-    text: "Celine Song's debut is devastating in its restraint. The final scene will stay with you for weeks.",
-    rating: 5,
-    visibility: 'private',
-    isOwn: true,
-  },
-];
-
-const watchlist = [
-  ['🎬', 'Joker 2'],
-  ['📽️', 'The Zone'],
-  ['🎞️', 'Barbie'],
-  ['🎥', 'Past Lives'],
-  ['📺', 'Deadpool 3'],
-  ['🎬', 'It · Part 2'],
-  ['🎞️', 'Captain M.'],
-  ['📽️', 'Scream VII'],
-  ['🎥', '+80 more'],
-] as const;
-
 type TabKey = 'reviews' | 'watchlist';
 
 const dateLocaleByLanguage = {
@@ -94,15 +46,12 @@ export default function ProfilePage() {
   const { id: profileId } = useParams();
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateMe] = useUpdateMeMutation();
-  const isDemo = user?.username === 'demo';
-  const { data: latestUser } = useGetMeQuery(undefined, { skip: !user || isDemo });
-  const { data: dashboard } = useGetMyPageDashboardQuery(undefined, { skip: !user || isDemo });
   const displayUsername = user?.username?.trim() || '';
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || displayUsername || t('home.defaultDisplayName');
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
   const [isEditing, setIsEditing] = useState(false);
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
-  const [reviews, setReviews] = useState<ReviewItem[]>(isDemo ? initialReviews : []);
+  const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl ?? '');
   const [profileForm, setProfileForm] = useState({
     username: user?.username ?? '',
@@ -134,42 +83,7 @@ export default function ProfilePage() {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('') || displayUsername.slice(0, 2).toUpperCase();
-  const userReviews = isDemo
-    ? reviews
-    : (dashboard?.reviews ?? []).map((review): ReviewItem => ({
-        id: String(review.id),
-        title: review.title,
-        type: 'media',
-        date: review.when,
-        poster: '🎞️',
-        text: review.note,
-        rating: review.rating,
-        visibility: review.visibility,
-      }));
-  const userWatchlist = isDemo
-    ? watchlist
-    : (dashboard?.watchlist ?? []).map((title) => ['🎞️', title] as const);
-  const joinedDate = formatJoinedDate(user.dateJoined, language);
-  const joinedLabel = joinedDate ? `${t('home.joinedYear')} ${joinedDate}` : t('home.joinedYear');
-  const profileDisplayName = isEditing
-    ? displayName
-    : [user.firstName, user.lastName].filter(Boolean).join(' ') || displayUsername;
-  const profileBio = isEditing ? profileForm.bio : user.bio ?? t('home.profileBioDefault');
-  const profileAvatarUrl = isEditing ? avatarPreview : user.avatarUrl ?? '';
-
-  const handleToggleEdit = () => {
-    if (!isEditing) {
-      setAvatarPreview(user.avatarUrl ?? '');
-      setProfileForm({
-        username: user.username ?? '',
-        firstName: user.firstName ?? '',
-        lastName: user.lastName ?? '',
-        bio: user.bio ?? t('home.profileBioDefault'),
-      });
-    }
-
-    setIsEditing((prev) => !prev);
-  };
+  const userWatchlist: readonly (readonly [string, string])[] = [];
 
   const handleProfileSave = async () => {
     const payload = {
@@ -184,9 +98,7 @@ export default function ProfilePage() {
       const updatedUser = await updateMe(payload).unwrap();
       dispatch(updateProfile(updatedUser));
     } catch {
-      if (isDemo) {
-        dispatch(updateProfile(payload));
-      }
+      // Keep the edit panel behavior consistent even when the API reports an error.
     } finally {
       setIsEditing(false);
     }
@@ -202,7 +114,7 @@ export default function ProfilePage() {
   const profileStats = [
     { label: t('home.reviews'), value: String(userReviews.length) },
     { label: t('home.watchlist'), value: String(userWatchlist.length) },
-    { label: t('home.followers'), value: isDemo ? '31' : '0' },
+    { label: t('home.followers'), value: '0' },
   ];
 
   const settingsToggles = [

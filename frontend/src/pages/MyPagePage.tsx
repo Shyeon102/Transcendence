@@ -37,7 +37,6 @@ export default function MyPagePage() {
           activities={dashboard?.activities}
           emptyLabel={t('mypage.empty')}
           entriesLabel={t('mypage.entries')}
-          isDemo={isDemo}
           logLabel={t('mypage.log')}
           queueLabel={t('mypage.queue')}
           recentActivityLabel={t('mypage.recentActivity')}
