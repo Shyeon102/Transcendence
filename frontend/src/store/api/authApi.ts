@@ -20,6 +20,7 @@ import type {
   LoginResponse,
   MediaReview,
   MediaReviewRequest,
+  MediaInteraction,
   MyPageDashboardData,
   PasswordChangeRequest,
   PublicUserProfile,
@@ -85,7 +86,12 @@ type GoogleLoginRequest = {
   id_token: string;
 };
 
-type RawDashboardReview = {
+type RawActivityInteraction = {
+  media_id: number;
+  media_title: string;
+};
+
+type RawActivityReview = {
   id: number;
   title?: string;
   note?: string;
@@ -103,9 +109,14 @@ type RawDashboardInteraction = {
 };
 
 type RawDashboard = {
-  activity?: string[];
-  recent_activity?: string[];
-  reviews?: RawDashboardReview[];
+  interactions?: {
+    like?: RawActivityInteraction[];
+    dislike?: RawActivityInteraction[];
+    watchlist?: RawActivityInteraction[];
+    watched?: RawActivityInteraction[];
+  };
+  reviews?: RawActivityReview[];
+  // demo/legacy 응답 호환
   watchlist?: string[];
   activities?: string[];
   interactions?: {
@@ -302,7 +313,7 @@ const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse 
   };
 };
 
-const normalizeDashboardReview = (review: RawDashboardReview): DashboardReview => ({
+const normalizeDashboardReview = (review: RawActivityReview): DashboardReview => ({
   id: review.id,
   title: review.title ?? review.media_title ?? `Review #${review.id}`,
   note: review.note ?? review.content ?? '',
@@ -543,6 +554,7 @@ export const authApi = createApi({
           error: {
             message: toMessage(data) ?? 'Request failed.',
             fields: toFieldErrors(data),
+            status: typeof error.status === 'number' ? error.status : undefined,
           },
         };
       },
@@ -1047,6 +1059,7 @@ export const {
   useChangePasswordMutation,
   useDeleteAccountMutation,
   useCreateMediaReviewMutation,
+  useDeleteAccountMutation,
   useDeleteMediaReviewMutation,
   useGetAdminReportsQuery,
   useGetMeQuery,

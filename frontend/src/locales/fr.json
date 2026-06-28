@@ -116,6 +116,7 @@
     "password": "Mot de passe",
     "passwordPlaceholder": "Entrez votre mot de passe",
     "forgotPassword": "Mot de passe oublie ?",
+    "invalidCredentials": "Identifiant ou mot de passe incorrect.",
     "submit": "Connexion",
     "submitDisplay": "Connexion →",
     "loading": "Connexion en cours...",
@@ -319,7 +320,7 @@
   },
   "chat": {
     "title": "Salles de discussion",
-    "nodescription" : "Aucune description",
+    "nodescription": "Aucune description",
     "createRoom": "Créer une salle",
     "delete": "Supprimer",
     "deleteConfirm": "Supprimer cette salle ?",
@@ -333,6 +334,18 @@
     "roomTypePrivate": "Privée",
     "createRoomSubmit": "Créer la salle",
     "createRoomValidation": "Veuillez saisir un nom et choisir un type pour la salle.",
-    "createRoomError": "Échec de la création de la salle. Réessayez."
+    "createRoomError": "Échec de la création de la salle. Réessayez.",
+    "roomList": "Salons de discussion",
+    "newRoom": "+ Nouveau salon",
+    "inputPlaceholder": "Tapez un message",
+    "send": "Envoyer",
+    "deleteRoomConfirm": "Supprimer cette salle ?",
+    "deleteRoomError": "Échec de la suppression de la salle. Seul le créateur peut la supprimer.",
+    "descriptionPlaceholder": "Description",
+    "maxMembersPlaceholder": "Membres max",
+    "creating": "Création...",
+    "create": "Créer",
+    "cancel": "Annuler",
+    "maxMembersRange": "Le nombre de membres doit être entre 4 et 10."
   }
 }

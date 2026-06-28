@@ -84,7 +84,7 @@ export default function ProfileEditForm({
   const [saveError, setSaveError] = useState('');
 
   const handleSave = () => {
-    // username 은 백엔드 필수값 (빈 값이면 400) → first/last name, bio 와 달리 막는다.
+    // username 은 백엔드 필수값 (빈 값이면 400) → first/last name, bio 와 달리 프론트에서 막는다.
     if (!form.username.trim()) {
       setSaveError(t('validation.usernameRequired'));
       return;
