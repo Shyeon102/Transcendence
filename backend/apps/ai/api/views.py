@@ -73,8 +73,8 @@ class RAGRecommendationView(APIView):
                                 status=status.HTTP_400_BAD_REQUEST)
             rag_series = rag_recommendations(query)
             if rag_series.empty:
-                return Response({"error": "No recommendations found"},
-                                status=status.HTTP_404_NOT_FOUND)
+                return Response({"media": []},
+                                status=status.HTTP_200_OK)
             score_dict = rag_series.to_dict()
             medias = list(
                     Media.objects
