@@ -142,4 +142,5 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         if not (is_owner or is_staff):
             return Response({"error": "Forbidden"}, status=403)
 
-        return super().destroy(request, *args, **kwargs)
+        room.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)  # super().destroy(request, *args, **kwargs)
