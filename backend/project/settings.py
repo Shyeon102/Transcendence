@@ -168,7 +168,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+SECURE_SSL_REDIRECT = False
 CORS_ALLOWED_ORIGINS = [
+    "https://localhost:5173",
     "http://localhost:5173",
 ]
 
