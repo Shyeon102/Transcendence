@@ -63,7 +63,6 @@ export const mediaApi = createApi({
         userId?: number;
       }
     >({
-      // TODO) getMediaDetail (단일 mock, 백엔드 detail endpoint 머지되면 query로 교체)
       query: ({source, type, userId }) => {
         const params = new URLSearchParams();
 

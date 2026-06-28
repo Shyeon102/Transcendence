@@ -1,11 +1,11 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNTYxNTQyLCJpYXQiOjE3ODI1NTk3NDIsImp0aSI6Ijk0OTlmNmFkNmNkYTQ0NzRiZjNmODI4OWYwZjczYTY4IiwidXNlcl9pZCI6IjIifQ.nyuVsMlB5-JBLH4SodyQ4j_juA0ywlCCyPXmj6EJG8E
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNjQ5MjE0LCJpYXQiOjE3ODI2NDc0MTQsImp0aSI6ImRhNGU4ZTEyMjVkNTQyOWE5ZTljNzUxN2E1NDkxNjdmIiwidXNlcl9pZCI6IjIifQ.Xu_-cDoRKCQo7nNHrrsxuTTed7WNISv5MLoWBdxdgPI
 ###
 Curl -X POST https://localhost:8443/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "demo",
-    "email": "demo@example.com",
-    "password": "demo"
+    "username": "testuser",
+    "email": "testuser@example.com",
+    "password": "testpassword123"
   }'
 
 ###
@@ -83,8 +83,8 @@ curl -X POST https://localhost:8443/api/community/posts/4/comments/ \
 curl -X POST https://localhost:8443/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "test",
-    "password": "12341234"
+    "username": "testuser",
+    "password": "ValidPass1!"
   }'
 
 ###
@@ -231,7 +231,7 @@ curl -k -X POST https://localhost:8443/api/auth/token/ \
 # Should fail - new password too short
 curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Authorization: Bearer {{token}}" \
   -d '{
     "old_password": "ValidPass1!",
     "new_password": "short"
@@ -240,7 +240,7 @@ curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
 # Should fail - no uppercase
 curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Authorization: Bearer {{token}}" \
   -d '{
     "old_password": "ValidPass1!",
     "new_password": "nouppercase1!"
@@ -249,7 +249,7 @@ curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
 # Should fail - wrong old password
 curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Authorization: Bearer {{token}}" \
   -d '{
     "old_password": "wrongpassword",
     "new_password": "NewValid1!"
@@ -258,7 +258,7 @@ curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
 # Should succeed
 curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Authorization: Bearer {{token}}" \
   -d '{
     "old_password": "ValidPass1!",
     "new_password": "NewValid1!"

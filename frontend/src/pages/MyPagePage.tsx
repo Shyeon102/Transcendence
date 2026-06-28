@@ -14,7 +14,6 @@ export default function MyPagePage() {
   const heading = user.firstName
     ? t('mypage.userSpace').replace('{{name}}', user.firstName.toUpperCase())
     : t('mypage.title');
-  const isDemo = user.username === 'demo';
 
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
@@ -34,7 +33,6 @@ export default function MyPagePage() {
         <MyPageDashboard
           emptyLabel={t('mypage.empty')}
           entriesLabel={t('mypage.entries')}
-          isDemo={isDemo}
           logLabel={t('mypage.log')}
           queueLabel={t('mypage.queue')}
           recentActivityLabel={t('mypage.recentActivity')}

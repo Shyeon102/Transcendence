@@ -86,7 +86,7 @@ def call_gemini_with_retry(prompt: str) -> ParsedQuery | None:
         raise RuntimeError("GEMINI_API_KEY is not set")
     url = (
         "https://generativelanguage.googleapis.com/v1beta/"
-        f"models/gemini-2.0-flash:generateContent?key={api_key}"
+        f"models/gemini-3.5-flash:generateContent?key={api_key}"
     )
     payload = {
         "contents": [
@@ -98,6 +98,8 @@ def call_gemini_with_retry(prompt: str) -> ParsedQuery | None:
         ]
     }
     res = requests.post(url, json=payload, timeout=30)
+    if res.status_code == 429:
+        return None
     res.raise_for_status()
     data = res.json()
     text = data["candidates"][0]["content"]["parts"][0]["text"]
@@ -168,7 +170,7 @@ def retrieve_media(
 
     if genres:
         for g in genres:
-            qs = qs.filter(genres__name=g)
+            qs = qs.filter(media__genres__name=g)
 
     qs = qs.distinct()
 
@@ -185,6 +187,7 @@ def rag_recommendations(
     top_k: int = 10
 ) -> pd.Series:
     parsed_query = parse_query(query)
+    logger.info("** Query parsed successfully **")
     query_embedded = embed_query(parsed_query.embedding_text)
     return retrieve_media(
         query_embedded,

@@ -1,7 +1,7 @@
 
 import { useI18n } from "../lib/i18n";
 import MediaCard from "../components/MediaCard";
-import type { Media, Genre } from "../types/media";
+import type { Media } from "../types/media";
 import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -11,135 +11,6 @@ import {
   useLazySearchMediaQuery,
   useLazyRagMediaQuery,
 } from "../store/api/mediaApi";
-
-// 목업 데이터
-
-const genreCrime: Genre = { id: 1, name: "Crime" };
-const genreThriller: Genre = { id: 2, name: "Thriller" };
-
-// 기준이 되는 목업 미디어 1개 (임시 더미, 추후 백엔드 api 받아서 변경)
-const mockMedia: Media = {
-  id: 1,
-  title: "Pulp Fiction",
-  director: "Quentin Tarantino",
-  genre: [genreCrime, genreThriller],
-  releaseDate: "1994-10-26",
-  country: "USA",
-  language: "English",
-  cast: ["John Travolta", "Samuel L. Jackson", "Uma Thurman", "..."],
-  story:
-    "The bloody and ridiculous journey of petty thieves roaming the Hollywood jungle unfolds as three intertwined stories. At a restaurant, a young robbery couple, Pumpkin and Yolanda, discuss the dangers of their profession",
-  ageRating: "PG-15",
-  starRating: 5,
-  runtime: "2h 34m",
-  type: "Movie",
-  frontPosterUrl: "/pulp-fiction.jpg",
-  sidePosterUrl: "/pulp-fiction-side.png",
-  reviews: [], // 리뷰가 화면에 표시되진 않으니까 그냥 빈 배열
-};
-
-// mockMedia를 기반으로 id/title/poster만 바꿔서 15개 생성
-const mockMediaList: Media[] = [
-  mockMedia,
-  {
-    ...mockMedia,
-    id: 2,
-    title: "A Clockwork Orange",
-    frontPosterUrl: "/orange.jpg",
-    sidePosterUrl: "/orange-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 3,
-    title: "Past Lives",
-    frontPosterUrl: "/past.jpg",
-    sidePosterUrl: "/past-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 4,
-    title: "Zone",
-    frontPosterUrl: "/zone.jpg",
-    sidePosterUrl: "/zone-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 5,
-    title: "Barbie",
-    frontPosterUrl: "/barbie.jpg",
-    sidePosterUrl: "/barbie-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 6,
-    title: "Pulp Fiction",
-    frontPosterUrl: "/pulp-fiction.jpg",
-    sidePosterUrl: "/pulp-fiction-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 7,
-    title: "Poor Things",
-    frontPosterUrl: "/poor.jpg",
-    sidePosterUrl: "/poor-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 8,
-    title: "Joker",
-    frontPosterUrl: "/joker.jpg",
-    sidePosterUrl: "/joker-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 9,
-    title: "It",
-    frontPosterUrl: "/it.jpg",
-    sidePosterUrl: "/it-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 10,
-    title: "Dune",
-    frontPosterUrl: "/dune.jpg",
-    sidePosterUrl: "/dune-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 11,
-    title: "Scream",
-    frontPosterUrl: "/scream.jpg",
-    sidePosterUrl: "/scream-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 12,
-    title: "Deadpool",
-    frontPosterUrl: "/dead-pool.jpg",
-    sidePosterUrl: "/deadpool-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 13,
-    title: "Academy",
-    frontPosterUrl: "/shining.jpg",
-    sidePosterUrl: "/academy-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 14,
-    title: "Back to the Future",
-    frontPosterUrl: "/back.jpg",
-    sidePosterUrl: "/back-side.png",
-  },
-  {
-    ...mockMedia,
-    id: 15,
-    title: "Kill Bill",
-    frontPosterUrl: "/kill-bill.jpg",
-    sidePosterUrl: "/killbill-side.png",
-  },
-];
 
 // 컴포넌트
 
@@ -161,19 +32,15 @@ const HomePage = () => {
 
 
 
-  const isDemo = user?.username === "demo";
-
   // AI 검색 기능
   const [searchQuery, setSearchQuery] = useState("");
   const [isAiMode, setIsAiMode] = useState(false);
 
-  const mediaList = isDemo
-    ? mockMediaList
-    : isAiMode
-      ? ragResult.data ?? []
-      : searchQuery.trim() && searchResult.data
-        ? searchResult.data.slice(0, 10)
-        : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
+  const mediaList = isAiMode
+    ? ragResult.data ?? []
+    : searchQuery.trim() && searchResult.data
+      ? searchResult.data.slice(0, 10)
+      : (data ?? []); // 아직 로딩 중이라 data가 undefined일 때 빈 배열로 막아주기
 
   // 필터 버튼 공통 스타일 (반복 방지용)
   const filterBtnClass =
@@ -249,7 +116,7 @@ const HomePage = () => {
     });
   };
 
-  if (!isDemo && isLoading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0c0c0b] text-[1vw] italic text-white/50">
         {t("main.loading")}
@@ -257,7 +124,7 @@ const HomePage = () => {
     );
   }
 
-  if (!isDemo && error) {
+  if (error) {
     return <div className="...">{t("main.loadError")}</div>;
   }
 
