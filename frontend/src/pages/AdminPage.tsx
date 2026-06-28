@@ -4,16 +4,10 @@ import { useSelector } from "react-redux";
 import { useI18n } from "../lib/i18n";
 import type { RootState } from "../store";
 import {
-  useBanAdminUserMutation,
   useGetAdminReportsQuery,
-  useGetAdminUsersQuery,
   useProcessAdminReportMutation,
-  useUnbanAdminUserMutation,
-  type AdminAccountStatus,
   type AdminReportStatus,
 } from "../store/api/adminApi";
-
-type TabKey = "reports" | "users";
 
 const reportTypeColor: Record<string, string> = {
   Spam: "border-[#f2b84b]/30 bg-[#f2b84b]/10 text-[#f2b84b]",
@@ -64,22 +58,16 @@ export default function AdminPage() {
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
-  const [activeTab, setActiveTab] = useState<TabKey>("reports");
   const [reportFilter, setReportFilter] = useState<AdminReportStatus | "all">("all");
-  const [userFilter, setUserFilter] = useState<AdminAccountStatus | "all">("all");
   const shouldFetchAdminData = Boolean(user?.isStaff && accessToken);
   const reportsQuery = useGetAdminReportsQuery(undefined, { skip: !shouldFetchAdminData });
-  const usersQuery = useGetAdminUsersQuery(undefined, { skip: !shouldFetchAdminData });
   const [processReport, { isLoading: isProcessingReport }] = useProcessAdminReportMutation();
-  const [banUser, { isLoading: isBanningUser }] = useBanAdminUserMutation();
-  const [unbanUser, { isLoading: isUnbanningUser }] = useUnbanAdminUserMutation();
 
   if (!user?.isStaff) {
     return <Navigate to="/home" replace />;
   }
 
   const reports = reportsQuery.data ?? [];
-  const users = usersQuery.data ?? [];
 
   const handleReportStatus = async (
     id: number,
@@ -88,28 +76,14 @@ export default function AdminPage() {
     await processReport({ id, status });
   };
 
-  const handleUserStatus = async (id: number, status: AdminAccountStatus) => {
-    if (status === "banned") {
-      await banUser(id);
-      return;
-    }
-
-    await unbanUser(id);
-  };
-
   const reportCounts = {
     pending: reports.filter((report) => report.status === "pending").length,
     approved: reports.filter((report) => report.status === "approved").length,
     rejected: reports.filter((report) => report.status === "rejected").length,
   };
-  const bannedCount = users.filter((managedUser) => managedUser.status === "banned").length;
   const filteredReports =
     reportFilter === "all" ? reports : reports.filter((report) => report.status === reportFilter);
-  const filteredUsers =
-    userFilter === "all" ? users : users.filter((managedUser) => managedUser.status === userFilter);
   const reportFilterOptions: (AdminReportStatus | "all")[] = ["all", "pending", "approved", "rejected"];
-  const userFilterOptions: (AdminAccountStatus | "all")[] = ["all", "active", "banned"];
-  const isUpdatingUser = isBanningUser || isUnbanningUser;
 
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
@@ -132,30 +106,10 @@ export default function AdminPage() {
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard label={t("admin.reportsTitle")} value={reports.length} />
           <StatCard label={t("admin.status.pending")} value={reportCounts.pending} accent={reportCounts.pending > 0 ? "text-[#f2b84b]" : "text-[#f0ead0]"} />
-          <StatCard label={t("admin.usersTitle")} value={users.length} />
-          <StatCard label={t("admin.status.banned")} value={bannedCount} accent={bannedCount > 0 ? "text-[#ff9c8e]" : "text-[#f0ead0]"} />
+          <StatCard label={t("admin.status.approved")} value={reportCounts.approved} />
+          <StatCard label={t("admin.status.rejected")} value={reportCounts.rejected} />
         </div>
-
-        <div className="mb-6 flex border-b border-[#f0ead0]/10">
-          {([
-            ["reports", t("admin.reportsTitle"), String(reports.length)],
-            ["users", t("admin.usersTitle"), String(users.length)],
-          ] as const).map(([key, label, count]) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveTab(key)}
-              className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
-                activeTab === key ? "border-[#d63e2a] text-[#f0ead0]" : "border-transparent text-[#8a8474] hover:text-[#c8c2a8]"
-              }`}
-            >
-              {label} <span className={activeTab === key ? "text-[#d63e2a]" : "text-[#8a8474]"}>{count}</span>
-            </button>
-          ))}
-        </div>
-
-        {activeTab === "reports" ? (
-          <div>
+        <div>
             <div className="mb-5 flex flex-wrap gap-2">
               {reportFilterOptions.map((option) => (
                 <button
@@ -240,106 +194,7 @@ export default function AdminPage() {
                 </p>
               )}
             </div>
-          </div>
-        ) : null}
-
-        {activeTab === "users" ? (
-          <div>
-            <div className="mb-5 flex flex-wrap gap-2">
-              {userFilterOptions.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setUserFilter(option)}
-                  className={`border px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] transition ${
-                    userFilter === option
-                      ? "border-[#d63e2a]/60 bg-[#d63e2a]/10 text-[#f0ead0]"
-                      : "border-[#f0ead0]/10 text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]"
-                  }`}
-                >
-                  {t(`admin.status.${option}`)}
-                </button>
-              ))}
-            </div>
-
-            {usersQuery.isLoading ? (
-              <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
-                {t("admin.loading")}
-              </p>
-            ) : null}
-
-            {usersQuery.isError ? (
-              <p className="mb-3 border border-[#ff4f38]/30 bg-[#ff4f38]/10 px-5 py-4 text-sm text-[#ff9c8e]">
-                {t("admin.usersLoadError")}
-              </p>
-            ) : null}
-
-            <div className="space-y-3">
-              {usersQuery.isLoading ? null : filteredUsers.length ? (
-                filteredUsers.map((managedUser) => (
-                  <article
-                    key={managedUser.id}
-                    className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/20"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#f0ead0]/10 bg-[#1c1c19] text-[11px] uppercase tracking-[0.08em] text-[#8a8474]">
-                          {managedUser.username.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-[13px] font-bold tracking-[0.04em] text-[#f0ead0]">
-                              {managedUser.username}
-                            </h3>
-                            <StatusBadge status={managedUser.status} />
-                          </div>
-                          <p className="mt-0.5 text-[10px] text-[#8a8474]">
-                            {managedUser.email}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p
-                          className={`text-[9px] uppercase tracking-[0.12em] ${
-                            managedUser.reportCount > 5 ? "text-[#ff9c8e]" : "text-[#8a8474]"
-                          }`}
-                        >
-                          {t("admin.reportCount").replace("{{count}}", String(managedUser.reportCount))}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {managedUser.status !== "banned" ? (
-                        <button
-                          type="button"
-                          onClick={() => void handleUserStatus(managedUser.id, "banned")}
-                          disabled={isUpdatingUser || managedUser.id === user.id}
-                          className="border border-[#ff4f38]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#ff9c8e] transition hover:bg-[#ff4f38]/10 disabled:opacity-30"
-                        >
-                          {t("admin.ban")}
-                        </button>
-                      ) : null}
-                      {managedUser.status !== "active" ? (
-                        <button
-                          type="button"
-                          onClick={() => void handleUserStatus(managedUser.id, "active")}
-                          disabled={isUpdatingUser}
-                          className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10 disabled:opacity-30"
-                        >
-                          {t("admin.reactivate")}
-                        </button>
-                      ) : null}
-                    </div>
-                  </article>
-                ))
-              ) : (
-                <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
-                  {t("admin.emptyUsers")}
-                </p>
-              )}
-            </div>
-          </div>
-        ) : null}
+        </div>
       </div>
     </section>
   );
