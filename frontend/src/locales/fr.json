@@ -59,7 +59,7 @@
     "welcomePrefix": "Bienvenue,",
     "welcomeSuffix": "",
     "verifiedMember": "Membre verifie",
-    "joinedYear": "Inscrit en 2025",
+    "joinedYear": "Inscrit en",
     "editProfile": "Modifier le profil",
     "closeEdit": "Fermer",
     "uploadAvatar": "Changer la photo",
@@ -223,36 +223,6 @@
       "abuse": "Abus ou harcèlement",
       "nsfw": "Contenu inapproprié",
       "copyright": "Atteinte aux droits d'auteur"
-    }
-  },
-  "admin": {
-    "eyebrow": "Espace de moderation",
-    "title": "Console admin",
-    "description": "Examinez les contenus signales et gerez le statut des comptes.",
-    "connectedNotice": "Connecte a l'API admin. Les actions sont envoyees au serveur.",
-    "loading": "Chargement...",
-    "reportsLoadError": "Impossible de charger les signalements.",
-    "usersLoadError": "Impossible de charger les utilisateurs.",
-    "emptyReports": "Aucun signalement ne correspond a ce filtre.",
-    "emptyUsers": "Aucun utilisateur ne correspond a ce filtre.",
-    "noReason": "Aucun motif de signalement n'a ete fourni.",
-    "reportsEyebrow": "Moderation du contenu",
-    "reportsTitle": "Signalements",
-    "usersEyebrow": "Moderation des comptes",
-    "usersTitle": "Utilisateurs",
-    "reportedBy": "Signale par",
-    "reportCount": "Signalements : {{count}}",
-    "approve": "Approuver",
-    "reject": "Rejeter",
-    "ban": "Bannir",
-    "reactivate": "Reactiver",
-    "status": {
-      "all": "Tous",
-      "pending": "En attente",
-      "approved": "Approuve",
-      "rejected": "Rejete",
-      "active": "Actif",
-      "banned": "Banni"
     }
   },
   "mypage": {

@@ -23,6 +23,7 @@ export interface PublicUserProfile {
   followingCount: number;
   isFollowing: boolean;
   reviews: MediaReview[];
+  dateJoined?: string;
 }
 
 export interface StoredUser extends AuthUser {
@@ -84,6 +85,7 @@ export interface DashboardReview {
   note: string;
   when: string;
   rating: number;
+  visibility?: 'public' | 'followers' | 'private';
 }
 
 export interface MyPageDashboardData {

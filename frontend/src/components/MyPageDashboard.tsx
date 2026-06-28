@@ -1,3 +1,4 @@
+import type { DashboardReview } from '../types';
 import EmptyState from './ui/EmptyState';
 import SectionCard from './ui/SectionCard';
 
