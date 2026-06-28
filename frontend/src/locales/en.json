@@ -65,6 +65,8 @@
     "closeEdit": "Close",
     "uploadAvatar": "Change Photo",
     "avatarAlt": "Profile avatar",
+    "avatarUrl": "Profile Photo URL",
+    "avatarUrlPlaceholder": "https://example.com/avatar.jpg",
     "reviews": "Reviews",
     "posts": "Posts",
     "communityPosts": "Community Posts",
@@ -94,10 +96,11 @@
     "passwordSameAsCurrent": "The new password must be different from the current password.",
     "deleteAccount": "Delete Account",
     "deleteAccountTitle": "Delete this account?",
-    "deleteAccountDescription": "This cannot be undone. The real deletion flow will be connected once the backend API is confirmed.",
+    "deleteAccountDescription": "This cannot be undone. Your account and related data will be permanently deleted.",
     "deleteAccountCancel": "Cancel",
     "deleteAccountConfirm": "Confirm delete",
-    "deleteAccountPending": "The confirmation flow is ready; the account deletion API is still pending.",
+    "deleteAccountPending": "Deleting your account...",
+    "deleteAccountError": "Failed to delete the account. Please try again later.",
     "publicProfilePlaceholder": "Once the public profile API is connected, this area will show user-specific reviews and profile details.",
     "profileBioDefault": "\"Cinema is a mirror by which we often see ourselves.\" - Currently obsessed with slow cinema and anything A24."
   },
@@ -113,6 +116,7 @@
     "password": "Password",
     "passwordPlaceholder": "Enter your password",
     "forgotPassword": "Forgot password?",
+    "invalidCredentials": "Incorrect username or password.",
     "submit": "Log in",
     "submitDisplay": "Sign In →",
     "loading": "Logging in...",
@@ -268,7 +272,8 @@
     "passwordTooShort": "Password must be at least 8 characters.",
     "passwordWeak": "Password must include at least one uppercase letter, one lowercase letter, and one number.",
     "passwordMismatch": "Passwords do not match.",
-    "usernameInvalid": "Username must be 3+ chars using letters, numbers, or underscores."
+    "usernameInvalid": "Username must be 3+ chars using letters, numbers, or underscores.",
+    "usernameRequired": "Username cannot be empty."
   },
   "oauth": {
     "callbackEyebrow": "42 OAuth",

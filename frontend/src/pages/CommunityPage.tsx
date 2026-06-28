@@ -114,7 +114,7 @@ export default function CommunityPage() {
                         {post.content}
                       </p>
                       <div className="mt-3 flex items-center gap-3 text-[9px] uppercase tracking-[0.12em] text-[#8a8474]/60">
-                        <span>{t('community.user')} #{post.user}</span>
+                        <span>{t('community.user')} {post.user}</span>
                         <span>·</span>
                         <span>{postDate(post.created_at)}</span>
                         <span className="ml-auto flex gap-3">

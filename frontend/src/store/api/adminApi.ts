@@ -2,6 +2,7 @@ import { apiSlice } from "../slices/apiSlice";
 
 export type AdminReportStatus = "pending" | "approved" | "rejected";
 export type AdminReportAction = "approve" | "reject";
+export type AdminAccountStatus = "active" | "banned";
 
 export type AdminReport = {
   id: number;
@@ -11,6 +12,14 @@ export type AdminReport = {
   reason: string;
   createdAt: string;
   status: AdminReportStatus;
+};
+
+export type AdminUser = {
+  id: number;
+  username: string;
+  email: string;
+  status: AdminAccountStatus;
+  isStaff: boolean;
 };
 
 type ListResponse<T> = T[] | { results?: T[]; reports?: T[]; users?: T[] };
@@ -35,6 +44,14 @@ type RawAdminReport = {
   created_at?: string;
   createdAt?: string;
   status?: AdminReportStatus;
+};
+
+type RawAdminUser = {
+  id?: number;
+  username?: string;
+  email?: string;
+  is_banned?: boolean;
+  is_staff?: boolean;
 };
 
 const toList = <T>(response: ListResponse<T>): T[] => {
@@ -77,6 +94,14 @@ const normalizeReport = (report: RawAdminReport): AdminReport => {
   };
 };
 
+const normalizeUser = (user: RawAdminUser): AdminUser => ({
+  id: user.id ?? 0,
+  username: user.username ?? "-",
+  email: user.email ?? "-",
+  status: user.is_banned ? "banned" : "active",
+  isStaff: user.is_staff ?? false,
+});
+
 const actionByStatus: Record<Exclude<AdminReportStatus, "pending">, AdminReportAction> = {
   approved: "approve",
   rejected: "reject",
@@ -102,6 +127,12 @@ export const adminApi = apiSlice.injectEndpoints({
       transformResponse: (response: RawAdminReport) => normalizeReport(response),
       invalidatesTags: ["AdminReports"],
     }),
+    getAdminUsers: builder.query<AdminUser[], void>({
+      query: () => "/users/admin/users/",
+      transformResponse: (response: ListResponse<RawAdminUser>) =>
+        toList(response).map(normalizeUser),
+      providesTags: ["AdminUsers"],
+    }),
     banAdminUser: builder.mutation<void, number>({
       query: (id) => ({
         url: `/users/${id}/ban/`,
@@ -122,6 +153,7 @@ export const adminApi = apiSlice.injectEndpoints({
 export const {
   useBanAdminUserMutation,
   useGetAdminReportsQuery,
+  useGetAdminUsersQuery,
   useProcessAdminReportMutation,
   useUnbanAdminUserMutation,
 } = adminApi;

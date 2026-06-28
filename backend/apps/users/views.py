@@ -34,6 +34,10 @@ class UserView(APIView):
             return Response({"success": True, "user": serializer.data})
         return Response(serializer.errors, status=400)
 
+    def delete(self, request):
+        request.user.delete()
+        return Response(status=204)
+
 
 class AdminUserListView(APIView):
     permission_classes = [IsAdminUser]
