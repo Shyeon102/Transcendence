@@ -4,6 +4,8 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from django.db import models
+import logging
+logger = logging.getLogger(__name__)
 
 
 from apps.media.models import Media, MediaInteraction
@@ -53,15 +55,20 @@ class MediaSearchView(APIView):
 
 
 class ReviewCreateView(APIView):
+    # def get(self, request, media_id):
+    #     media = get_object_or_404(Media, pk=media_id)
+    #     try:
+    #         reviews = media.reviews.visible_to(request.user)
+    #         serializer = ReviewSerializer(reviews, many=True)
+    #         return Response({'reviews': serializer.data},
+    #                         status=status.HTTP_200_OK)
+    #     except Exception:
+    #         return Response({'reviews': []}, status=status.HTTP_200_OK)
     def get(self, request, media_id):
         media = get_object_or_404(Media, pk=media_id)
-        try:
-            reviews = media.reviews.visible_to(request.user)
-            serializer = ReviewSerializer(reviews, many=True)
-            return Response({'reviews': serializer.data},
-                            status=status.HTTP_200_OK)
-        except Exception:
-            return Response({'reviews': []}, status=status.HTTP_200_OK)
+        reviews = media.reviews.all()
+        serializer = ReviewSerializer(reviews, many=True)
+        return Response({'reviews': serializer.data}, status=status.HTTP_200_OK)
 
     def put(self, request, media_id, review_id):
         return self.patch(request, media_id, review_id)
@@ -115,7 +122,7 @@ class ReviewCreateView(APIView):
 
 class MediaInteractionView(APIView):
     def post(self, request, media_id):
-
+        print("REQUEST DATA:", request.data)  # 추가
         serializer = MediaInteractionSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({'errors': serializer.errors},
@@ -158,7 +165,7 @@ class MediaInteractionView(APIView):
         response_status = (
             status.HTTP_201_CREATED if created else status.HTTP_200_OK
         )
-
+        print("SERIALIZER ERRORS:", serializer.errors)  # 추가
         return Response(
             {
                 'interaction': {
@@ -172,18 +179,37 @@ class MediaInteractionView(APIView):
             status=response_status,
         )
 
-    def get(self, request):
-        user = request.user
-        interactions = user.interactions.select_related('media').all()
-        data = [
-            {
-                'media_id': interaction.media.id,
-                'action': interaction.action,
-                'media_title': interaction.media.title,
-            }
-            for interaction in interactions
-        ]
-        return Response({'interactions': data}, status=status.HTTP_200_OK)
+    # def get(self, request, media_id):
+    #     media = get_object_or_404(Media, pk=media_id)
+    #     user = request.user
+    #     interactions = request.user.interactions.filter(media=media)
+    #     data = [
+    #         {
+    #             'media_id': interaction.media.id,
+    #             'action': interaction.action,
+    #             'media_title': interaction.media.title,
+    #             'created_at': interaction.created_at,
+    #         }
+    #         for interaction in interactions
+    #     ]
+    #     return Response({'interactions': data}, status=status.HTTP_200_OK)
+    def get(self, request, media_id):
+        import traceback
+        try:
+            media = get_object_or_404(Media, pk=media_id)
+            interactions = request.user.interactions.filter(media=media)
+            data = [
+                {
+                    'id': interaction.id,
+                    'action': interaction.action,
+                    'created_at': interaction.created_at,
+                }
+                for interaction in interactions
+            ]
+            return Response({'interactions': data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            traceback.print_exc()
+            return Response({'interactions': []}, status=status.HTTP_200_OK)
 
     def delete(self, request, media_id, action):
         user = request.user

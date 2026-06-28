@@ -26,7 +26,7 @@ class HybridRecommendationView(APIView):
                 get_hybrid_scores(user_id=user_id)
             )
             if not hybrid_series.empty:
-                score_dict = hybrid_series.to_dict()
+                score_dict = {int(k): v for k, v in hybrid_series.to_dict().items()}
                 medias = list(
                     Media.objects
                     .filter(id__in=score_dict.keys())

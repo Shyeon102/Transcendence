@@ -23,6 +23,7 @@ import type {
   LoginResponse,
   MediaReview,
   MediaReviewRequest,
+  MediaInteraction,
   PasswordChangeRequest,
   RefreshTokenResponse,
   SignupRequest,
@@ -332,7 +333,7 @@ const normalizeReviewList = (payload: RawReviewPayload): MediaReview[] => {
 
 const toReviewRequestBody = (review: MediaReviewRequest) => ({
   rating: review.rating,
-  comment: review.content,
+  content: review.content,
 });
 
 const getTargetData = (target: number | RawAdminReportTarget | null | undefined) => {
@@ -472,7 +473,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery,
-  tagTypes: ['AdminReports', 'AdminUsers'],
+  tagTypes: ['AdminReports', 'AdminUsers', 'MediaReviews'],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials, api) {
@@ -747,6 +748,7 @@ export const authApi = createApi({
           },
         };
       },
+      providesTags: (_result, _error, mediaId) => [{ type: 'MediaReviews', id: mediaId }],
     }),
     createMediaReview: builder.mutation<MediaReview, { mediaId: number; review: MediaReviewRequest }>({
       async queryFn({ mediaId, review }, api) {
@@ -773,6 +775,7 @@ export const authApi = createApi({
           },
         };
       },
+      invalidatesTags: (_result, _error, { mediaId }) => [{ type: 'MediaReviews', id: mediaId }],
     }),
     updateMediaReview: builder.mutation<MediaReview, { mediaId: number; reviewId: number; review: MediaReviewRequest }>({
       async queryFn({ mediaId, reviewId, review }, api) {
@@ -799,12 +802,43 @@ export const authApi = createApi({
           },
         };
       },
+      invalidatesTags: (_result, _error, { mediaId }) => [{ type: 'MediaReviews', id: mediaId }],
     }),
     deleteMediaReview: builder.mutation<void, { mediaId: number; reviewId: number }>({
       query: ({ mediaId, reviewId }) => ({
         url: `/media/${mediaId}/reviews/${reviewId}/`,
         method: 'DELETE',
       }),
+      invalidatesTags: (_result, _error, { mediaId }) => [{ type: 'MediaReviews', id: mediaId }],
+    }),
+    getMediaInteractions: builder.query<MediaInteraction[], number>({
+      async queryFn(mediaId, api) {
+        const result = await rawBaseQuery(`/media/${mediaId}/interactions/`, api, {});
+        if (result.data) {
+          const data = result.data as { interactions: MediaInteraction[] };
+          return { data: data.interactions ?? [] };
+        }
+        return { data: [] };
+      },
+      providesTags: (_result, _error, mediaId) => [{ type: 'MediaInteractions', id: mediaId }],
+    }),
+
+    toggleMediaInteraction: builder.mutation<void, { mediaId: number; action: 'like' | 'dislike' | 'watched' | 'watchlist'; active: boolean }>({
+      async queryFn({ mediaId, action, active }, api) {
+        const result = await rawBaseQuery(
+          active
+            ? { url: `/media/${mediaId}/interactions/`, method: 'POST', body: { action } }
+            : { url: `/media/${mediaId}/interactions/${action}/`, method: 'DELETE' },
+          api,
+          {}
+        );
+        if (result.error) {
+          const error = result.error as FetchBaseQueryError;
+          const data = 'data' in error ? error.data : undefined;
+          return { error: { message: toMessage(data) ?? 'Interaction failed.', fields: toFieldErrors(data) } };
+        }
+        return { data: undefined };
+      },
     }),
     getAdminReports: builder.query<AdminReport[], AdminReportStatus | void>({
       async queryFn(status, api) {
@@ -900,4 +934,6 @@ export const {
   useUpdateAvatarMutation,
   useUpdateMeMutation,
   useUpdateMediaReviewMutation,
+  useGetMediaInteractionsQuery,
+  useToggleMediaInteractionMutation,
 } = authApi;
