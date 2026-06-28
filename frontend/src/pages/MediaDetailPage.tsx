@@ -6,77 +6,10 @@ import { useParams } from "react-router-dom";
 import { useGetMediaDetailQuery } from "../store/api/mediaApi";
 import { useGetMediaInteractionsQuery, useToggleMediaInteractionMutation, useDeleteMediaReviewMutation } from "../store/api/authApi";
 import { useSelector } from "react-redux";
-import type { Media, Genre } from "../types/media";
 import type { RootState } from "../store";
 import defaultPoster from '/src/assets/images/defaultposter.png';
 import type { MediaReview } from "../types";
 import { useNavigate } from "react-router-dom";
-
-// 임시 목업 데이터: 현재 백엔드가 없으므로 목업 데이터 임시 선언
-const genreCrime: Genre = { id: 1, name: "Crime" };
-const genreThriller: Genre = { id: 2, name: "Thriller" };
-
-// review는 목업 데이터 추후 백엔드 연동
-const mockMedia: Media = {
-  id: 1,
-  title: "Pulp Fiction",
-  director: "Quentin Tarantino",
-  genre: [genreCrime, genreThriller],
-  releaseDate: "1994-10-26",
-  country: "USA",
-  language: "English",
-  cast: ["John Travolta", "Samuel L. Jackson", "Uma Thurman", "..."],
-  story:
-    "The bloody and ridiculous journey of petty thieves roaming the Hollywood jungle unfolds as three intertwined stories. At a restaurant, a young robbery couple, Pumpkin and Yolanda, discuss the dangers of their profession",
-  ageRating: "PG-15",
-  starRating: 5,
-  runtime: "2h 34m",
-  type: "Movie",
-  frontPosterUrl: "/pulp-fiction.jpg",
-  sidePosterUrl: "/pulp-fiction-side.png",
-  reviews: [
-    {
-      id: 1, //리뷰 자체 고유번호: DB에 저장될 때 순서대로 번호
-      userId: 1, //목업이라 그냥 숫자, 추후 유저 정보 필요
-      username: "seong-ki",
-      content: "good blah blah",
-      rating: 5,
-      visibility: "public",
-      createdAt: "2026-05-18",
-      updatedAt: "2026-05-18",
-    },
-    {
-      id: 2,
-      userId: 2,
-      username: "jaoh",
-      content: "good blah blah",
-      rating: 5,
-      visibility: "public",
-      createdAt: "2026-05-18",
-      updatedAt: "2026-05-18",
-    },
-    {
-      id: 3,
-      userId: 3,
-      username: "thelee42",
-      content: "good blah blah",
-      rating: 5,
-      visibility: "public",
-      createdAt: "2026-05-18",
-      updatedAt: "2026-05-18",
-    },
-    {
-      id: 4,
-      userId: 4,
-      username: "llarrey",
-      content: "good blah blah",
-      rating: 5,
-      visibility: "public",
-      createdAt: "2026-05-18",
-      updatedAt: "2026-05-18",
-    },
-  ],
-};
 
 const MediaDetailPage = () => {
   const navigate = useNavigate();
@@ -86,9 +19,8 @@ const MediaDetailPage = () => {
   const { data, isLoading } = useGetMediaDetailQuery(mediaId);
   const { data: reviews } = useGetMediaReviewsQuery(mediaId);
   const user = useSelector((state: RootState) => state.auth.user);
-  const isDemo = user?.username === "demo";
-  const media = isDemo ? mockMedia : data;
-  const reviewList = isDemo ? mockMedia.reviews : (reviews ?? []);
+  const media = data;
+  const reviewList = reviews ?? [];
 
   const { data: interactions, refetch: refetchInteractions } = useGetMediaInteractionsQuery(mediaId);  // 추가
   const [toggleInteraction] = useToggleMediaInteractionMutation();        // 추가
@@ -119,6 +51,7 @@ const MediaDetailPage = () => {
       eye: interactions.some(i => i.action === 'watched'),
       like: interactions.some(i => i.action === 'like'),
       dislike: interactions.some(i => i.action === 'dislike'),
+      wish: interactions.some(i => i.action === 'watchlist'),
     });
   }, [interactions]);
 
@@ -130,7 +63,7 @@ const MediaDetailPage = () => {
     setMyReview(
       reviews.find((r) => r.username === user.username) ?? null
     );
-  }, [reviews, user.username]);
+  }, [reviews, user]);
 
   const [myRating, setMyRating] = useState(0);
   useEffect(() => {
@@ -140,7 +73,7 @@ const MediaDetailPage = () => {
   }, [myReview?.rating]);
 
 
-  if (!isDemo && isLoading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen flex-col bg-[#0c0c0b] text-white">
         <div className="flex flex-1 items-center justify-center px-6 text-center">
@@ -349,7 +282,7 @@ const MediaDetailPage = () => {
               onClick={async () => {
                 const next = !icon.wish;
                 setActiveIcon({ ...icon, wish: next });
-                await toggleInteraction({ mediaId, action: 'wish', active: next });
+                await toggleInteraction({ mediaId, action: 'watchlist', active: next });
               }}
             >
               <img
