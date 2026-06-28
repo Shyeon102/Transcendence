@@ -91,6 +91,11 @@ export interface MediaReview {
   createdAt: string;
   updatedAt: string;
 }
+export interface MediaInteraction {
+  id: number;
+  action: 'like' | 'dislike' | 'watched' | 'watchlist';
+  createdAt: string;
+}
 
 export interface MediaReviewRequest {
   rating: number;
