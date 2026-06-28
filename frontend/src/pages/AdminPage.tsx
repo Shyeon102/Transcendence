@@ -271,86 +271,69 @@ export default function AdminPage() {
             ) : null}
 
             <div className="space-y-3">
-              {reportsQuery.isLoading ? null : filteredReports.length ? (
-                filteredReports.map((report) => {
-                  const reportTypeLabel = t(`admin.reportTypes.${report.type}`);
-
-                  return (
-                  <article key={report.id} className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/20">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className={`inline-block border px-2 py-0.5 text-[8px] uppercase tracking-[0.14em] ${reportTypeColor[report.type] ?? "border-[#f0ead0]/10 text-[#8a8474]"}`}>
-                            {reportTypeLabel === `admin.reportTypes.${report.type}` ? report.type : reportTypeLabel}
-                          </span>
-                          <StatusBadge status={report.status} />
+              {usersQuery.isLoading ? null : filteredUsers.length ? (
+                filteredUsers.map((managedUser) => (
+                  <article
+                    key={managedUser.id}
+                    className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-[18px] transition hover:border-[#f0ead0]/20"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-[#f0ead0]/10 bg-[#1c1c19] text-[11px] uppercase tracking-[0.08em] text-[#8a8474]">
+                          {managedUser.username.slice(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-[13px] font-bold tracking-[0.04em] text-[#f0ead0]">
+                              {managedUser.username}
+                            </h3>
+                            <StatusBadge status={managedUser.status} />
+                          </div>
+                          <p className="mt-0.5 text-[10px] text-[#8a8474]">
+                            {managedUser.email}
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className={`text-[9px] uppercase tracking-[0.12em] ${managedUser.reportCount > 5 ? "text-[#ff9c8e]" : "text-[#8a8474]"}`}>
+                        <p
+                          className={`text-[9px] uppercase tracking-[0.12em] ${
+                            managedUser.reportCount > 5 ? "text-[#ff9c8e]" : "text-[#8a8474]"
+                          }`}
+                        >
                           {t("admin.reportCount").replace("{{count}}", String(managedUser.reportCount))}
                         </p>
                       </div>
                     </div>
-                    <p className="mt-3 font-['IBM_Plex_Serif'] text-sm italic leading-6 text-[#c8c2a8]">
-                      {report.reason}
-                    </p>
-                    {report.status === "pending" ? (
-                      <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {managedUser.status !== "banned" ? (
                         <button
                           type="button"
-                          onClick={() => void handleReportStatus(report.id, "approved")}
-                          disabled={isProcessingReport}
-                          className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10 disabled:opacity-30 disabled:hover:bg-transparent"
+                          onClick={() => void handleUserStatus(managedUser.id, "banned")}
+                          disabled={isUpdatingUser || managedUser.id === user.id}
+                          className="border border-[#ff4f38]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#ff9c8e] transition hover:bg-[#ff4f38]/10 disabled:opacity-30"
                         >
-                          {t("admin.approve")}
+                          {t("admin.ban")}
                         </button>
+                      ) : null}
+                      {managedUser.status !== "active" ? (
                         <button
                           type="button"
-                          onClick={() => void handleReportStatus(report.id, "rejected")}
-                          disabled={isProcessingReport}
-                          className="border border-[#f0ead0]/15 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#c8c2a8] transition hover:border-[#f0ead0]/30 disabled:opacity-30 disabled:hover:border-[#f0ead0]/15"
+                          onClick={() => void handleUserStatus(managedUser.id, "active")}
+                          disabled={isUpdatingUser}
+                          className="border border-[#6bbf72]/40 px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] text-[#9edba2] transition hover:bg-[#6bbf72]/10 disabled:opacity-30"
                         >
-                          {t("admin.reject")}
+                          {t("admin.reactivate")}
                         </button>
-                      </div>
-                    ) : null}
+                      ) : null}
+                    </div>
                   </article>
-                  );
-                })
+                ))
               ) : (
                 <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
-                  {t("admin.emptyReports")}
+                  {t("admin.emptyUsers")}
                 </p>
               )}
             </div>
-          </div>
-        ) : null}
-
-        {activeTab === "users" ? (
-          <div>
-            <div className="mb-5 flex flex-wrap gap-2">
-              {userFilterOptions.map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setUserFilter(option)}
-                  className={`border px-3 py-1.5 text-[9px] uppercase tracking-[0.12em] transition ${
-                    userFilter === option
-                      ? "border-[#d63e2a]/60 bg-[#d63e2a]/10 text-[#f0ead0]"
-                      : "border-[#f0ead0]/10 text-[#8a8474] hover:border-[#f0ead0]/25 hover:text-[#c8c2a8]"
-                  }`}
-                >
-                  {t(`admin.status.${option}`)}
-                </button>
-              ))}
-            </div>
-
-            {usersQuery.isLoading ? (
-              <p className="border border-[#f0ead0]/10 bg-[#141412] px-5 py-5 text-sm italic text-[#8a8474]">
-                {t("admin.emptyUsers")}
-              </p>
-            )}
           </div>
         ) : null}
       </div>
