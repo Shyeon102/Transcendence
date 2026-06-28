@@ -10,6 +10,20 @@ export interface AuthUser {
   favoriteTitles?: string[];
   favoriteCountries?: string[];
   isStaff?: boolean;
+  followersCount?: number;
+  followingCount?: number;
+}
+
+export interface PublicUserProfile {
+  id: number;
+  username: string;
+  avatarUrl?: string;
+  bio?: string;
+  followersCount: number;
+  followingCount: number;
+  isFollowing: boolean;
+  reviews: MediaReview[];
+  dateJoined?: string;
 }
 
 export interface StoredUser extends AuthUser {
@@ -71,6 +85,7 @@ export interface DashboardReview {
   note: string;
   when: string;
   rating: number;
+  visibility?: 'public' | 'followers' | 'private';
 }
 
 export interface MyPageDashboardData {

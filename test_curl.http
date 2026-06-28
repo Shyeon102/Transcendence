@@ -1,15 +1,25 @@
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNjQ5MjE0LCJpYXQiOjE3ODI2NDc0MTQsImp0aSI6ImRhNGU4ZTEyMjVkNTQyOWE5ZTljNzUxN2E1NDkxNjdmIiwidXNlcl9pZCI6IjIifQ.Xu_-cDoRKCQo7nNHrrsxuTTed7WNISv5MLoWBdxdgPI
-###
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNjUwNzkwLCJpYXQiOjE3ODI2NDg5OTAsImp0aSI6IjNkODMyMzZlOTBkYzQ2YTFiZmE1NzFjMmY1YzQ4MGE2IiwidXNlcl9pZCI6IjEifQ.VvQ4_eYojYQAUmmLwcBX9Vl6PopievfRBhaJL6I1VQ0
 Curl -X POST https://localhost:8443/api/auth/register/ \
   -H "Content-Type: application/json" \
   -d '{
     "username": "testuser",
     "email": "testuser@example.com",
-    "password": "testpassword123"
+    "password": "testpasswordD1!"
   }'
+
 
 ###
 
+Curl -X POST https://localhost:8443/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser2",
+    "email": "testuser@example2.com",
+    "password": "testpasswordD1!"
+  }'
+
+
+###
 # Should fail - password too short
 curl -k -X POST https://localhost:8443/api/auth/register/ \
   -H "Content-Type: application/json" \
@@ -83,8 +93,8 @@ curl -X POST https://localhost:8443/api/community/posts/4/comments/ \
 curl -X POST https://localhost:8443/api/auth/login/ \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "testuser",
-    "password": "ValidPass1!"
+    "username": "1234",
+    "password": "1234"
   }'
 
 ###
@@ -263,3 +273,32 @@ curl -k -X POST https://localhost:8443/api/auth/changePassword/ \
     "old_password": "ValidPass1!",
     "new_password": "NewValid1!"
   }'
+
+###
+
+curl -X GET https://localhost:8443/api/users/admin/users/ \
+  -H "Authorization: Bearer {{token}}"
+
+###
+# First get a token
+curl -k -X POST https://localhost:8443/api/auth/token/ \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "ValidPass1!"}'
+###
+# Create a public room
+curl -k -X POST https://localhost:8443/api/chat/rooms/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNjUwNzk3LCJpYXQiOjE3ODI2NDg5OTcsImp0aSI6IjliNmZkM2UyMjU0NjRiM2ViNmM2YjAwYWUzYjIxNTkwIiwidXNlcl9pZCI6IjIifQ.yxSPDvMAtsw4ukVDIj8bXPaBXYwCZ7WyitfqAcn2mjo" \
+  -d '{"title": "Test Room", "description": "A test room", "max_members": 4}'
+###
+# Create a private room
+curl -k -X POST https://localhost:8443/api/chat/rooms/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNjUwNzk3LCJpYXQiOjE3ODI2NDg5OTcsImp0aSI6IjliNmZkM2UyMjU0NjRiM2ViNmM2YjAwYWUzYjIxNTkwIiwidXNlcl9pZCI6IjIifQ.yxSPDvMAtsw4ukVDIj8bXPaBXYwCZ7WyitfqAcn2mjo" \
+  -d '{"title": "Private Chat", "is_private": true}'
+###
+# Invite a user to private room (replace 1 with room id, 2 with user id)
+curl -k -X POST https://localhost:8443/api/chat/rooms/2/invite/ \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzgyNjUwNzk3LCJpYXQiOjE3ODI2NDg5OTcsImp0aSI6IjliNmZkM2UyMjU0NjRiM2ViNmM2YjAwYWUzYjIxNTkwIiwidXNlcl9pZCI6IjIifQ.yxSPDvMAtsw4ukVDIj8bXPaBXYwCZ7WyitfqAcn2mjo" \
+  -d '{"user_id": 1}'
