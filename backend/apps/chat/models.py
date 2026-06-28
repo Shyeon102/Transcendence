@@ -10,6 +10,7 @@ class ChatRoom(models.Model):
                                    on_delete=models.CASCADE,
                                    related_name='created_rooms')
 
+    is_private = models.BooleanField(default=False)
     password = models.CharField(max_length=128, blank=True)
 
     max_members = models.IntegerField(default=4)
@@ -17,6 +18,21 @@ class ChatRoom(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     ended_at = models.DateTimeField(null=True, blank=True)
+
+
+class ChatRoomInvite(models.Model):
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE,
+                             related_name='invites')
+    invited_user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                     on_delete=models.CASCADE,
+                                     related_name='chat_invites')
+    invited_by = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                   on_delete=models.CASCADE,
+                                   related_name='sent_invites')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('room', 'invited_user')
 
 
 class ChatRoomMember(models.Model):
