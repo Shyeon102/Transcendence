@@ -181,18 +181,6 @@ type RawAdminReportsPayload = RawAdminReport[] | {
   results?: RawAdminReport[];
 };
 
-// type RawAdminUser = RawAuthUser & {
-//   is_active?: boolean;
-//   isActive?: boolean;
-//   date_joined?: string;
-//   dateJoined?: string;
-// };
-
-// type RawAdminUsersPayload = RawAdminUser[] | {
-//   users?: RawAdminUser[];
-//   results?: RawAdminUser[];
-// };
-
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'https://localhost:8443/api').replace(/\/+$/, '');
 const GOOGLE_AUTH_ENDPOINT = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT ?? '/auth/login/google/';
 
@@ -265,8 +253,6 @@ const normalizeUser = (user: RawAuthUser): AuthUser => ({
   favoriteTitles: user.favoriteTitles ?? user.favorite_titles,
   favoriteCountries: user.favoriteCountries ?? user.favorite_countries,
   isStaff: user.isStaff ?? user.is_staff,
-  followersCount: user.followersCount ?? user.followers_count,
-  followingCount: user.followingCount ?? user.following_count,
   dateJoined: user.dateJoined ?? user.date_joined,
 });
 
