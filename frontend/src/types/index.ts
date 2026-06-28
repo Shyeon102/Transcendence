@@ -8,7 +8,6 @@ export interface AuthUser {
   bio?: string;
   favoriteGenres?: number[];
   favoriteTitles?: string[];
-  onboardingCompleted?: boolean;
   favoriteCountries?: string[];
   isStaff?: boolean;
   dateJoined?: string;
@@ -92,6 +91,11 @@ export interface MediaReview {
   visibility: 'public' | 'followers' | 'private';
   createdAt: string;
   updatedAt: string;
+}
+export interface MediaInteraction {
+  id: number;
+  action: 'like' | 'dislike' | 'watched' | 'watchlist';
+  createdAt: string;
 }
 
 export interface MediaReviewRequest {
