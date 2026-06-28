@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import ProfileCard from '../components/ProfileCard';
@@ -9,35 +9,162 @@ import EmptyState from '../components/ui/EmptyState';
 import type { ReviewItem } from '../components/ReviewCard';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
-import { useUpdateMeMutation } from '../store/api/authApi';
+import {
+  useGetMyPageDashboardQuery,
+  useUpdateMeMutation,
+} from '../store/api/authApi';
 import { updateProfile } from '../store/slices/authSlice';
 
 type TabKey = 'reviews' | 'watchlist';
 
+type AuthUser = NonNullable<RootState['auth']['user']>;
+
+type AuthUserWithDates = AuthUser & {
+  createdAt?: string;
+  joinedAt?: string;
+};
+
+type DashboardShape = {
+  user?: AuthUser | null;
+  reviews?: ReviewItem[];
+};
+
+type ProfileFormState = {
+  username: string;
+  firstName: string;
+  lastName: string;
+  bio: string;
+};
+
+const EMPTY_REVIEWS: ReviewItem[] = [];
+
+const dateLocaleByLanguage = {
+  ko: 'ko-KR',
+  en: 'en-US',
+  fr: 'fr-FR',
+} as const;
+
+const formatJoinedDate = (
+  value: string | undefined,
+  language: keyof typeof dateLocaleByLanguage
+) => {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
+  return date.toLocaleDateString(dateLocaleByLanguage[language], {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+};
+
+const buildProfileForm = (
+  user: Partial<AuthUser> | null | undefined,
+  defaultBio: string
+): ProfileFormState => ({
+  username: user?.username ?? '',
+  firstName: user?.firstName ?? '',
+  lastName: user?.lastName ?? '',
+  bio: user?.bio ?? defaultBio,
+});
+
 export default function ProfilePage() {
   const dispatch = useDispatch();
-  const { t } = useI18n();
+  const { language, t } = useI18n();
   const { id: profileId } = useParams();
   const user = useSelector((state: RootState) => state.auth.user);
   const [updateMe] = useUpdateMeMutation();
-  const displayUsername = user?.username?.trim() || '';
-  const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ').trim() || displayUsername || t('home.defaultDisplayName');
+
+  const defaultProfileBio = t('home.profileBioDefault');
+
+  const isOwnProfileRequest =
+    !profileId ||
+    profileId === 'me' ||
+    profileId === String(user?.id) ||
+    profileId === user?.username;
+
+  const { data: dashboard } = useGetMyPageDashboardQuery(undefined, {
+    skip: !user || !isOwnProfileRequest,
+  });
+
+  const dashboardData = dashboard as DashboardShape | undefined;
+  const dashboardUser = dashboardData?.user ?? null;
+  const dashboardReviews = dashboardData?.reviews ?? EMPTY_REVIEWS;
+
   const [activeTab, setActiveTab] = useState<TabKey>('reviews');
   const [isEditing, setIsEditing] = useState(false);
-  const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
-  const [reviews, setReviews] = useState<ReviewItem[]>([]);
-  const [avatarPreview, setAvatarPreview] = useState(user?.avatarUrl ?? '');
-  const [profileForm, setProfileForm] = useState({
-    username: user?.username ?? '',
-    firstName: user?.firstName ?? '',
-    lastName: user?.lastName ?? '',
-    bio: user?.bio ?? t('home.profileBioDefault'),
-  });
-  const displayName = [profileForm.firstName, profileForm.lastName].filter(Boolean).join(' ') || displayUsername;
+  const [emailNotificationsEnabled, setEmailNotificationsEnabled] =
+    useState(true);
+  const [localReviews, setLocalReviews] = useState<ReviewItem[] | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [profileForm, setProfileForm] = useState<ProfileFormState>(() =>
+    buildProfileForm(user, defaultProfileBio)
+  );
+
+  useEffect(() => {
+    if (dashboardUser) {
+      dispatch(updateProfile(dashboardUser));
+    }
+  }, [dispatch, dashboardUser]);
 
   if (!user) {
     return null;
   }
+
+  const profileUser = user;
+  const profileUserWithDates = profileUser as AuthUserWithDates;
+
+  const safeLanguage = Object.prototype.hasOwnProperty.call(
+    dateLocaleByLanguage,
+    language
+  )
+    ? (language as keyof typeof dateLocaleByLanguage)
+    : 'en';
+
+  const savedDisplayUsername = profileUser.username?.trim() || '';
+  const formDisplayUsername =
+    profileForm.username.trim() || savedDisplayUsername;
+
+  const savedDisplayName =
+    [profileUser.firstName, profileUser.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .trim() ||
+    savedDisplayUsername ||
+    t('home.defaultDisplayName');
+
+  const formDisplayName =
+    [profileForm.firstName, profileForm.lastName]
+      .filter(Boolean)
+      .join(' ')
+      .trim() ||
+    formDisplayUsername ||
+    t('home.defaultDisplayName');
+
+  const displayUsername = isEditing
+    ? formDisplayUsername
+    : savedDisplayUsername;
+
+  const profileDisplayName = isEditing ? formDisplayName : savedDisplayName;
+
+  const profileBio = isEditing
+    ? profileForm.bio || defaultProfileBio
+    : profileUser.bio || defaultProfileBio;
+
+  const profileAvatarUrl =
+    (isEditing ? avatarPreview : null) ?? profileUser.avatarUrl ?? '';
+
+  const joinedLabel = formatJoinedDate(
+    profileUserWithDates.createdAt ?? profileUserWithDates.joinedAt,
+    safeLanguage
+  );
 
   const isOwnProfile =
     !profileId ||
@@ -45,29 +172,56 @@ export default function ProfilePage() {
     profileId === String(user.id) ||
     profileId === user.username;
 
-  const initials = fullName
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('') || displayUsername.slice(0, 2).toUpperCase();
+  const initials =
+    profileDisplayName
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase() ?? '')
+      .join('') || displayUsername.slice(0, 2).toUpperCase();
+
+  const userReviews = localReviews ?? dashboardReviews;
   const userWatchlist: readonly (readonly [string, string])[] = [];
 
+  const handleToggleEdit = () => {
+    if (isEditing) {
+      setProfileForm(buildProfileForm(profileUser, defaultProfileBio));
+      setAvatarPreview(null);
+      setIsEditing(false);
+      return;
+    }
+
+    setProfileForm(buildProfileForm(profileUser, defaultProfileBio));
+    setAvatarPreview(profileUser.avatarUrl ?? null);
+    setIsEditing(true);
+  };
+
   const handleProfileSave = async () => {
+    const avatarUrl =
+      avatarPreview && /^https?:\/\//.test(avatarPreview)
+        ? avatarPreview
+        : undefined;
+
     const payload = {
       username: profileForm.username,
       firstName: profileForm.firstName,
       lastName: profileForm.lastName,
       bio: profileForm.bio,
-      avatarUrl: /^https?:\/\//.test(avatarPreview) ? avatarPreview : undefined,
+      avatarUrl,
     };
 
     try {
-      const updatedUser = await updateMe(payload).unwrap();
+      const response = await updateMe(payload).unwrap();
+
+      const updatedUser =
+        (response as { user?: AuthUser } | null | undefined)?.user ??
+        (response as AuthUser);
+
       dispatch(updateProfile(updatedUser));
     } catch {
       // Keep the edit panel behavior consistent even when the API reports an error.
     } finally {
+      setAvatarPreview(null);
       setIsEditing(false);
     }
   };
@@ -80,7 +234,7 @@ export default function ProfilePage() {
   };
 
   const profileStats = [
-    { label: t('home.reviews'), value: String(reviews.length) },
+    { label: t('home.reviews'), value: String(userReviews.length) },
     { label: t('home.watchlist'), value: String(userWatchlist.length) },
     { label: t('home.followers'), value: '0' },
   ];
@@ -95,16 +249,18 @@ export default function ProfilePage() {
   ];
 
   const handleReviewSubmit = (review: ReviewItem) => {
-    setReviews((prev) => [review, ...prev]);
+    setLocalReviews((prev) => [review, ...(prev ?? dashboardReviews)]);
   };
 
   const handleReviewDelete = (reviewId: string) => {
-    setReviews((prev) => prev.filter((review) => review.id !== reviewId));
+    setLocalReviews((prev) =>
+      (prev ?? dashboardReviews).filter((review) => review.id !== reviewId)
+    );
   };
 
   const handleReviewEdit = (review: ReviewItem) => {
-    setReviews((prev) =>
-      prev.map((item) =>
+    setLocalReviews((prev) =>
+      (prev ?? dashboardReviews).map((item) =>
         item.id === review.id
           ? { ...item, text: `${item.text} ${t('review.editDraftSuffix')}` }
           : item
@@ -118,11 +274,13 @@ export default function ProfilePage() {
     }
 
     const reader = new FileReader();
+
     reader.onload = () => {
       if (typeof reader.result === 'string') {
         setAvatarPreview(reader.result);
       }
     };
+
     reader.readAsDataURL(file);
   };
 
@@ -131,18 +289,18 @@ export default function ProfilePage() {
       <div className="mx-auto max-w-7xl">
         <ProfileCard
           avatarAlt={t('home.avatarAlt')}
-          avatarUrl={avatarPreview || undefined}
-          bio={profileForm.bio}
+          avatarUrl={profileAvatarUrl || undefined}
+          bio={profileBio}
           canEdit={isOwnProfile}
           closeEditLabel={t('home.closeEdit')}
-          displayName={displayName}
+          displayName={profileDisplayName}
           displayUsername={displayUsername}
           editProfileLabel={t('home.editProfile')}
           initials={initials}
           isEditing={isEditing}
-          joinedYearLabel={t('home.joinedYear')}
+          joinedYearLabel={joinedLabel}
           onAvatarSelect={handleAvatarSelect}
-          onToggleEdit={() => setIsEditing((prev) => !prev)}
+          onToggleEdit={handleToggleEdit}
           stats={profileStats}
           uploadAvatarLabel={t('home.uploadAvatar')}
           verifiedLabel={t('home.verifiedMember')}
@@ -152,7 +310,7 @@ export default function ProfilePage() {
           <div>
             <div className="mb-7 flex border-b border-[#f0ead0]/10">
               {[
-                ['reviews', t('home.reviews'), String(reviews.length)],
+                ['reviews', t('home.reviews'), String(userReviews.length)],
                 ['watchlist', t('home.watchlist'), String(userWatchlist.length)],
               ].map(([key, label, count]) => (
                 <button
@@ -160,10 +318,19 @@ export default function ProfilePage() {
                   type="button"
                   onClick={() => setActiveTab(key as TabKey)}
                   className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
-                    activeTab === key ? 'border-[#d63e2a] text-[#f0ead0]' : 'border-transparent text-[#8a8474] hover:text-[#c8c2a8]'
+                    activeTab === key
+                      ? 'border-[#d63e2a] text-[#f0ead0]'
+                      : 'border-transparent text-[#8a8474] hover:text-[#c8c2a8]'
                   }`}
                 >
-                  {label} <span className={activeTab === key ? 'text-[#d63e2a]' : 'text-[#8a8474]'}>{count}</span>
+                  {label}{' '}
+                  <span
+                    className={
+                      activeTab === key ? 'text-[#d63e2a]' : 'text-[#8a8474]'
+                    }
+                  >
+                    {count}
+                  </span>
                 </button>
               ))}
             </div>
@@ -171,10 +338,11 @@ export default function ProfilePage() {
             {activeTab === 'reviews' ? (
               <>
                 {isOwnProfile ? <ReviewForm onSubmit={handleReviewSubmit} /> : null}
+
                 <ReviewList
                   onDelete={isOwnProfile ? handleReviewDelete : undefined}
                   onEdit={isOwnProfile ? handleReviewEdit : undefined}
-                  reviews={reviews}
+                  reviews={userReviews}
                 />
               </>
             ) : null}
@@ -188,7 +356,9 @@ export default function ProfilePage() {
                       className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] text-[22px] transition hover:border-[#f0ead0]/25"
                     >
                       <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_4px,rgba(240,234,210,0.02)_4px,rgba(240,234,210,0.02)_8px)]" />
+
                       <span className="relative z-10">{icon}</span>
+
                       <span className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-1 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
                         {label}
                       </span>
