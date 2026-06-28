@@ -35,6 +35,7 @@ declare global {
 const GOOGLE_SCRIPT_ID = 'google-identity-services';
 const GOOGLE_SCRIPT_SRC = 'https://accounts.google.com/gsi/client';
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '';
+let googleInitialized = false; 
 
 let googleScriptPromise: Promise<void> | null = null;
 
@@ -96,13 +97,11 @@ export default function GoogleAuthButton({
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   // 🔥 IMPORTANT: prevents multiple initialize() calls
-  const initializedRef = useRef(false);
-
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID || disabled) return;
-    if (initializedRef.current) return;
+    if (googleInitialized) return;
 
     let mounted = true;
 
@@ -110,7 +109,7 @@ export default function GoogleAuthButton({
       .then(() => {
         if (!mounted || !containerRef.current || !window.google?.accounts) return;
 
-        initializedRef.current = true;
+        googleInitialized = true;
 
         window.google.accounts.id.initialize({
           client_id: GOOGLE_CLIENT_ID,
@@ -122,7 +121,7 @@ export default function GoogleAuthButton({
 
             onCredential(response.credential);
           },
-          use_fedcm_for_prompt: false, 
+          use_fedcm_for_prompt: false,
         });
 
         containerRef.current.innerHTML = '';
