@@ -36,4 +36,4 @@ cat "$DUMP_FILE" | $COMPOSE exec -T db sh -c \
 
 echo "[restore] Restore completed."
 echo "[restore] Check service health with:"
-echo "  curl http://localhost:8000/health/"
+echo "  curl https://localhost:8443/health/"
