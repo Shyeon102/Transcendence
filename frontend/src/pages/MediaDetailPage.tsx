@@ -324,7 +324,7 @@ const MediaDetailPage = () => {
             <button
               onClick={async () => {
                 const next = !icon.like;
-                setActiveIcon({ ...icon, like: next });
+                setActiveIcon({ ...icon, like: next, dislike: next ? false : icon.dislike });
                 await toggleInteraction({ mediaId, action: 'like', active: next });
               }}
             >
@@ -343,18 +343,6 @@ const MediaDetailPage = () => {
               <img
                 src={icon.dislike ? "/dislike.png" : "/non-dislike.png"}
                 className="w-[1.4vw] h-[1.4vw]"
-              />
-            </button>
-            <button
-              onClick={async () => {
-                const next = !icon.wish;
-                setActiveIcon({ ...icon, wish: next });
-                await toggleInteraction({ mediaId, action: 'wish', active: next });
-              }}
-            >
-              <img
-                src={icon.wish ? "/wish.png" : "/non-wish.png"}
-                className="w-[1.2vw] h-[1.2vw] ml-[0.1vw]"
               />
             </button>
           </div>

@@ -88,7 +88,6 @@ def get_hybrid_scores(
 
     cbf_series = get_cbf_scores_cached(user_id)
     cf_series = get_cf_scores_cached(user_id)
-
     if cbf_series.empty and cf_series.empty:
         return pd.Series(dtype=float)
 
