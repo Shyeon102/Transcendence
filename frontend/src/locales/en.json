@@ -275,7 +275,8 @@
     "callbackErrorDescription": "There was a problem while handling 42 OAuth. Check the configured callback URL and backend response flow.",
     "callbackContinue": "Continue",
     "callbackRetry": "Back to login",
-    "startUrlMissing": "42 OAuth backend URL is not configured yet."
+    "startUrlMissing": "42 OAuth backend URL is not configured yet.",
+    "googleClientMissing": "Google login is not configured yet."
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",

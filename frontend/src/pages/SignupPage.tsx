@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthShell from '../components/AuthShell';
+import GoogleAuthButton from '../components/GoogleAuthButton';
 import Button from '../components/ui/Button';
 import StatusMessage from '../components/ui/StatusMessage';
 import { useI18n } from '../lib/i18n';
-import { beginOAuth42Login } from '../lib/oauth';
-import { useSignupMutation } from '../store/api/authApi';
+// import { beginOAuth42Login } from '../lib/oauth';
+import { useGoogleLoginMutation, useSignupMutation } from '../store/api/authApi';
 import type { AuthErrorResponse } from '../store';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,6 +26,7 @@ export default function SignupPage() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [signup, { isLoading }] = useSignupMutation();
+  const [googleLogin, { isLoading: isGoogleLoading }] = useGoogleLoginMutation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -92,6 +94,24 @@ export default function SignupPage() {
 
     try {
       await signup(formData).unwrap();
+      navigate('/home');
+    } catch (err) {
+      const apiError = err as AuthErrorResponse;
+      setErrorMsg(apiError.message ?? t('common.error'));
+    }
+  };
+
+  const handleGoogleCredential = async (credential: string) => {
+    setErrorMsg('');
+
+    try {
+      const session = await googleLogin({  id_token: credential }).unwrap();
+
+      if (!session?.user) {
+        setErrorMsg("Login failed");
+        return;
+      }
+
       navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
@@ -240,7 +260,7 @@ export default function SignupPage() {
           <div className="h-px flex-1 bg-[#f0ead0]/10" />
         </div>
 
-        <Button
+        {/* <Button
           onClick={() => {
             if (!beginOAuth42Login()) {
               setErrorMsg(t('oauth.startUrlMissing'));
@@ -251,7 +271,15 @@ export default function SignupPage() {
         >
           <span className="font-['Bebas_Neue'] text-base tracking-[0.05em] text-[#f0ead0]">42</span>
           {t('signup.oauth42Intra')}
-        </Button>
+        </Button> */}
+
+        <GoogleAuthButton
+          disabled={isGoogleLoading}
+          missingConfigLabel={t('oauth.googleClientMissing')}
+          onCredential={(credential) => void handleGoogleCredential(credential)}
+          onError={setErrorMsg}
+          text="signup_with"
+        />
       </form>
 
       <p className="mt-7 text-center text-[11px] tracking-[0.05em] text-[#8a8474]">

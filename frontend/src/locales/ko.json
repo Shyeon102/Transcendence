@@ -275,7 +275,8 @@
     "callbackErrorDescription": "42 OAuth 처리 중 문제가 발생했습니다. 설정된 callback URL과 백엔드 응답을 확인해야 합니다.",
     "callbackContinue": "다음으로 이동",
     "callbackRetry": "로그인으로 돌아가기",
-    "startUrlMissing": "42 OAuth 백엔드 URL이 아직 설정되지 않았습니다."
+    "startUrlMissing": "42 OAuth 백엔드 URL이 아직 설정되지 않았습니다.",
+    "googleClientMissing": "Google 로그인이 아직 설정되지 않았습니다."
   },
   "footer": {
     "privacyPolicy": "개인정보처리방침",
