@@ -10,6 +10,7 @@ type GoogleAccounts = {
     initialize: (options: {
       client_id: string;
       callback: (response: GoogleCredentialResponse) => void;
+      use_fedcm_for_prompt?: boolean;
     }) => void;
     renderButton: (
       parent: HTMLElement,
@@ -121,6 +122,7 @@ export default function GoogleAuthButton({
 
             onCredential(response.credential);
           },
+          use_fedcm_for_prompt: false, 
         });
 
         containerRef.current.innerHTML = '';

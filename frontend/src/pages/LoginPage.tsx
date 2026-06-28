@@ -32,26 +32,38 @@ export default function LoginPage() {
     const validationError = validateForm();
     setErrorMsg(validationError);
 
-    if (validationError) {
-      return;
-    }
+    if (validationError) return;
 
     try {
       const session = await login({ username, password }).unwrap();
-      const isDemo = session.user.username === 'demo';
-      navigate(isDemo || session.user.onboardingCompleted ? '/home' : '/onboarding');
+
+      if (!session?.user) {
+        setErrorMsg("Login failed");
+        return;
+      }
+
+      navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
       setErrorMsg(apiError.message ?? t('common.error'));
     }
   };
 
-  const handleGoogleCredential = async (credential: string) => {
+ const handleGoogleCredential = async (credential: string) => {
     setErrorMsg('');
 
     try {
-      const session = await googleLogin({ credential }).unwrap();
-      navigate(session.user.onboardingCompleted ? '/home' : '/onboarding');
+      const session = await googleLogin({ id_token: credential }).unwrap();
+
+      const user = session?.user;
+
+      if (!user) {
+        console.log("Invalid session:", session);
+        setErrorMsg("Login failed: missing user");
+        return;
+      }
+
+      navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
       setErrorMsg(apiError.message ?? t('common.error'));

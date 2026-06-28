@@ -105,8 +105,14 @@ export default function SignupPage() {
     setErrorMsg('');
 
     try {
-      const session = await googleLogin({ credential }).unwrap();
-      navigate(session.user.onboardingCompleted ? '/home' : '/onboarding');
+      const session = await googleLogin({  id_token: credential }).unwrap();
+
+      if (!session?.user) {
+        setErrorMsg("Login failed");
+        return;
+      }
+
+      navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
       setErrorMsg(apiError.message ?? t('common.error'));
