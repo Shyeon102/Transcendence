@@ -10,6 +10,7 @@ type Props = {
 const NewRoomModal = ({ isOpen, onClose }: Props) => {
   const { t } = useI18n();
   const [title, setTitle] = useState("");
+  const [isPrivate, setIsPrivate] = useState(false);
   const [description, setDescription] = useState("");
   const [maxMembers, setMaxMembers] = useState(4);
   const [createChatRoom, { isLoading }] = useCreateChatRoomMutation(); // createChatRoom: trigger:호출하면 백엔드에 POST 요청, isLoading: 결과상태(로딩, 에러 등): 요청 중인지
@@ -26,11 +27,13 @@ const NewRoomModal = ({ isOpen, onClose }: Props) => {
       await createChatRoom({
         title,
         description,
-        max_members: maxMembers,
+        max_members: isPrivate ? 2 : maxMembers,
+        is_private: isPrivate,
       }).unwrap();
       setTitle("");
       setDescription("");
       setMaxMembers(4);
+      setIsPrivate(false);
       onClose();
     } catch (err) {
       console.error("방 생성 실패:", err);
@@ -41,6 +44,30 @@ const NewRoomModal = ({ isOpen, onClose }: Props) => {
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div className="bg-[#1a1a1a] p-6 rounded text-white w-96">
         <h2 className="text-xl font-bold mb-4">{t("chat.createRoom")}</h2>
+        <div className="flex gap-2 mb-3">
+          <button
+            type="button"
+            onClick={() => setIsPrivate(false)}
+            className={`flex-1 py-2 rounded text-sm font-semibold transition ${
+              !isPrivate
+                ? "bg-[#e8d5b7] text-black"
+                : "bg-[#1a1a1a] text-gray-400 hover:text-white"
+            }`}
+          >
+            {t("chat.public")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsPrivate(true)}
+            className={`flex-1 py-2 rounded text-sm font-semibold transition ${
+              isPrivate
+                ? "bg-[#e8d5b7] text-black"
+                : "bg-[#1a1a1a] text-gray-400 hover:text-white"
+            }`}
+          >
+            {t("chat.private")}
+          </button>
+        </div>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -53,15 +80,17 @@ const NewRoomModal = ({ isOpen, onClose }: Props) => {
           placeholder={t("chat.descriptionPlaceholder")}
           className="w-full bg-[#0c0c0b] px-3 py-2 rounded mb-2"
         />
-        <input
-          type="number"
-          value={maxMembers}
-          onChange={(e) => setMaxMembers(Number(e.target.value))}
-          placeholder={t("chat.maxMembersPlaceholder")}
-          className="w-full bg-[#0c0c0b] px-3 py-2 rounded mb-2"
-          min={4}
-          max={10}
-        />
+        {!isPrivate && (
+          <input
+            type="number"
+            value={maxMembers}
+            onChange={(e) => setMaxMembers(Number(e.target.value))}
+            placeholder={t("chat.maxMembersPlaceholder")}
+            className="w-full bg-[#0c0c0b] px-3 py-2 rounded mb-2"
+            min={4}
+            max={10}
+          />
+        )}
         <div className="flex gap-2 mt-4">
           <button
             onClick={handleSubmit}

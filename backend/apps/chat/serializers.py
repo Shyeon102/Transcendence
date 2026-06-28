@@ -30,6 +30,7 @@ class ChatRoomSerializer(serializers.ModelSerializer):
             "created_by",
             "max_members",
             "is_active",
+            "is_private",
             "created_at",
             "ended_at",
         ]

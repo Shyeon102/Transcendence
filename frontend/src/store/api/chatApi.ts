@@ -32,7 +32,12 @@ export const chatApi = createApi({
     }),
     createChatRoom: builder.mutation<
       ChatRoom,
-      { title: string; description: string; max_members: number }
+      {
+        title: string;
+        description: string;
+        max_members: number;
+        is_private: boolean;
+      }
     >({
       query: (body) => ({
         url: "/chat/rooms/",
@@ -47,6 +52,13 @@ export const chatApi = createApi({
         method: "DELETE",
       }),
       invalidatesTags: ["ChatRoom"],
+    }),
+    inviteToRoom: builder.mutation<void, { roomId: number; userId: number }>({
+      query: ({ roomId, userId }) => ({
+        url: `/chat/rooms/${roomId}/invite/`,
+        method: "POST",
+        body: { user_id: userId },
+      }),
     }),
     joinChatRoom: builder.mutation<void, number>({
       query: (roomId) => ({
@@ -81,6 +93,7 @@ export const {
   useGetChatRoomsQuery,
   useCreateChatRoomMutation,
   useDeleteChatRoomMutation,
+  useInviteToRoomMutation,
   useGetChatMessagesQuery,
   useJoinChatRoomMutation,
 } = chatApi; // 훅 노출: 이 훅을 컴포넌트에서 호출하면 데이터/로딩/에러 다 받아짐
