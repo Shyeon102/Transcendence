@@ -118,7 +118,7 @@
     "demoHint": "demo@demo.demo / demo1234",
     "noAccount": "Pas encore de compte ?",
     "toSignup": "Inscription",
-    "toSignupCta": "Creer un compte gratuitement"
+    "toSignupCta": "Creer un compte"
   },
   "signup": {
     "title": "Inscription",
