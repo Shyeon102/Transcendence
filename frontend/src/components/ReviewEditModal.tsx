@@ -2,14 +2,21 @@ import { useState } from "react";
 import { useI18n } from "../lib/i18n";
 import StarRating from "./StarRating";
 import type { ReviewItem } from "./ReviewCard";
+import StatusMessage from "./ui/StatusMessage";
 
 type ReviewEditModalProps = {
   review: ReviewItem;
+  errorMessage?: string;
   onClose: () => void;
   onSave: (data: { rating: number; content: string }) => void;
 };
 
-export default function ReviewEditModal({ review, onClose, onSave }: ReviewEditModalProps) {
+export default function ReviewEditModal({
+  review,
+  errorMessage,
+  onClose,
+  onSave,
+}: ReviewEditModalProps) {
   const { t } = useI18n();
   const [rating, setRating] = useState(review.rating);
   const [content, setContent] = useState(review.text);
@@ -35,6 +42,10 @@ export default function ReviewEditModal({ review, onClose, onSave }: ReviewEditM
           onChange={(e) => setContent(e.target.value)}
           className="min-h-28 w-full border border-[#f0ead0]/10 bg-[#0c0c0b] px-3 py-2 text-[13px] text-[#f0ead0] outline-none focus:border-[#f0ead0]/25"
         />
+
+        {errorMessage ? (
+          <StatusMessage className="mt-3">{errorMessage}</StatusMessage>
+        ) : null}
 
         <div className="mt-4 flex gap-2">
           <button

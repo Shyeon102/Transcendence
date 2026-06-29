@@ -7,6 +7,7 @@ import ProfileEditForm from "../components/ProfileEditForm";
 import ReviewForm from "../components/ReviewForm";
 import ReviewList from "../components/ReviewList";
 import EmptyState from "../components/ui/EmptyState";
+import StatusMessage from "../components/ui/StatusMessage";
 import type { ReviewItem, ReviewVisibility } from "../components/ReviewCard";
 import { useI18n } from "../lib/i18n";
 import type { RootState } from "../store";
@@ -176,6 +177,8 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [saveError, setSaveError] = useState('');
+  const [reviewActionErrorKey, setReviewActionErrorKey] = useState('');
+  const [reviewEditErrorKey, setReviewEditErrorKey] = useState('');
   const [profileForm, setProfileForm] = useState<ProfileFormState>(() =>
     buildProfileForm(user, defaultProfileBio),
   );
@@ -415,6 +418,7 @@ export default function ProfilePage() {
           visibility: review.visibility,
         },
       }).unwrap();
+      setReviewActionErrorKey('');
       refetchDashboard?.();
     } catch (err) {
       const message = (err as { message?: string }).message ?? "";
@@ -432,13 +436,15 @@ export default function ProfilePage() {
         mediaId: review.mediaId,
         reviewId: Number(review.id),
       }).unwrap();
+      setReviewActionErrorKey('');
       refetchDashboard();
-    } catch (err) {
-      console.error("리뷰 삭제 실패:", err);
+    } catch {
+      setReviewActionErrorKey("review.deleteError");
     }
   };
 
   const handleReviewEdit = (review: ReviewItem) => {
+    setReviewEditErrorKey('');
     setEditingReview(review);
   };
 
@@ -453,10 +459,11 @@ export default function ProfilePage() {
         reviewId: Number(editingReview.id),
         review: { rating: data.rating, content: data.content },
       }).unwrap();
+      setReviewEditErrorKey('');
       setEditingReview(null);
       refetchDashboard();
-    } catch (err) {
-      console.error("리뷰 수정 실패:", err);
+    } catch {
+      setReviewEditErrorKey("review.updateError");
     }
   };
 
@@ -555,6 +562,12 @@ export default function ProfilePage() {
                       placeholder={t("mypage.reviewSearchPlaceholder")}
                       className="mb-4 w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[12px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
                     />
+
+                    {reviewActionErrorKey ? (
+                      <StatusMessage className="mb-4">
+                        {t(reviewActionErrorKey)}
+                      </StatusMessage>
+                    ) : null}
 
                     <ReviewList
                       onDelete={isOwnProfile ? handleReviewDelete : undefined}
@@ -674,7 +687,13 @@ export default function ProfilePage() {
       {editingReview && (
         <ReviewEditModal
           review={editingReview}
-          onClose={() => setEditingReview(null)}
+          errorMessage={
+            reviewEditErrorKey ? t(reviewEditErrorKey) : undefined
+          }
+          onClose={() => {
+            setReviewEditErrorKey('');
+            setEditingReview(null);
+          }}
           onSave={handleReviewUpdate}
         />
       )}

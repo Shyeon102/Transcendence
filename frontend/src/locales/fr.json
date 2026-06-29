@@ -257,6 +257,8 @@
     "submit": "Ajouter une critique",
     "validation": "Veuillez saisir le titre, le type, la note et le texte de la critique.",
     "duplicate": "Une critique existe deja.",
+    "deleteError": "Impossible de supprimer la critique. Reessayez.",
+    "updateError": "Impossible de modifier la critique. Reessayez.",
     "visibilityLabel": "Visibilite",
     "visibility": {
       "public": "Public",
