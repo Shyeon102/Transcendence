@@ -249,9 +249,6 @@ export default function ProfilePage() {
     ? publicDisplayName
     : ownDisplayName;
 
-  const displayedProfileUserId =
-    isPublicProfile && viewedProfile ? viewedProfile.id : profileUser.id;
-
   const profileBio = isPublicProfile
     ? (viewedProfile?.bio ?? "")
     : isEditing
