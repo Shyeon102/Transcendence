@@ -98,9 +98,6 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
 
         room = self.get_object()
 
-        if not self.is_member(room, request.user):
-            return Response({"error": "Not a member"}, status=403)
-
         messages = ChatMessage.objects.filter(room=room)
 
         serializer = ChatMessageSerializer(messages, many=True)
