@@ -235,6 +235,7 @@
     "title": "My Activity",
     "description": "Review your activity, saved titles, and recent updates in one place.",
     "reviewSection": "My Reviews",
+    "reviewSearchPlaceholder": "Search reviews by title",
     "watchlistSection": "Watchlist",
     "recentActivity": "Recent Activity",
     "entries": "entries",
