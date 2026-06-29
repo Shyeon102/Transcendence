@@ -14,6 +14,7 @@ import type {
   AdminReportStatus,
   AdminReportTargetType,
   AdminReportType,
+  DashboardMediaItem,
   AuthUser,
   DashboardReview,
   LoginRequest,
@@ -104,6 +105,7 @@ type RawActivityReview = {
 type RawDashboardInteraction = {
   media_id?: number;
   media_title?: string;
+  media_image_url?: string;
 };
 
 type RawDashboard = {
@@ -328,12 +330,20 @@ const normalizeDashboardReview = (review: RawActivityReview): DashboardReview =>
   visibility: review.visibility,
 });
 
+const normalizeDashboardInteraction = (
+  item: RawDashboardInteraction,
+): DashboardMediaItem => ({
+  mediaId: item.media_id ?? 0,
+  title: item.media_title ?? `Media #${item.media_id ?? '-'}`,
+  poster: item.media_image_url ?? '',
+});
+
 const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
   reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
   // 마이페이지 '찜 목록'은 사실상 '시청 완료(watched)' 목록이므로 watched를 매핑한다.
   watchlist:
-    payload.watchlist ??
-    payload.interactions?.watched?.map((item) => item.media_title ?? `Media #${item.media_id ?? '-'}`) ??
+    payload.interactions?.watched?.map(normalizeDashboardInteraction) ??
+    payload.watchlist?.map((title) => ({ mediaId: 0, title, poster: '' })) ??
     [],
   activities: payload.activities ?? payload.activity ?? payload.recent_activity ?? [],
 });

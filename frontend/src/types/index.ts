@@ -89,7 +89,7 @@ export interface PasswordChangeRequest {
 
 export interface DashboardReview {
   id: number;
-   mediaId: number;
+  mediaId: number;
   title: string;
   note: string;
   text: string;
@@ -100,9 +100,15 @@ export interface DashboardReview {
   visibility?: 'public' | 'followers' | 'private';
 }
 
+export interface DashboardMediaItem {
+  mediaId: number;
+  title: string;
+  poster: string;
+}
+
 export interface MyPageDashboardData {
   reviews: DashboardReview[];
-  watchlist: string[];
+  watchlist: DashboardMediaItem[];
   activities: string[];
 }
 

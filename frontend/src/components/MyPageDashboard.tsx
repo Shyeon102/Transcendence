@@ -1,4 +1,4 @@
-import type { DashboardReview } from '../types';
+import type { DashboardMediaItem, DashboardReview } from '../types';
 import EmptyState from './ui/EmptyState';
 import SectionCard from './ui/SectionCard';
 
@@ -11,7 +11,7 @@ type MyPageDashboardProps = {
   recentActivityLabel: string;
   reviews?: DashboardReview[];
   reviewSectionLabel: string;
-  watchlist?: string[];
+  watchlist?: DashboardMediaItem[];
   watchlistLabel: string;
 };
 
@@ -69,10 +69,10 @@ export default function MyPageDashboard({
             {watchlist.length ? (
               watchlist.map((item) => (
                 <span
-                  key={item}
+                  key={item.mediaId ? item.mediaId : item.title}
                   className="border border-[#d4a847]/30 bg-[#d4a847]/10 px-3 py-1 text-[10px] uppercase tracking-[0.08em] text-[#e6bf63]"
                 >
-                  {item}
+                  {item.title}
                 </span>
               ))
             ) : (

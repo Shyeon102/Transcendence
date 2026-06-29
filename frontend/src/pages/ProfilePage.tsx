@@ -15,6 +15,7 @@ import {
   useFollowUserMutation,
   useGetMeQuery,
   useGetPublicProfileQuery,
+  useGetUserActivityQuery,
   useGetUserFollowersQuery,
   useUnfollowUserMutation,
   useGetMyPageDashboardQuery,
@@ -24,7 +25,8 @@ import {
   useUpdateMeMutation,
 } from "../store/api/authApi";
 import { updateProfile } from "../store/slices/authSlice";
-import type { MediaReview } from "../types";
+import type { DashboardMediaItem, MediaReview } from "../types";
+import defaultPoster from "/src/assets/images/defaultposter.png";
 
 type TabKey = "reviews" | "watchlist" | "followers";
 
@@ -50,6 +52,7 @@ type AuthUserWithDates = AuthUser & {
 type DashboardShape = {
   user?: AuthUser | null;
   reviews?: ReviewItem[];
+  watchlist?: DashboardMediaItem[];
 };
 
 type ProfileFormState = {
@@ -198,6 +201,11 @@ export default function ProfilePage() {
       skip: !user || !isOwnProfile,
     });
 
+  const { data: publicActivity } = useGetUserActivityQuery(routeUserId ?? 0, {
+    refetchOnMountOrArgChange: true,
+    skip: !user || !isPublicProfile || !routeUserId,
+  });
+
   const {
     data: followers = [],
     isError: isFollowersError,
@@ -319,7 +327,9 @@ export default function ProfilePage() {
     ? visibleReviews.filter((r) => r.title.toLowerCase().includes(reviewQuery))
     : visibleReviews;
 
-  const userWatchlist: readonly (readonly [string, string])[] = [];
+  const userWatchlist = isPublicProfile
+    ? (publicActivity?.watchlist ?? [])
+    : (dashboardData?.watchlist ?? []);
 
   const shouldBlockForProfileLoad = isPublicProfile && isViewedProfileLoading;
 
@@ -627,17 +637,24 @@ export default function ProfilePage() {
                 {activeTab === "watchlist" ? (
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {userWatchlist.length ? (
-                      userWatchlist.map(([icon, label]) => (
-                        <div
-                          key={label}
-                          className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] text-[22px] transition hover:border-[#f0ead0]/25"
+                      userWatchlist.map((item) => (
+                        <Link
+                          key={item.mediaId ? item.mediaId : item.title}
+                          to={item.mediaId ? `/media/${item.mediaId}` : "#"}
+                          className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] transition hover:border-[#f0ead0]/25"
                         >
-                          <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_4px,rgba(240,234,210,0.02)_4px,rgba(240,234,210,0.02)_8px)]" />
-                          <span className="relative z-10">{icon}</span>
-                          <span className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-1 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
-                            {label}
-                          </span>
-                        </div>
+                          <img
+                            src={item.poster || defaultPoster}
+                            alt={item.title}
+                            onError={(event) => {
+                              event.currentTarget.src = defaultPoster;
+                            }}
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
+                          <div className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-2 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
+                            {item.title}
+                          </div>
+                        </Link>
                       ))
                     ) : (
                       <EmptyState title={t("mypage.empty")} />
