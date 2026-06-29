@@ -4,9 +4,14 @@ import {
   type BaseQueryFn,
   type FetchArgs,
   type FetchBaseQueryError,
-} from '@reduxjs/toolkit/query/react';
-import { logout, setCredentials, updateProfile, updateTokens } from '../../features/auth/authSlice';
-import type { RootState } from '../index';
+} from "@reduxjs/toolkit/query/react";
+import {
+  logout,
+  setCredentials,
+  updateProfile,
+  updateTokens,
+} from "../../features/auth/authSlice";
+import type { RootState } from "../index";
 import type {
   AuthErrorResponse,
   AuthSession,
@@ -28,7 +33,7 @@ import type {
   RefreshTokenResponse,
   SignupRequest,
   SignupResponse,
-} from '../../types';
+} from "../../types";
 
 type LoginTokenResponse = RawTokenResponse & {
   error?: string;
@@ -101,7 +106,7 @@ type RawActivityReview = {
   content?: string;
   created_at?: string;
   rating: number;
-  visibility?: 'public' | 'followers' | 'private';
+  visibility?: "public" | "followers" | "private";
 };
 
 type RawDashboardInteraction = {
@@ -134,15 +139,17 @@ type RawReview = {
   rating: number;
   comment?: string;
   content?: string;
-  visibility?: 'public' | 'followers' | 'private';
+  visibility?: "public" | "followers" | "private";
   created_at?: string;
   updated_at?: string;
 };
 
-type RawReviewPayload = RawReview | {
-  review?: RawReview;
-  reviews?: RawReview[];
-};
+type RawReviewPayload =
+  | RawReview
+  | {
+      review?: RawReview;
+      reviews?: RawReview[];
+    };
 
 type RawPublicUserProfile = RawAuthUser & {
   followers_count?: number;
@@ -187,16 +194,21 @@ type RawAdminReport = {
   created_at?: string;
 };
 
-type RawAdminReportsPayload = RawAdminReport[] | {
-  reports?: RawAdminReport[];
-  results?: RawAdminReport[];
-};
+type RawAdminReportsPayload =
+  | RawAdminReport[]
+  | {
+      reports?: RawAdminReport[];
+      results?: RawAdminReport[];
+    };
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'https://localhost/api').replace(/\/+$/, '');
-const GOOGLE_AUTH_ENDPOINT = import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT ?? '/auth/login/google/';
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ?? "https://localhost/api"
+).replace(/\/+$/, "");
+const GOOGLE_AUTH_ENDPOINT =
+  import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT ?? "/auth/login/google/";
 
 const toMessage = (value: unknown): string | undefined => {
-  if (typeof value === 'string' && value.trim()) {
+  if (typeof value === "string" && value.trim()) {
     return value;
   }
 
@@ -205,9 +217,9 @@ const toMessage = (value: unknown): string | undefined => {
     return nested;
   }
 
-  if (value && typeof value === 'object') {
+  if (value && typeof value === "object") {
     const objectValue = value as Record<string, unknown>;
-    const preferredKeys = ['detail', 'message', 'error', 'non_field_errors'];
+    const preferredKeys = ["detail", "message", "error", "non_field_errors"];
 
     for (const key of preferredKeys) {
       const nested = toMessage(objectValue[key]);
@@ -227,15 +239,19 @@ const toMessage = (value: unknown): string | undefined => {
   return undefined;
 };
 
-const toFieldErrors = (value: unknown): Record<string, string[]> | undefined => {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+const toFieldErrors = (
+  value: unknown,
+): Record<string, string[]> | undefined => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;
   }
 
   const entries: Array<[string, string[]]> = [];
 
-  for (const [key, fieldValue] of Object.entries(value as Record<string, unknown>)) {
-    if (['detail', 'message', 'error'].includes(key)) {
+  for (const [key, fieldValue] of Object.entries(
+    value as Record<string, unknown>,
+  )) {
+    if (["detail", "message", "error"].includes(key)) {
       continue;
     }
 
@@ -244,7 +260,7 @@ const toFieldErrors = (value: unknown): Record<string, string[]> | undefined => 
       continue;
     }
 
-    if (typeof fieldValue === 'string') {
+    if (typeof fieldValue === "string") {
       entries.push([key, [fieldValue]]);
     }
   }
@@ -254,8 +270,8 @@ const toFieldErrors = (value: unknown): Record<string, string[]> | undefined => 
 
 const normalizeUser = (user: RawAuthUser): AuthUser => ({
   id: user.id ?? 0,
-  email: user.email ?? '',
-  username: user.username ?? '',
+  email: user.email ?? "",
+  username: user.username ?? "",
   firstName: user.firstName ?? user.first_name,
   lastName: user.lastName ?? user.last_name,
   avatarUrl: user.avatarUrl ?? user.avatar_url,
@@ -271,28 +287,44 @@ const normalizeUser = (user: RawAuthUser): AuthUser => ({
 
 const normalizeUserPayload = (payload: RawUserPayload): AuthUser => {
   const candidate = (() => {
-    if ('id' in payload || 'email' in payload || 'username' in payload) {
+    if ("id" in payload || "email" in payload || "username" in payload) {
       return payload;
     }
 
     const responsePayload = payload as RawAuthResponse;
-    return responsePayload.user ?? responsePayload.users ?? responsePayload.data?.user ?? responsePayload.data?.users;
+    return (
+      responsePayload.user ??
+      responsePayload.users ??
+      responsePayload.data?.user ??
+      responsePayload.data?.users
+    );
   })();
 
   if (!candidate) {
-    throw new Error('User response is missing required fields.');
+    throw new Error("User response is missing required fields.");
   }
 
   return normalizeUser(candidate);
 };
 
 const normalizeSession = (payload: RawAuthResponse): AuthSession => {
-  const user = payload.user ?? payload.users ?? payload.data?.user ?? payload.data?.users;
-  const token = payload.token ?? payload.access ?? payload.access_token ?? payload.data?.token ?? payload.data?.access ?? payload.data?.access_token;
-  const refreshToken = payload.refresh ?? payload.refresh_token ?? payload.data?.refresh ?? payload.data?.refresh_token;
+  const user =
+    payload.user ?? payload.users ?? payload.data?.user ?? payload.data?.users;
+  const token =
+    payload.token ??
+    payload.access ??
+    payload.access_token ??
+    payload.data?.token ??
+    payload.data?.access ??
+    payload.data?.access_token;
+  const refreshToken =
+    payload.refresh ??
+    payload.refresh_token ??
+    payload.data?.refresh ??
+    payload.data?.refresh_token;
 
   if (!user || !token) {
-    throw new Error('Authentication response is missing required fields.');
+    throw new Error("Authentication response is missing required fields.");
   }
 
   return {
@@ -302,12 +334,24 @@ const normalizeSession = (payload: RawAuthResponse): AuthSession => {
   };
 };
 
-const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse => {
-  const token = payload.token ?? payload.access ?? payload.access_token ?? payload.data?.token ?? payload.data?.access ?? payload.data?.access_token;
-  const refreshToken = payload.refresh ?? payload.refresh_token ?? payload.data?.refresh ?? payload.data?.refresh_token;
+const normalizeRefreshTokens = (
+  payload: RawAuthResponse,
+): RefreshTokenResponse => {
+  const token =
+    payload.token ??
+    payload.access ??
+    payload.access_token ??
+    payload.data?.token ??
+    payload.data?.access ??
+    payload.data?.access_token;
+  const refreshToken =
+    payload.refresh ??
+    payload.refresh_token ??
+    payload.data?.refresh ??
+    payload.data?.refresh_token;
 
   if (!token) {
-    throw new Error('Refresh response is missing an access token.');
+    throw new Error("Refresh response is missing an access token.");
   }
 
   return {
@@ -316,14 +360,16 @@ const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse 
   };
 };
 
-const normalizeDashboardReview = (review: RawActivityReview): DashboardReview => ({
+const normalizeDashboardReview = (
+  review: RawActivityReview,
+): DashboardReview => ({
   id: review.id,
   mediaId: review.media ?? 0,
   title: review.title ?? review.media_title ?? `Review #${review.id}`,
-  note: review.note ?? review.content ?? '',
-  text: review.note ?? review.content ?? '',
-  when: review.when ?? review.created_at ?? '',
-  date: review.when ?? review.created_at ?? '',
+  note: review.note ?? review.content ?? "",
+  text: review.note ?? review.content ?? "",
+  when: review.when ?? review.created_at ?? "",
+  date: review.when ?? review.created_at ?? "",
   rating: review.rating,
   visibility: review.visibility,
 });
@@ -332,44 +378,49 @@ const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
   reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
   watchlist:
     payload.watchlist ??
-    payload.interactions?.watchlist?.map((item) => item.media_title ?? `Media #${item.media_id ?? '-'}`) ??
+    payload.interactions?.watchlist?.map(
+      (item) => item.media_title ?? `Media #${item.media_id ?? "-"}`,
+    ) ??
     [],
-  activities: payload.activities ?? payload.activity ?? payload.recent_activity ?? [],
+  activities:
+    payload.activities ?? payload.activity ?? payload.recent_activity ?? [],
 });
 
 const normalizeReview = (review: RawReview): MediaReview => ({
   id: review.id,
   userId: review.user_id ?? review.user?.id ?? 0,
-  username: review.username ?? review.user?.username ?? '',
+  username: review.username ?? review.user?.username ?? "",
   mediaId: review.media_id ?? 0,
-  mediaTitle: review.media_title ?? '',
+  mediaTitle: review.media_title ?? "",
   rating: review.rating,
-  content: review.content ?? review.comment ?? '',
-  visibility: review.visibility ?? 'public',
-  createdAt: review.created_at ?? '',
-  updatedAt: review.updated_at ?? '',
+  content: review.content ?? review.comment ?? "",
+  visibility: review.visibility ?? "public",
+  createdAt: review.created_at ?? "",
+  updatedAt: review.updated_at ?? "",
 });
 
 const normalizeReviewPayload = (payload: RawReviewPayload): MediaReview => {
-  if ('id' in payload) {
+  if ("id" in payload) {
     return normalizeReview(payload);
   }
   if (payload.review) {
     return normalizeReview(payload.review);
   }
-  throw new Error('Review response is missing required fields.');
+  throw new Error("Review response is missing required fields.");
 };
 
 const normalizeReviewList = (payload: RawReviewPayload): MediaReview[] => {
-  if ('reviews' in payload && Array.isArray(payload.reviews)) {
+  if ("reviews" in payload && Array.isArray(payload.reviews)) {
     return payload.reviews.map(normalizeReview);
   }
   return [];
 };
 
-const normalizePublicUserProfile = (profile: RawPublicUserProfile): PublicUserProfile => ({
+const normalizePublicUserProfile = (
+  profile: RawPublicUserProfile,
+): PublicUserProfile => ({
   id: profile.id ?? 0,
-  username: profile.username ?? '',
+  username: profile.username ?? "",
   avatarUrl: profile.avatarUrl ?? profile.avatar_url,
   bio: profile.bio,
   followersCount: profile.followers_count ?? 0,
@@ -378,9 +429,11 @@ const normalizePublicUserProfile = (profile: RawPublicUserProfile): PublicUserPr
   reviews: (profile.reviews ?? []).map(normalizeReview),
 });
 
-const normalizeProfileUserSummary = (user: RawAuthUser): ProfileUserSummary => ({
+const normalizeProfileUserSummary = (
+  user: RawAuthUser,
+): ProfileUserSummary => ({
   id: user.id ?? 0,
-  username: user.username ?? '',
+  username: user.username ?? "",
   avatarUrl: user.avatarUrl ?? user.avatar_url,
 });
 
@@ -390,10 +443,12 @@ const toReviewRequestBody = (review: MediaReviewRequest) => ({
   visibility: review.visibility,
 });
 
-const getTargetData = (target: number | RawAdminReportTarget | null | undefined) => {
-  if (!target || typeof target === 'number') {
+const getTargetData = (
+  target: number | RawAdminReportTarget | null | undefined,
+) => {
+  if (!target || typeof target === "number") {
     return {
-      id: typeof target === 'number' ? target : 0,
+      id: typeof target === "number" ? target : 0,
       title: undefined,
       preview: undefined,
     };
@@ -407,63 +462,83 @@ const getTargetData = (target: number | RawAdminReportTarget | null | undefined)
 };
 
 const normalizeAdminReport = (report: RawAdminReport): AdminReport => {
-  const targetType = report.target_type ?? (report.post || report.post_id ? 'post' : 'comment');
-  const target = targetType === 'post'
-    ? getTargetData(report.post ?? report.post_id)
-    : getTargetData(report.comment ?? report.comment_id);
-  const reporter = typeof report.reporter === 'object'
-    ? report.reporter
-    : typeof report.user === 'object'
-      ? report.user
-      : undefined;
+  const targetType =
+    report.target_type ?? (report.post || report.post_id ? "post" : "comment");
+  const target =
+    targetType === "post"
+      ? getTargetData(report.post ?? report.post_id)
+      : getTargetData(report.comment ?? report.comment_id);
+  const reporter =
+    typeof report.reporter === "object"
+      ? report.reporter
+      : typeof report.user === "object"
+        ? report.user
+        : undefined;
 
   return {
     id: report.id,
-    type: report.report_type ?? report.type ?? 'spam',
-    reason: report.reason ?? '',
-    status: report.status ?? 'pending',
+    type: report.report_type ?? report.type ?? "spam",
+    reason: report.reason ?? "",
+    status: report.status ?? "pending",
     targetType,
     targetId: report.target_id ?? target.id,
     targetTitle: report.target_title ?? target.title,
     targetPreview: report.target_preview ?? target.preview,
     reporterId: report.reporter_id ?? report.user_id ?? reporter?.id ?? 0,
-    reporterUsername: report.reporter_username ?? report.username ?? reporter?.username ?? '',
-    processedBy: typeof report.processed_by === 'string' ? report.processed_by : report.processed_by?.username,
+    reporterUsername:
+      report.reporter_username ?? report.username ?? reporter?.username ?? "",
+    processedBy:
+      typeof report.processed_by === "string"
+        ? report.processed_by
+        : report.processed_by?.username,
     processedAt: report.processed_at ?? undefined,
-    createdAt: report.created_at ?? '',
+    createdAt: report.created_at ?? "",
   };
 };
 
-const normalizeAdminReports = (payload: RawAdminReportsPayload): AdminReport[] => {
-  const reports = Array.isArray(payload) ? payload : payload.results ?? payload.reports ?? [];
+const normalizeAdminReports = (
+  payload: RawAdminReportsPayload,
+): AdminReport[] => {
+  const reports = Array.isArray(payload)
+    ? payload
+    : (payload.results ?? payload.reports ?? []);
   return reports.map(normalizeAdminReport);
 };
 
-const getRequestUrl = (args: string | FetchArgs) => (typeof args === 'string' ? args : args.url);
+const getRequestUrl = (args: string | FetchArgs) =>
+  typeof args === "string" ? args : args.url;
 
 const isRefreshEligibleRequest = (args: string | FetchArgs) => {
   const url = getRequestUrl(args);
-  return !['/auth/token/', '/auth/register/', '/auth/token/refresh/', '/auth/logout/'].includes(url);
+  return ![
+    "/auth/token/",
+    "/auth/register/",
+    "/auth/token/refresh/",
+    "/auth/logout/",
+  ].includes(url);
 };
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
-
     const state = getState() as RootState;
-     if (state.auth.accessToken) {
-      headers.set("Authorization", `Bearer ${state.auth.accessToken}`)
+    if (state.auth.accessToken) {
+      headers.set("Authorization", `Bearer ${state.auth.accessToken}`);
     }
     const token = state.auth.accessToken;
-    headers.set('Accept-Language', state.ui.language);
+    headers.set("Accept-Language", state.ui.language);
     if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
+      headers.set("Authorization", `Bearer ${token}`);
     }
     return headers;
   },
 });
 
-const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = async (args, api, extraOptions) => {
+const baseQuery: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  AuthErrorResponse
+> = async (args, api, extraOptions) => {
   let result = await rawBaseQuery(args, api, extraOptions);
 
   if (
@@ -478,21 +553,27 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
     } else {
       const refreshResult = await rawBaseQuery(
         {
-          url: '/auth/token/refresh/',
-          method: 'POST',
+          url: "/auth/token/refresh/",
+          method: "POST",
           body: { refresh: refreshToken },
         },
         api,
-        extraOptions
+        extraOptions,
       );
       if (!refreshResult.data) {
         api.dispatch(logout());
-        return result;
+        return {
+          error: {
+            message: "Session expired. Please log in again.",
+          },
+        };
       }
 
       if (refreshResult.data) {
         try {
-          const tokens = normalizeRefreshTokens(refreshResult.data as RawAuthResponse);
+          const tokens = normalizeRefreshTokens(
+            refreshResult.data as RawAuthResponse,
+          );
           api.dispatch(updateTokens(tokens));
         } catch {
           api.dispatch(logout());
@@ -508,10 +589,10 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
 
   if (result.error) {
     const error = result.error as FetchBaseQueryError;
-    const data = 'data' in error ? error.data : undefined;
+    const data = "data" in error ? error.data : undefined;
     return {
       error: {
-        message: toMessage(data) ?? 'Request failed.',
+        message: toMessage(data) ?? "Request failed.",
         fields: toFieldErrors(data),
       },
     };
@@ -521,20 +602,28 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
 };
 
 export const authApi = createApi({
-  reducerPath: 'authApi',
+  reducerPath: "authApi",
   baseQuery,
-  tagTypes: ['AdminReports', 'AdminUsers', 'MediaReviews', 'MediaInteractions', 'Me', 'UserProfile', 'UserFollowers'],
+  tagTypes: [
+    "AdminReports",
+    "AdminUsers",
+    "MediaReviews",
+    "MediaInteractions",
+    "Me",
+    "UserProfile",
+    "UserFollowers",
+  ],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials, api) {
         const tokenResult = await rawBaseQuery(
           {
-            url: '/auth/login/',
-            method: 'POST',
+            url: "/auth/login/",
+            method: "POST",
             body: credentials,
           },
           api,
-          {}
+          {},
         );
 
         if (tokenResult.data) {
@@ -551,20 +640,20 @@ export const authApi = createApi({
           if (!tokenPayload.access) {
             return {
               error: {
-                message: 'Unexpected login response: missing access token.',
+                message: "Unexpected login response: missing access token.",
               },
             };
           }
 
           const userResult = await rawBaseQuery(
             {
-              url: '/users/profile/',
+              url: "/users/profile/",
               headers: {
                 Authorization: `Bearer ${tokenPayload.access}`,
               },
             },
             api,
-            {}
+            {},
           );
 
           if (userResult.data) {
@@ -579,12 +668,12 @@ export const authApi = createApi({
         }
 
         const error = (tokenResult.error ?? {}) as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Request failed.',
+            message: toMessage(data) ?? "Request failed.",
             fields: toFieldErrors(data),
-            status: typeof error.status === 'number' ? error.status : undefined,
+            status: typeof error.status === "number" ? error.status : undefined,
           },
         };
       },
@@ -592,9 +681,8 @@ export const authApi = createApi({
         try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data));
-        }
-        catch (e) {
-          void(e);
+        } catch (e) {
+          void e;
         }
       },
     }),
@@ -603,24 +691,25 @@ export const authApi = createApi({
         const result = await rawBaseQuery(
           {
             url: GOOGLE_AUTH_ENDPOINT,
-            method: 'POST',
+            method: "POST",
             body: { id_token: payload.id_token },
           },
           api,
-          {}
+          {},
         );
 
         if (result.data) {
           const rawData = result.data as RawAuthResponse;
-          const accessToken = rawData.access ?? rawData.access_token ?? rawData.token;
+          const accessToken =
+            rawData.access ?? rawData.access_token ?? rawData.token;
 
           const userResult = await rawBaseQuery(
             {
-              url: '/users/profile/',
+              url: "/users/profile/",
               headers: { Authorization: `Bearer ${accessToken}` },
             },
             api,
-            {}
+            {},
           );
 
           if (userResult.data) {
@@ -635,10 +724,10 @@ export const authApi = createApi({
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Google authentication failed.',
+            message: toMessage(data) ?? "Google authentication failed.",
             fields: toFieldErrors(data),
           },
         };
@@ -650,80 +739,80 @@ export const authApi = createApi({
     }),
     signup: builder.mutation<SignupResponse, SignupRequest>({
       async queryFn({ passwordConfirm, firstName, lastName, ...payload }, api) {
-      const result = await baseQuery(
-        {
-          url: '/auth/register/',
-          method: 'POST',
-          body: {
-            ...payload,
-            first_name: firstName,
-            last_name: lastName,
-            passwordConfirm,
+        const result = await baseQuery(
+          {
+            url: "/auth/register/",
+            method: "POST",
+            body: {
+              ...payload,
+              first_name: firstName,
+              last_name: lastName,
+              passwordConfirm,
+            },
           },
-        },
-        api,
-        {}
-      );
+          api,
+          {},
+        );
 
-      if (result.error) {
-        return { error: result.error };
-      }
+        if (result.error) {
+          return { error: result.error };
+        }
 
-      const data = result.data as RawAuthResponse;
+        const data = result.data as RawAuthResponse;
 
-      // 200 with error fields means validation failed
-      if (!data?.user || !data?.access) {
-        return {
-          error: {
-            message: toMessage(data) ?? 'Request failed.',
-            fields: toFieldErrors(data),
-          },
-        };
-      }
+        // 200 with error fields means validation failed
+        if (!data?.user || !data?.access) {
+          return {
+            error: {
+              message: toMessage(data) ?? "Request failed.",
+              fields: toFieldErrors(data),
+            },
+          };
+        }
 
-      return { data: normalizeSession(data) };
-    },
+        return { data: normalizeSession(data) };
+      },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data));
-        } catch{
+        } catch {
           // mutation errors are handled by the caller
-        } 
+        }
       },
     }),
     logout: builder.mutation<{ success: boolean }, string | null | undefined>({
       query: (refreshToken) => ({
-        url: '/auth/logout/',
-        method: 'POST',
+        url: "/auth/logout/",
+        method: "POST",
         body: { refresh: refreshToken },
       }),
     }),
     getMe: builder.query<AuthUser, void>({
       async queryFn(_arg, api) {
-        const result = await rawBaseQuery('/users/profile/', api, {});
+        const result = await rawBaseQuery("/users/profile/", api, {});
 
         if (result.data) {
           return { data: normalizeUserPayload(result.data as RawUserPayload) };
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Failed to load user.',
+            message: toMessage(data) ?? "Failed to load user.",
             fields: toFieldErrors(data),
           },
         };
       },
-      providesTags: ['Me'],
+      providesTags: ["Me"],
     }),
     updateMe: builder.mutation<AuthUser, Partial<AuthUser>>({
       async queryFn(payload, api) {
         const result = await rawBaseQuery(
           {
-            url: '/users/profile/',
-            method: 'PATCH',
+            url: "/users/profile/",
+            method: "PATCH",
             body: {
               username: payload.username,
               email: payload.email,
@@ -734,7 +823,7 @@ export const authApi = createApi({
             },
           },
           api,
-          {}
+          {},
         );
 
         if (result.data) {
@@ -744,26 +833,26 @@ export const authApi = createApi({
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Request failed.',
+            message: toMessage(data) ?? "Request failed.",
             fields: toFieldErrors(data),
           },
         };
       },
-      invalidatesTags: ['Me'],
+      invalidatesTags: ["Me"],
     }),
     updateAvatar: builder.mutation<AuthUser, string>({
       async queryFn(avatarUrl, api) {
         const result = await rawBaseQuery(
           {
-            url: '/users/profile/avatar/',
-            method: 'PATCH',
+            url: "/users/profile/avatar/",
+            method: "PATCH",
             body: { avatar_url: avatarUrl },
           },
           api,
-          {}
+          {},
         );
 
         if (result.data) {
@@ -771,10 +860,10 @@ export const authApi = createApi({
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Avatar update failed.',
+            message: toMessage(data) ?? "Avatar update failed.",
             fields: toFieldErrors(data),
           },
         };
@@ -782,14 +871,17 @@ export const authApi = createApi({
     }),
     deleteAccount: builder.mutation<void, void>({
       query: () => ({
-        url: '/users/profile/',
-        method: 'DELETE',
+        url: "/users/profile/",
+        method: "DELETE",
       }),
     }),
-    changePassword: builder.mutation<{ success: boolean }, PasswordChangeRequest>({
+    changePassword: builder.mutation<
+      { success: boolean },
+      PasswordChangeRequest
+    >({
       query: ({ currentPassword, newPassword }) => ({
-        url: '/auth/changePassword/',
-        method: 'POST',
+        url: "/auth/changePassword/",
+        method: "POST",
         body: {
           old_password: currentPassword,
           new_password: newPassword,
@@ -798,17 +890,17 @@ export const authApi = createApi({
     }),
     getMyPageDashboard: builder.query<MyPageDashboardData, void>({
       async queryFn(_arg, api) {
-        const result = await rawBaseQuery('/users/me/activity/', api, {});
+        const result = await rawBaseQuery("/users/me/activity/", api, {});
 
         if (result.data) {
           return { data: normalizeDashboard(result.data as RawDashboard) };
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Dashboard request failed.',
+            message: toMessage(data) ?? "Dashboard request failed.",
             fields: toFieldErrors(data),
           },
         };
@@ -816,17 +908,21 @@ export const authApi = createApi({
     }),
     getUserActivity: builder.query<MyPageDashboardData, number>({
       async queryFn(userId, api) {
-        const result = await rawBaseQuery(`/users/${userId}/activity/`, api, {});
+        const result = await rawBaseQuery(
+          `/users/${userId}/activity/`,
+          api,
+          {},
+        );
 
         if (result.data) {
           return { data: normalizeDashboard(result.data as RawDashboard) };
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'User activity request failed.',
+            message: toMessage(data) ?? "User activity request failed.",
             fields: toFieldErrors(data),
           },
         };
@@ -837,23 +933,33 @@ export const authApi = createApi({
         const result = await rawBaseQuery(`/users/profile/${userId}/`, api, {});
 
         if (result.data) {
-          return { data: normalizePublicUserProfile(result.data as RawPublicUserProfile) };
+          return {
+            data: normalizePublicUserProfile(
+              result.data as RawPublicUserProfile,
+            ),
+          };
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Profile request failed.',
+            message: toMessage(data) ?? "Profile request failed.",
             fields: toFieldErrors(data),
           },
         };
       },
-      providesTags: (_result, _error, userId) => [{ type: 'UserProfile', id: userId }],
+      providesTags: (_result, _error, userId) => [
+        { type: "UserProfile", id: userId },
+      ],
     }),
     getUserFollowers: builder.query<ProfileUserSummary[], number>({
       async queryFn(userId, api) {
-        const result = await rawBaseQuery(`/users/${userId}/followers/`, api, {});
+        const result = await rawBaseQuery(
+          `/users/${userId}/followers/`,
+          api,
+          {},
+        );
 
         if (result.data) {
           const payload = result.data as RawUserSummaryPayload;
@@ -863,30 +969,32 @@ export const authApi = createApi({
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Followers request failed.',
+            message: toMessage(data) ?? "Followers request failed.",
             fields: toFieldErrors(data),
           },
         };
       },
-      providesTags: (_result, _error, userId) => [{ type: 'UserFollowers', id: userId }],
+      providesTags: (_result, _error, userId) => [
+        { type: "UserFollowers", id: userId },
+      ],
     }),
     followUser: builder.mutation<void, number>({
       async queryFn(userId, api) {
         const result = await rawBaseQuery(
-          { url: `/users/${userId}/follow/`, method: 'POST' },
+          { url: `/users/${userId}/follow/`, method: "POST" },
           api,
-          {}
+          {},
         );
 
         if (result.error) {
           const error = result.error as FetchBaseQueryError;
-          const data = 'data' in error ? error.data : undefined;
+          const data = "data" in error ? error.data : undefined;
           return {
             error: {
-              message: toMessage(data) ?? 'Follow request failed.',
+              message: toMessage(data) ?? "Follow request failed.",
               fields: toFieldErrors(data),
             },
           };
@@ -896,12 +1004,12 @@ export const authApi = createApi({
       },
       async onQueryStarted(userId, { dispatch, queryFulfilled }) {
         const patch = dispatch(
-          authApi.util.updateQueryData('getPublicProfile', userId, (draft) => {
+          authApi.util.updateQueryData("getPublicProfile", userId, (draft) => {
             if (!draft.isFollowing) {
               draft.isFollowing = true;
               draft.followersCount += 1;
             }
-          })
+          }),
         );
 
         try {
@@ -911,24 +1019,24 @@ export const authApi = createApi({
         }
       },
       invalidatesTags: (_result, _error, userId) => [
-        { type: 'UserProfile', id: userId },
-        { type: 'UserFollowers', id: userId },
+        { type: "UserProfile", id: userId },
+        { type: "UserFollowers", id: userId },
       ],
     }),
     unfollowUser: builder.mutation<void, number>({
       async queryFn(userId, api) {
         const result = await rawBaseQuery(
-          { url: `/users/${userId}/follow/`, method: 'DELETE' },
+          { url: `/users/${userId}/follow/`, method: "DELETE" },
           api,
-          {}
+          {},
         );
 
         if (result.error) {
           const error = result.error as FetchBaseQueryError;
-          const data = 'data' in error ? error.data : undefined;
+          const data = "data" in error ? error.data : undefined;
           return {
             error: {
-              message: toMessage(data) ?? 'Unfollow request failed.',
+              message: toMessage(data) ?? "Unfollow request failed.",
               fields: toFieldErrors(data),
             },
           };
@@ -938,12 +1046,12 @@ export const authApi = createApi({
       },
       async onQueryStarted(userId, { dispatch, queryFulfilled }) {
         const patch = dispatch(
-          authApi.util.updateQueryData('getPublicProfile', userId, (draft) => {
+          authApi.util.updateQueryData("getPublicProfile", userId, (draft) => {
             if (draft.isFollowing) {
               draft.isFollowing = false;
               draft.followersCount = Math.max(0, draft.followersCount - 1);
             }
-          })
+          }),
         );
 
         try {
@@ -953,152 +1061,211 @@ export const authApi = createApi({
         }
       },
       invalidatesTags: (_result, _error, userId) => [
-        { type: 'UserProfile', id: userId },
-        { type: 'UserFollowers', id: userId },
+        { type: "UserProfile", id: userId },
+        { type: "UserFollowers", id: userId },
       ],
     }),
     getMediaReviews: builder.query<MediaReview[], number>({
       async queryFn(mediaId, api) {
-        const result = await rawBaseQuery(`/media/${mediaId}/reviews/`, api, {});
+        const result = await rawBaseQuery(
+          `/media/${mediaId}/reviews/`,
+          api,
+          {},
+        );
 
         if (result.data) {
           return { data: normalizeReviewList(result.data as RawReviewPayload) };
         }
 
         const error = result.error as FetchBaseQueryError;
-        if ('status' in error && error.status === 500) {
+        if ("status" in error && error.status === 500) {
           return { data: [] };
         }
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Review request failed.',
+            message: toMessage(data) ?? "Review request failed.",
             fields: toFieldErrors(data),
           },
         };
       },
-      providesTags: (_result, _error, mediaId) => [{ type: 'MediaReviews', id: mediaId }],
+      providesTags: (_result, _error, mediaId) => [
+        { type: "MediaReviews", id: mediaId },
+      ],
     }),
-    createMediaReview: builder.mutation<MediaReview, { mediaId: number; review: MediaReviewRequest }>({
+    createMediaReview: builder.mutation<
+      MediaReview,
+      { mediaId: number; review: MediaReviewRequest }
+    >({
       async queryFn({ mediaId, review }, api) {
         const result = await rawBaseQuery(
           {
             url: `/media/${mediaId}/reviews/`,
-            method: 'POST',
+            method: "POST",
             body: toReviewRequestBody(review),
           },
           api,
-          {}
+          {},
         );
 
         if (result.data) {
-          return { data: normalizeReviewPayload(result.data as RawReviewPayload) };
+          return {
+            data: normalizeReviewPayload(result.data as RawReviewPayload),
+          };
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Review save failed.',
+            message: toMessage(data) ?? "Review save failed.",
             fields: toFieldErrors(data),
           },
         };
       },
-      invalidatesTags: (_result, _error, { mediaId }) => [{ type: 'MediaReviews', id: mediaId }],
+      invalidatesTags: (_result, _error, { mediaId }) => [
+        { type: "MediaReviews", id: mediaId },
+      ],
     }),
-    updateMediaReview: builder.mutation<MediaReview, { mediaId: number; reviewId: number; review: MediaReviewRequest }>({
+    updateMediaReview: builder.mutation<
+      MediaReview,
+      { mediaId: number; reviewId: number; review: MediaReviewRequest }
+    >({
       async queryFn({ mediaId, reviewId, review }, api) {
         const result = await rawBaseQuery(
           {
             url: `/media/${mediaId}/reviews/${reviewId}/`,
-            method: 'PATCH',
+            method: "PATCH",
             body: toReviewRequestBody(review),
           },
           api,
-          {}
+          {},
         );
 
         if (result.data) {
-          return { data: normalizeReviewPayload(result.data as RawReviewPayload) };
+          return {
+            data: normalizeReviewPayload(result.data as RawReviewPayload),
+          };
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Review update failed.',
+            message: toMessage(data) ?? "Review update failed.",
             fields: toFieldErrors(data),
           },
         };
       },
-      invalidatesTags: (_result, _error, { mediaId }) => [{ type: 'MediaReviews', id: mediaId }],
+      invalidatesTags: (_result, _error, { mediaId }) => [
+        { type: "MediaReviews", id: mediaId },
+      ],
     }),
-    deleteMediaReview: builder.mutation<void, { mediaId: number; reviewId: number }>({
+    deleteMediaReview: builder.mutation<
+      void,
+      { mediaId: number; reviewId: number }
+    >({
       query: ({ mediaId, reviewId }) => ({
         url: `/media/${mediaId}/reviews/${reviewId}/`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: (_result, _error, { mediaId }) => [{ type: 'MediaReviews', id: mediaId }],
+      invalidatesTags: (_result, _error, { mediaId }) => [
+        { type: "MediaReviews", id: mediaId },
+      ],
     }),
     getMediaInteractions: builder.query<MediaInteraction[], number>({
       async queryFn(mediaId, api) {
-        const result = await rawBaseQuery(`/media/${mediaId}/interactions/`, api, {});
+        const result = await rawBaseQuery(
+          `/media/${mediaId}/interactions/`,
+          api,
+          {},
+        );
         if (result.data) {
           const data = result.data as { interactions: MediaInteraction[] };
           return { data: data.interactions ?? [] };
         }
         return { data: [] };
       },
-      providesTags: (_result, _error, mediaId) => [{ type: 'MediaInteractions', id: mediaId }],
+      providesTags: (_result, _error, mediaId) => [
+        { type: "MediaInteractions", id: mediaId },
+      ],
     }),
 
-    toggleMediaInteraction: builder.mutation<void, { mediaId: number; action: 'like' | 'dislike' | 'watched' | 'watchlist'; active: boolean }>({
+    toggleMediaInteraction: builder.mutation<
+      void,
+      {
+        mediaId: number;
+        action: "like" | "dislike" | "watched" | "watchlist";
+        active: boolean;
+      }
+    >({
       async queryFn({ mediaId, action, active }, api) {
         const result = await rawBaseQuery(
           active
-            ? { url: `/media/${mediaId}/interactions/`, method: 'POST', body: { action } }
-            : { url: `/media/${mediaId}/interactions/${action}/`, method: 'DELETE' },
+            ? {
+                url: `/media/${mediaId}/interactions/`,
+                method: "POST",
+                body: { action },
+              }
+            : {
+                url: `/media/${mediaId}/interactions/${action}/`,
+                method: "DELETE",
+              },
           api,
-          {}
+          {},
         );
         if (result.error) {
           const error = result.error as FetchBaseQueryError;
-          const data = 'data' in error ? error.data : undefined;
-          return { error: { message: toMessage(data) ?? 'Interaction failed.', fields: toFieldErrors(data) } };
+          const data = "data" in error ? error.data : undefined;
+          return {
+            error: {
+              message: toMessage(data) ?? "Interaction failed.",
+              fields: toFieldErrors(data),
+            },
+          };
         }
         return { data: undefined };
       },
     }),
     getAdminReports: builder.query<AdminReport[], AdminReportStatus | void>({
       async queryFn(status, api) {
-        const query = status ? `?status=${status}` : '';
-        const result = await rawBaseQuery(`/community/reports/${query}`, api, {});
+        const query = status ? `?status=${status}` : "";
+        const result = await rawBaseQuery(
+          `/community/reports/${query}`,
+          api,
+          {},
+        );
 
         if (result.data) {
-          return { data: normalizeAdminReports(result.data as RawAdminReportsPayload) };
+          return {
+            data: normalizeAdminReports(result.data as RawAdminReportsPayload),
+          };
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Admin reports request failed.',
+            message: toMessage(data) ?? "Admin reports request failed.",
             fields: toFieldErrors(data),
           },
         };
       },
-      providesTags: ['AdminReports'],
+      providesTags: ["AdminReports"],
     }),
-    processAdminReport: builder.mutation<AdminReport, { reportId: number; status: Exclude<AdminReportStatus, 'pending'> }>({
+    processAdminReport: builder.mutation<
+      AdminReport,
+      { reportId: number; status: Exclude<AdminReportStatus, "pending"> }
+    >({
       async queryFn({ reportId, status }, api) {
         const result = await rawBaseQuery(
           {
             url: `/community/reports/${reportId}/`,
-            method: 'PATCH',
-            body: { action: status === 'approved' ? 'approve' : 'reject' },
+            method: "PATCH",
+            body: { action: status === "approved" ? "approve" : "reject" },
           },
           api,
-          {}
+          {},
         );
 
         if (result.data) {
@@ -1106,22 +1273,22 @@ export const authApi = createApi({
         }
 
         const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+        const data = "data" in error ? error.data : undefined;
         return {
           error: {
-            message: toMessage(data) ?? 'Report update failed.',
+            message: toMessage(data) ?? "Report update failed.",
             fields: toFieldErrors(data),
           },
         };
       },
-      invalidatesTags: ['AdminReports'],
+      invalidatesTags: ["AdminReports"],
     }),
     banAdminUser: builder.mutation<void, number>({
       query: (userId) => ({
         url: `/users/${userId}/ban/`,
-        method: 'PUT',
+        method: "PUT",
       }),
-      invalidatesTags: ['AdminUsers'],
+      invalidatesTags: ["AdminUsers"],
     }),
   }),
 });

@@ -53,7 +53,10 @@ export const chatApi = createApi({
       }),
       invalidatesTags: ["ChatRoom"],
     }),
-    inviteToRoom: builder.mutation<void, { roomId: number; userId: number }>({
+    inviteToRoom: builder.mutation<
+      { error?: string },
+      { roomId: number; userId: number }
+    >({
       query: ({ roomId, userId }) => ({
         url: `/chat/rooms/${roomId}/invite/`,
         method: "POST",
