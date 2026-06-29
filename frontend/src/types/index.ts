@@ -27,6 +27,12 @@ export interface PublicUserProfile {
   dateJoined?: string;
 }
 
+export interface ProfileUserSummary {
+  id: number;
+  username: string;
+  avatarUrl?: string;
+}
+
 export interface StoredUser extends AuthUser {
   password: string;
 }
