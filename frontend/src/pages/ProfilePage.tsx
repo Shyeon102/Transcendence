@@ -485,7 +485,7 @@ export default function ProfilePage() {
               closeEditLabel={t("home.closeEdit")}
               displayName={profileDisplayName}
               displayUsername={displayUsername}
-              userId={displayedProfileUserId}
+              userId={viewedProfile?.id ?? profileUser.id}
               editProfileLabel={t("home.editProfile")}
               followLabel={t("home.follow")}
               initials={initials}

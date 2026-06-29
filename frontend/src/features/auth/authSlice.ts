@@ -41,6 +41,14 @@ const authSlice = createSlice({
       });
     },
     updateTokens: (state, action: PayloadAction<RefreshTokenResponse>) => {
+      const { token } = action.payload;
+      if (!token || token === "invalid_token") {
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.isAuthenticated = false;
+        state.user = null;
+        return;
+      }
       state.accessToken = action.payload.token;
       if (action.payload.refreshToken) {
         state.refreshToken = action.payload.refreshToken;

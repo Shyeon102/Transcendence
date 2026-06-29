@@ -326,9 +326,10 @@ const normalizeDashboardReview = (review: RawActivityReview): DashboardReview =>
 
 const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
   reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
+  // 마이페이지 '찜 목록'은 사실상 '시청 완료(watched)' 목록이므로 watched를 매핑한다.
   watchlist:
     payload.watchlist ??
-    payload.interactions?.watchlist?.map((item) => item.media_title ?? `Media #${item.media_id ?? '-'}`) ??
+    payload.interactions?.watched?.map((item) => item.media_title ?? `Media #${item.media_id ?? '-'}`) ??
     [],
   activities: payload.activities ?? payload.activity ?? payload.recent_activity ?? [],
 });
@@ -445,7 +446,11 @@ const isRefreshEligibleRequest = (args: string | FetchArgs) => {
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
+
     const state = getState() as RootState;
+     if (state.auth.accessToken) {
+      headers.set("Authorization", `Bearer ${state.auth.accessToken}`)
+    }
     const token = state.auth.accessToken;
     headers.set('Accept-Language', state.ui.language);
     if (token) {
@@ -477,6 +482,10 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
         api,
         extraOptions
       );
+      if (!refreshResult.data) {
+        api.dispatch(logout());
+        return result;
+      }
 
       if (refreshResult.data) {
         try {

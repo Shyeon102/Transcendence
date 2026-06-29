@@ -29,7 +29,6 @@ export interface CommunityComment {
   is_hidden: boolean;
   is_liked?: boolean;
   created_at: string;
-  replies?: CommunityComment[];
 }
 
 export interface PostListResponse {
