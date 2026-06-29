@@ -298,9 +298,17 @@ export default function ProfilePage() {
       setAvatarPreview(null);
       setIsEditing(false);
     } catch (err) {
-      // 저장 실패: 에러를 노출하고 편집 패널은 열어둬 사용자가 수정/재시도할 수 있게 한다.
-      const apiError = err as { message?: string };
-      setSaveError(apiError.message ?? t('common.error'));
+      // 저장 실패: 편집 패널은 열어두고, 알려진 백엔드 영문 에러는 i18n으로 현지화해 노출.
+      const message = (err as { message?: string }).message ?? '';
+      let localized = message || t('common.error');
+      if (/already exists/i.test(message)) {
+        localized = t('validation.usernameTaken');
+      } else if (/valid url/i.test(message)) {
+        localized = t('validation.avatarUrlInvalid');
+      } else if (/may not be blank/i.test(message)) {
+        localized = t('validation.usernameRequired');
+      }
+      setSaveError(localized);
     }
   };
 
