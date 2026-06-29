@@ -10,7 +10,6 @@ export interface CommunityPost {
   media_files: string[];
   like_count: number;
   report_count: number;
-  view_count: number;
   is_hidden: boolean;
   is_liked?: boolean;
   created_at: string;
@@ -30,6 +29,7 @@ export interface CommunityComment {
   is_hidden: boolean;
   is_liked?: boolean;
   created_at: string;
+  replies?: CommunityComment[];
 }
 
 export interface PostListResponse {

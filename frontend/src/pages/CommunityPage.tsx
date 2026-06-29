@@ -153,7 +153,6 @@ export default function CommunityPage() {
                         <span>{postDate(post.created_at)}</span>
                         <span className="ml-auto flex gap-3">
                           <span>♥ {post.like_count}</span>
-                          <span>○ {post.view_count}</span>
                         </span>
                       </div>
                     </div>
