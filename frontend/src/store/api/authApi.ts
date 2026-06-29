@@ -513,22 +513,11 @@ export const authApi = createApi({
         );
 
         if (tokenResult.data) {
-          if (tokenResult.error) {
-            const err = tokenResult.error as any;
-
-            return {
-              error: {
-                message: toMessage(err.data) ?? "Login failed",
-                status: err.status,
-              },
-            };
-          }
-
           const tokenPayload = tokenResult.data as RawTokenResponse;
-          if (!tokenPayload?.access) {
+          if (!tokenPayload.access) {
             return {
               error: {
-                message: "Invalid login",
+                message: 'Login response is missing an access token.',
               },
             };
           }
@@ -566,11 +555,8 @@ export const authApi = createApi({
         };
       },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try {
-            const { data } = await queryFulfilled;
-            dispatch(setCredentials(data));
-          } catch (err) {
-        }
+        const { data } = await queryFulfilled;
+        dispatch(setCredentials(data));
       },
     }),
     googleLogin: builder.mutation<LoginResponse, GoogleLoginRequest>({
