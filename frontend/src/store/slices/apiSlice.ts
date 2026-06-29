@@ -58,7 +58,6 @@ const baseQuery = fetchBaseQuery({
         api,
         extraOptions
       )
-
       if (refreshResult.data) {
         // 새 토큰 받으면 스토어에 저장
         const { access, refresh } = refreshResult.data as RefreshResponse;
