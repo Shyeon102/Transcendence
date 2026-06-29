@@ -12,6 +12,7 @@ import { useI18n } from "../lib/i18n";
 import type { RootState } from "../store";
 import {
   useFollowUserMutation,
+  useGetMeQuery,
   useGetPublicProfileQuery,
   useUnfollowUserMutation,
   useGetMyPageDashboardQuery,
@@ -136,6 +137,14 @@ export default function ProfilePage() {
     skip: !shouldFetchViewedProfile,
   });
 
+  const { data: meProfile } = useGetMeQuery(undefined, {
+    pollingInterval: 3000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+    refetchOnReconnect: true,
+    skip: !user || !isOwnProfile,
+  });
+
   const [createReview] = useCreateMediaReviewMutation();
 
   const [deleteReviewMutation] = useDeleteMediaReviewMutation();
@@ -166,11 +175,17 @@ export default function ProfilePage() {
     }
   }, [dispatch, dashboardUser]);
 
+  useEffect(() => {
+    if (meProfile) {
+      dispatch(updateProfile(meProfile));
+    }
+  }, [dispatch, meProfile]);
+
   if (!user) {
     return null;
   }
 
-  const profileUser = dashboardUser ?? user;
+  const profileUser = meProfile ?? dashboardUser ?? user;
   const profileUserWithDates = profileUser as AuthUserWithDates;
 
   const safeLanguage = Object.prototype.hasOwnProperty.call(

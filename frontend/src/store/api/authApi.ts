@@ -255,6 +255,8 @@ const normalizeUser = (user: RawAuthUser): AuthUser => ({
   favoriteTitles: user.favoriteTitles ?? user.favorite_titles,
   favoriteCountries: user.favoriteCountries ?? user.favorite_countries,
   isStaff: user.isStaff ?? user.is_staff,
+  followersCount: user.followersCount ?? user.followers_count,
+  followingCount: user.followingCount ?? user.following_count,
   dateJoined: user.dateJoined ?? user.date_joined,
 });
 
