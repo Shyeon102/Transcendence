@@ -40,7 +40,7 @@ The team split work by feature area. Backend, frontend, AI, and DevOps owners co
 - Branch strategy: `feature/<name>`, `fix/<name>`, `test/<name>`, `docs/<name>`
 - Meetings: requirement analysis, API contract checks, progress syncs, pre-integration bug reviews
 - Project management tools: GitHub Issues/Projects, GitHub Pull Requests, GitHub Actions
-- Communication channels: Discord for meetings, PR notifications, and asynchronous questions
+- Communication channels: Discord for meetings, PR notifications, and asynchronous questions 
 - Quality control: backend lint/test, frontend lint, Docker image build checks, PR reviews
 
 ## Technical Stack
@@ -142,7 +142,6 @@ Scoring rule: Major module = 2 points, Minor module = 1 point.
 | Major | Frontend + Backend Framework | 2 | Provides a clear API-driven SPA architecture | React/TypeScript/Vite frontend with a Django REST Framework backend | `jihyeki2`, `jaoh`, `llarrey` |
 | Major | Real-time Features | 2 | Enables immediate user-to-user interaction | Django Channels, Redis channel layer, WebSocket chat rooms | `llarrey`, `seong-ki`, `jaoh` |
 | Major | User Interaction | 2 | Core relationship and community behavior for the service | Profiles, reviews, follows, likes, reports, chat | `llarrey`, `jihyeki2`, `jaoh` |
-| Major | Public API | 2 | Separates frontend/backend concerns and supports extensibility | REST API under `/api/auth`, `/api/users`, `/api/media`, `/api/community`, `/api/chat`, `/api/ai` | `llarrey`, `seong-ki` |
 | Major | Standard User Management & Authentication | 2 | Provides access control and the foundation for personalization | Django custom user, Simple JWT, refresh token blacklist, password change | `llarrey`, `jihyeki2` |
 | Major | Recommendation System | 2 | Provides a personalized experience aligned with the Surprise topic | SVD-based CF, user/media embedding CBF, Redis caching, Celery tasks | `thelee`, `seong-ki` |
 | Major | RAG System | 2 | Enables natural-language media discovery | Gemini query parsing/embedding, pgvector cosine search, RAG recommendation endpoint | `thelee` |
@@ -152,7 +151,7 @@ Scoring rule: Major module = 2 points, Minor module = 1 point.
 | Minor | Multiple Languages | 1 | Improves accessibility for international evaluators and users | `ko`, `en`, `fr` locale JSON files and language switcher UI | `jihyeki2`, `jaoh` |
 | Minor | Health Check & Backup | 1 | Improves operational stability and recoverability | `/health/`, `/health/live/`, Redis/Celery/DB checks, backup/restore scripts | `seong-ki` |
 
-Total: 7 Major modules x 2 points = 14 points, 5 Minor modules x 1 point = 5 points, for a total of 19 points. The officially recognized score may vary depending on the subject rules and bonus cap.
+Total: 6 Major modules x 2 points = 14 points, 5 Minor modules x 1 point = 5 points, for a total of 17 points. The officially recognized score may vary depending on the subject rules and bonus cap.
 
 ## Individual Contributions
 

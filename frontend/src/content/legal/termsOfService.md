@@ -103,5 +103,5 @@ Continued use of the service after changes means you accept the updated Terms.
 
 For questions about these Terms, contact:
 
-Transcendence Team
-[contact email]
+Global Warming Team
+lucas.larrey@gmail.com
