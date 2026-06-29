@@ -235,6 +235,7 @@
     "title": "Mon activite",
     "description": "Retrouvez vos critiques, vos titres enregistres et votre activite recente au meme endroit.",
     "reviewSection": "Mes critiques",
+    "reviewSearchPlaceholder": "Rechercher des critiques par titre",
     "watchlistSection": "Liste a voir",
     "recentActivity": "Activite recente",
     "entries": "entrees",

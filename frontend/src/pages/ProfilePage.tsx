@@ -152,6 +152,7 @@ export default function ProfilePage() {
   const dashboardReviews = dashboardData?.reviews ?? EMPTY_REVIEWS;
 
   const [activeTab, setActiveTab] = useState<TabKey>("reviews");
+  const [reviewSearch, setReviewSearch] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [saveError, setSaveError] = useState('');
@@ -240,6 +241,12 @@ export default function ProfilePage() {
   const visibleReviews = isPublicProfile
     ? (viewedProfile?.reviews.map(toReviewItem) ?? [])
     : userReviews.map((r) => ({ ...r, isOwn: true }));
+
+  // 리뷰를 미디어 제목으로 검색 (ReviewItem.title = mediaTitle).
+  const reviewQuery = reviewSearch.trim().toLowerCase();
+  const searchedReviews = reviewQuery
+    ? visibleReviews.filter((r) => r.title.toLowerCase().includes(reviewQuery))
+    : visibleReviews;
 
   const userWatchlist: readonly (readonly [string, string])[] = [];
 
@@ -477,10 +484,18 @@ export default function ProfilePage() {
                       <ReviewForm onSubmit={handleReviewSubmit} />
                     ) : null}
 
+                    <input
+                      type="search"
+                      value={reviewSearch}
+                      onChange={(e) => setReviewSearch(e.target.value)}
+                      placeholder={t("mypage.reviewSearchPlaceholder")}
+                      className="mb-4 w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[12px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
+                    />
+
                     <ReviewList
                       onDelete={isOwnProfile ? handleReviewDelete : undefined}
                       onEdit={isOwnProfile ? handleReviewEdit : undefined}
-                      reviews={visibleReviews}
+                      reviews={searchedReviews}
                     />
                   </>
                 ) : null}

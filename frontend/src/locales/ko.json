@@ -235,6 +235,7 @@
     "title": "내 활동",
     "description": "내 리뷰, 찜한 작품, 최근 활동을 한 화면에서 확인합니다.",
     "reviewSection": "내 리뷰",
+    "reviewSearchPlaceholder": "작품 제목으로 리뷰 검색",
     "watchlistSection": "찜 목록",
     "recentActivity": "최근 활동",
     "entries": "개",

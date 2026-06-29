@@ -155,6 +155,11 @@ TEMPLATES = [
     },
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://localhost",
+    "https://localhost",
+]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -170,8 +175,8 @@ MIDDLEWARE = [
 
 SECURE_SSL_REDIRECT = False
 CORS_ALLOWED_ORIGINS = [
-    "https://localhost:5173",
-    "http://localhost:5173",
+    "https://localhost",
+    "https://localhost",
 ]
 
 ROOT_URLCONF = "project.urls"

@@ -24,7 +24,7 @@ type MediaSearchResponse = {
 };
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://localhost:8443/api',
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://localhost/api',
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as RootState
     const token = state.auth.accessToken
