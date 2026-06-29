@@ -75,6 +75,8 @@
     "communityPosts": "Posts de la communaute",
     "watchlist": "Visionnés",
     "followers": "Abonnes",
+    "followersEmpty": "Aucun abonne pour le moment.",
+    "followersLoadError": "Impossible de charger les abonnes.",
     "follow": "Suivre",
     "following": "Abonne",
     "profileLoadError": "Impossible de charger le profil.",

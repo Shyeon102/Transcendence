@@ -1,7 +1,7 @@
 import ReviewEditModal from "../components/ReviewEditModal";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import ProfileCard from "../components/ProfileCard";
 import ProfileEditForm from "../components/ProfileEditForm";
 import ReviewForm from "../components/ReviewForm";
@@ -14,6 +14,7 @@ import {
   useFollowUserMutation,
   useGetMeQuery,
   useGetPublicProfileQuery,
+  useGetUserFollowersQuery,
   useUnfollowUserMutation,
   useGetMyPageDashboardQuery,
   useCreateMediaReviewMutation,
@@ -24,7 +25,7 @@ import {
 import { updateProfile } from "../store/slices/authSlice";
 import type { MediaReview } from "../types";
 
-type TabKey = "reviews" | "watchlist";
+type TabKey = "reviews" | "watchlist" | "followers";
 
 const toReviewItem = (review: MediaReview): ReviewItem => ({
   id: String(review.id),
@@ -105,6 +106,7 @@ export default function ProfilePage() {
   const [followUser, followState] = useFollowUserMutation();
   const [unfollowUser, unfollowState] = useUnfollowUserMutation();
   const [editingReview, setEditingReview] = useState<ReviewItem | null>(null);
+  const [activeTab, setActiveTab] = useState<TabKey>("reviews");
 
   const defaultProfileBio = t("home.profileBioDefault");
 
@@ -118,6 +120,8 @@ export default function ProfilePage() {
 
   const routeUserId =
     profileId && /^\d+$/.test(profileId) ? Number(profileId) : undefined;
+
+  const followerListUserId = isPublicProfile ? routeUserId : user?.id;
 
   const cannotLoadPublicProfile = isPublicProfile && !routeUserId;
 
@@ -156,11 +160,18 @@ export default function ProfilePage() {
       skip: !user || !isOwnProfile,
     });
 
+  const {
+    data: followers = [],
+    isError: isFollowersError,
+    isFetching: isFollowersFetching,
+  } = useGetUserFollowersQuery(followerListUserId ?? 0, {
+    skip: !user || !followerListUserId || activeTab !== "followers",
+  });
+
   const dashboardData = dashboard as DashboardShape | undefined;
   const dashboardUser = dashboardData?.user ?? null;
   const dashboardReviews = dashboardData?.reviews ?? EMPTY_REVIEWS;
 
-  const [activeTab, setActiveTab] = useState<TabKey>("reviews");
   const [reviewSearch, setReviewSearch] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -361,10 +372,29 @@ export default function ProfilePage() {
   };
 
   const profileStats = [
-    { label: t("home.reviews"), value: String(visibleReviews.length) },
-    { label: t("home.watchlist"), value: String(userWatchlist.length) },
-    { label: t("home.followers"), value: String(displayedFollowersCount) },
+    {
+      id: "reviews",
+      label: t("home.reviews"),
+      value: String(visibleReviews.length),
+    },
+    {
+      id: "watchlist",
+      label: t("home.watchlist"),
+      value: String(userWatchlist.length),
+    },
+    {
+      id: "followers",
+      clickable: true,
+      label: t("home.followers"),
+      value: String(displayedFollowersCount),
+    },
   ];
+
+  const handleStatClick = (statId: string) => {
+    if (statId === "followers") {
+      setActiveTab("followers");
+    }
+  };
 
   const handleReviewSubmit = async (review: {
     mediaId: number;
@@ -460,6 +490,7 @@ export default function ProfilePage() {
               isFollowLoading={followState.isLoading || unfollowState.isLoading}
               isFollowing={viewedProfile?.isFollowing ?? false}
               joinedYearLabel={joinedLabel}
+              onStatClick={handleStatClick}
               onToggleEdit={handleToggleEdit}
               onToggleFollow={handleToggleFollow}
               stats={profileStats}
@@ -480,6 +511,11 @@ export default function ProfilePage() {
                       "watchlist",
                       t("home.watchlist"),
                       String(userWatchlist.length),
+                    ],
+                    [
+                      "followers",
+                      t("home.followers"),
+                      String(displayedFollowersCount),
                     ],
                   ].map(([key, label, count]) => (
                     <button
@@ -548,6 +584,55 @@ export default function ProfilePage() {
                     )}
                   </div>
                 ) : null}
+
+                {activeTab === "followers" ? (
+                  <div className="grid gap-3">
+                    {isFollowersFetching ? (
+                      <EmptyState title={t("main.loading")} />
+                    ) : isFollowersError ? (
+                      <EmptyState title={t("home.followersLoadError")} />
+                    ) : followers.length ? (
+                      followers.map((follower) => {
+                        const followerInitials =
+                          follower.username.slice(0, 2).toUpperCase() || "U";
+                        const profilePath =
+                          follower.id === user.id
+                            ? "/profile"
+                            : `/profile/${follower.id}`;
+
+                        return (
+                          <Link
+                            key={follower.id}
+                            to={profilePath}
+                            className="flex items-center gap-4 border border-[#f0ead0]/10 bg-[#141412] px-4 py-3 transition hover:border-[#f0ead0]/25 hover:bg-[#1c1c19]"
+                          >
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden border border-[#f0ead0]/15 bg-[#1c1c19] font-['Bebas_Neue'] text-xl tracking-[0.04em] text-[#c8c2a8]">
+                              {follower.avatarUrl ? (
+                                <img
+                                  src={follower.avatarUrl}
+                                  alt={follower.username}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                followerInitials
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold tracking-[0.04em] text-[#f0ead0]">
+                                {follower.username}
+                              </p>
+                              <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-[#8a8474]">
+                                ID: {follower.id}
+                              </p>
+                            </div>
+                          </Link>
+                        );
+                      })
+                    ) : (
+                      <EmptyState title={t("home.followersEmpty")} />
+                    )}
+                  </div>
+                ) : null}
               </div>
 
               {isOwnProfile ? (
@@ -581,11 +666,7 @@ export default function ProfilePage() {
                   toggles={[]}
                   usernameLabel={t("home.username")}
                 />
-              ) : (
-                <aside className="border border-[#f0ead0]/10 bg-[#141412] p-6 text-sm leading-6 text-[#8a8474]">
-                  {t("home.publicProfilePlaceholder")}
-                </aside>
-              )}
+              ) : null}
             </div>
           </>
         ) : null}

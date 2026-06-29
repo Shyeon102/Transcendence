@@ -23,6 +23,7 @@ import type {
   MediaInteraction,
   MyPageDashboardData,
   PasswordChangeRequest,
+  ProfileUserSummary,
   PublicUserProfile,
   RefreshTokenResponse,
   SignupRequest,
@@ -144,6 +145,10 @@ type RawPublicUserProfile = RawAuthUser & {
   following_count?: number;
   is_following?: boolean;
   reviews?: RawReview[];
+};
+
+type RawUserSummaryPayload = {
+  followers?: RawAuthUser[];
 };
 
 type RawAdminReportTarget = {
@@ -370,6 +375,12 @@ const normalizePublicUserProfile = (profile: RawPublicUserProfile): PublicUserPr
   reviews: (profile.reviews ?? []).map(normalizeReview),
 });
 
+const normalizeProfileUserSummary = (user: RawAuthUser): ProfileUserSummary => ({
+  id: user.id ?? 0,
+  username: user.username ?? '',
+  avatarUrl: user.avatarUrl ?? user.avatar_url,
+});
+
 const toReviewRequestBody = (review: MediaReviewRequest) => ({
   rating: review.rating,
   content: review.content,
@@ -509,7 +520,7 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery,
-  tagTypes: ['AdminReports', 'AdminUsers', 'MediaReviews', 'MediaInteractions', 'Me', 'UserProfile'],
+  tagTypes: ['AdminReports', 'AdminUsers', 'MediaReviews', 'MediaInteractions', 'Me', 'UserProfile', 'UserFollowers'],
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
       async queryFn(credentials, api) {
@@ -823,6 +834,28 @@ export const authApi = createApi({
       },
       providesTags: (_result, _error, userId) => [{ type: 'UserProfile', id: userId }],
     }),
+    getUserFollowers: builder.query<ProfileUserSummary[], number>({
+      async queryFn(userId, api) {
+        const result = await rawBaseQuery(`/users/${userId}/followers/`, api, {});
+
+        if (result.data) {
+          const payload = result.data as RawUserSummaryPayload;
+          return {
+            data: (payload.followers ?? []).map(normalizeProfileUserSummary),
+          };
+        }
+
+        const error = result.error as FetchBaseQueryError;
+        const data = 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Followers request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
+      },
+      providesTags: (_result, _error, userId) => [{ type: 'UserFollowers', id: userId }],
+    }),
     followUser: builder.mutation<void, number>({
       async queryFn(userId, api) {
         const result = await rawBaseQuery(
@@ -860,7 +893,10 @@ export const authApi = createApi({
           patch.undo();
         }
       },
-      invalidatesTags: (_result, _error, userId) => [{ type: 'UserProfile', id: userId }],
+      invalidatesTags: (_result, _error, userId) => [
+        { type: 'UserProfile', id: userId },
+        { type: 'UserFollowers', id: userId },
+      ],
     }),
     unfollowUser: builder.mutation<void, number>({
       async queryFn(userId, api) {
@@ -899,7 +935,10 @@ export const authApi = createApi({
           patch.undo();
         }
       },
-      invalidatesTags: (_result, _error, userId) => [{ type: 'UserProfile', id: userId }],
+      invalidatesTags: (_result, _error, userId) => [
+        { type: 'UserProfile', id: userId },
+        { type: 'UserFollowers', id: userId },
+      ],
     }),
     getMediaReviews: builder.query<MediaReview[], number>({
       async queryFn(mediaId, api) {
@@ -1081,6 +1120,7 @@ export const {
   useGetMediaReviewsQuery,
   useGetMyPageDashboardQuery,
   useGetPublicProfileQuery,
+  useGetUserFollowersQuery,
   useGetUserActivityQuery,
   useGoogleLoginMutation,
   useFollowUserMutation,

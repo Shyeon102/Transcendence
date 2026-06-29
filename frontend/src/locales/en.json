@@ -75,6 +75,8 @@
     "communityPosts": "Community Posts",
     "watchlist": "Watched",
     "followers": "Followers",
+    "followersEmpty": "No followers yet.",
+    "followersLoadError": "Could not load followers.",
     "follow": "Follow",
     "following": "Following",
     "profileLoadError": "Profile could not be loaded.",
