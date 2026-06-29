@@ -57,7 +57,8 @@ export default function SignupPage() {
     if (
       !/[a-z]/.test(formData.password) ||
       !/[A-Z]/.test(formData.password) ||
-      !/\d/.test(formData.password)
+      !/\d/.test(formData.password) ||
+      !/[^a-zA-Z0-9]/.test(formData.password)
     ) {
       return t("validation.passwordWeak");
     }
