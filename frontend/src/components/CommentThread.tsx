@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
@@ -36,7 +37,9 @@ export default function CommentThread({ postId }: CommentThreadProps) {
   const renderComment = (comment: CommunityComment) => (
     <article key={comment.id} className="border-t border-[#f0ead0]/8 py-6">
       <div className="flex items-center justify-between gap-3 text-[9px] uppercase tracking-[0.14em] text-[#8a8474]/60">
-        <span>{comment.username ?? `${t('community.user')} #${comment.user}`}</span>
+        <Link to={`/profile/${comment.user}`} className="transition hover:text-[#d63e2a]">
+          {comment.username ?? `${t('community.user')} #${comment.user}`}
+        </Link>
         <span>{new Date(comment.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
       </div>
       <p className="mt-3 whitespace-pre-wrap font-['IBM_Plex_Serif'] text-[13px] leading-7 text-[#c8c2a8]">

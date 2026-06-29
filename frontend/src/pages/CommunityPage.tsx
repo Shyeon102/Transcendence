@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useI18n } from '../lib/i18n';
 import type { RootState } from '../store';
@@ -13,6 +13,7 @@ const postDate = (value: string) =>
 
 export default function CommunityPage() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<PostSort>('recent');
@@ -129,7 +130,25 @@ export default function CommunityPage() {
                         {post.content}
                       </p>
                       <div className="mt-3 flex items-center gap-3 text-[9px] uppercase tracking-[0.12em] text-[#8a8474]/60">
-                        <span>{post.username ?? `${t('community.user')} #${post.user}`}</span>
+                        <span
+                          role="link"
+                          tabIndex={0}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            navigate(`/profile/${post.user}`);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              navigate(`/profile/${post.user}`);
+                            }
+                          }}
+                          className="cursor-pointer transition hover:text-[#d63e2a]"
+                        >
+                          {post.username ?? `${t('community.user')} #${post.user}`}
+                        </span>
                         <span>·</span>
                         <span>{postDate(post.created_at)}</span>
                         <span className="ml-auto flex gap-3">
