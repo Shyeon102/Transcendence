@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store";
 import { useLogoutMutation } from '../store/api/authApi';
 import { logout as clearAuth } from '../store/slices/authSlice';
+import { useI18n } from "../lib/i18n";
 
 const Header = () => {
   const { isAuthenticated, user, accessToken, refreshToken } = useSelector((state: RootState) => state.auth);
@@ -11,6 +12,7 @@ const Header = () => {
   const hasSession = isAuthenticated && Boolean(user) && Boolean(accessToken);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { t } = useI18n();
   const [logout] = useLogoutMutation();
   
 
@@ -46,14 +48,14 @@ const Header = () => {
 
       <div className="flex gap-[2.99vw]">
         <button type="button" onClick={() => requireLogin("/chat/rooms")} className="text-[0.90vw] text-white">
-          LIVE CHAT
+          {t("common.liveChat")}
         </button>
         <button type="button" onClick={() => requireLogin("/community")} className="text-[0.90vw] text-white">
-          FORUM
+          {t("common.forum")}
         </button>
         {canAccessAdmin ? (
           <button type="button" onClick={() => navigate("/admin")} className="text-[0.90vw] text-white">
-            ADMIN
+            {t("common.admin")}
           </button>
         ) : null}
         {hasSession && (
@@ -62,13 +64,13 @@ const Header = () => {
             onClick={handleLogout}
             className="text-[0.90vw] text-white"
           >
-            LOGOUT
+            {t("common.logout")}
           </button>
         )}
         <button type="button" onClick={() => navigate(hasSession ? "/profile" : "/login")}>
           <img
             src="/profile.png"
-            alt="profile"
+            alt={t("common.profile")}
             className="h-[3.11vh] w-[1.94vw] object-contain"
           />
         </button>

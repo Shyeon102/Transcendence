@@ -55,11 +55,14 @@ class Media(models.Model):
 
 class ReviewQuerySet(models.QuerySet):
     def visible_to(self, user):
+        if not getattr(user, "is_authenticated", False):
+            return self.filter(visibility="public")
+
         return self.filter(
             models.Q(visibility="public") |
-            models.Q(visibility="followers", user__followers__follower=user) |
-            models.Q(visibility="private", user=user)
-        )
+            models.Q(user=user) |
+            models.Q(visibility="followers", user__followers__follower=user)
+        ).distinct()
 
 
 class Review(models.Model):

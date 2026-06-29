@@ -7,7 +7,10 @@
     "logout": "Se deconnecter",
     "profile": "Profil",
     "mypage": "Ma page",
-    "info": "Info"
+    "info": "Info",
+    "liveChat": "Chat en direct",
+    "forum": "Forum",
+    "admin": "Admin"
   },
   "admin": {
     "eyebrow": "Espace de moderation",
@@ -246,12 +249,12 @@
   },
   "review": {
     "formEyebrow": "Brouillon de critique",
-    "formTitle": "WRITE A QUICK TAKE",
+    "formTitle": "Écris une analyse rapide.",
     "titlePlaceholder": "Titre",
-    "typePlaceholder": "movie / anime / drama",
     "textPlaceholder": "Ecrivez une courte reaction ou un point de recommandation.",
     "submit": "Ajouter une critique",
     "validation": "Veuillez saisir le titre, le type, la note et le texte de la critique.",
+    "duplicate": "Une critique existe deja.",
     "visibilityLabel": "Visibilite",
     "visibility": {
       "public": "Public",

@@ -157,7 +157,12 @@ class UserActivityView(APIView):
 
 class UserReviewView(APIView):
     def get(self, request, user_id):
-        reviews = Review.objects.filter(user_id=user_id)
+        reviews = (
+            Review.objects
+            .visible_to(request.user)
+            .filter(user_id=user_id)
+            .select_related("media", "user")
+        )
 
         return Response({
             "reviews": ReviewSerializer(reviews, many=True).data
@@ -170,7 +175,10 @@ class PublicUserActivityView(APIView):
     def get(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
 
-        reviews = user.reviews.select_related("media")
+        reviews = user.reviews.visible_to(request.user).select_related(
+            "media",
+            "user",
+        )
 
         return Response({
             "user": UserSerializer(user).data,

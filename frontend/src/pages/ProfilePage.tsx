@@ -368,6 +368,10 @@ export default function ProfilePage() {
     content: string;
     visibility: ReviewVisibility;
   }) => {
+    if (dashboardReviews.some((item) => item.mediaId === review.mediaId)) {
+      throw new Error("review.duplicate");
+    }
+
     try {
       await createReview({
         mediaId: review.mediaId,
@@ -379,7 +383,12 @@ export default function ProfilePage() {
       }).unwrap();
       refetchDashboard?.();
     } catch (err) {
-      console.error("리뷰 작성 실패:", err);
+      const message = (err as { message?: string }).message ?? "";
+      throw new Error(
+        /already exists/i.test(message)
+          ? "review.duplicate"
+          : message || "common.error",
+      );
     }
   };
 

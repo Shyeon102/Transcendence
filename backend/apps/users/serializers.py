@@ -87,4 +87,10 @@ class PublicUserProfileSerializer(serializers.ModelSerializer):
 
     def get_reviews(self, obj):
         from apps.media.serializers import ReviewSerializer
-        return ReviewSerializer(obj.reviews.all(), many=True).data
+        request = self.context.get("request")
+        reviews = obj.reviews.select_related("media", "user")
+        if request is not None:
+            reviews = reviews.visible_to(request.user)
+        else:
+            reviews = reviews.filter(visibility="public")
+        return ReviewSerializer(reviews, many=True).data
