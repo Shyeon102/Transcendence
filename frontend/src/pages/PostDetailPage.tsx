@@ -77,7 +77,6 @@ export default function PostDetailPage() {
               <span>{new Date(post.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
               <span className="ml-auto flex gap-4">
                 <span>♥ {post.like_count}</span>
-                <span>○ {post.view_count}</span>
               </span>
             </div>
 
