@@ -30,6 +30,10 @@ import type {
   SignupResponse,
 } from '../../types';
 
+type LoginTokenResponse = RawTokenResponse & {
+  error?: string;
+};
+
 type RawAuthUser = {
   id?: number;
   email?: string;
@@ -534,7 +538,7 @@ export const authApi = createApi({
         );
 
         if (tokenResult.data) {
-          const data = tokenResult.data as any;
+          const data = tokenResult.data as LoginTokenResponse;
 
           if (data.error) {
             return {
@@ -585,12 +589,12 @@ export const authApi = createApi({
         };
       },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        try{
+        try {
           const { data } = await queryFulfilled;
           dispatch(setCredentials(data));
         }
-        catch{
-
+        catch (e) {
+          void(e);
         }
       },
     }),
