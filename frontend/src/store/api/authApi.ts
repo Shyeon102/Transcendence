@@ -31,6 +31,10 @@ import type {
   SignupResponse,
 } from '../../types';
 
+type LoginTokenResponse = RawTokenResponse & {
+  error?: string;
+};
+
 type RawAuthUser = {
   id?: number;
   email?: string;
@@ -340,7 +344,6 @@ const normalizeDashboardInteraction = (
 
 const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
   reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
-  // 마이페이지 '찜 목록'은 사실상 '시청 완료(watched)' 목록이므로 watched를 매핑한다.
   watchlist:
     payload.interactions?.watched?.map(normalizeDashboardInteraction) ??
     payload.watchlist?.map((title) => ({ mediaId: 0, title, poster: '' })) ??
@@ -557,11 +560,20 @@ export const authApi = createApi({
         );
 
         if (tokenResult.data) {
-          const tokenPayload = tokenResult.data as RawTokenResponse;
+          const data = tokenResult.data as LoginTokenResponse;
+
+          if (data.error) {
+            return {
+              error: {
+                message: data.error,
+              },
+            };
+          }
+          const tokenPayload = data as RawTokenResponse;
           if (!tokenPayload.access) {
             return {
               error: {
-                message: 'Login response is missing an access token.',
+                message: 'Unexpected login response: missing access token.',
               },
             };
           }
@@ -599,8 +611,13 @@ export const authApi = createApi({
         };
       },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        const { data } = await queryFulfilled;
-        dispatch(setCredentials(data));
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCredentials(data));
+        }
+        catch (e) {
+          void(e);
+        }
       },
     }),
     googleLogin: builder.mutation<LoginResponse, GoogleLoginRequest>({
