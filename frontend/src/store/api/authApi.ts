@@ -435,7 +435,11 @@ const isRefreshEligibleRequest = (args: string | FetchArgs) => {
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
+
     const state = getState() as RootState;
+     if (state.auth.accessToken) {
+      headers.set("Authorization", `Bearer ${state.auth.accessToken}`)
+    }
     const token = state.auth.accessToken;
     headers.set('Accept-Language', state.ui.language);
     if (token) {
@@ -467,6 +471,10 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
         api,
         extraOptions
       );
+      if (!refreshResult.data) {
+        api.dispatch(logout());
+        return result;
+      }
 
       if (refreshResult.data) {
         try {
