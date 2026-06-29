@@ -32,6 +32,7 @@ export default function SignupPage() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  // 언어 변경 시에도 갱신되도록 번역된 문자열이 아닌 i18n 키를 반환한다.
   const validateForm = () => {
     if (
       !formData.email.trim() ||
@@ -41,19 +42,19 @@ export default function SignupPage() {
       !formData.password.trim() ||
       !formData.passwordConfirm.trim()
     ) {
-      return t('validation.required');
+      return 'validation.required';
     }
 
     if (!EMAIL_REGEX.test(formData.email)) {
-      return t("validation.invalidEmail");
+      return 'validation.invalidEmail';
     }
 
     if (formData.username.length < 3 || !USERNAME_REGEX.test(formData.username)) {
-      return t('validation.usernameInvalid');
+      return 'validation.usernameInvalid';
     }
 
     if (formData.password.length < 8) {
-      return t("validation.passwordTooShort");
+      return 'validation.passwordTooShort';
     }
 
     if (
@@ -62,11 +63,11 @@ export default function SignupPage() {
       !/\d/.test(formData.password) ||
       !/[^a-zA-Z0-9]/.test(formData.password)
     ) {
-      return t("validation.passwordWeak");
+      return 'validation.passwordWeak';
     }
 
     if (formData.password !== formData.passwordConfirm) {
-      return t("validation.passwordMismatch");
+      return 'validation.passwordMismatch';
     }
 
     return "";
@@ -108,7 +109,7 @@ export default function SignupPage() {
       navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
-      setErrorMsg(apiError.message ?? t('common.error'));
+      setErrorMsg(apiError.message ?? 'common.error');
     }
   };
 
@@ -126,7 +127,7 @@ export default function SignupPage() {
       navigate('/home');
     } catch (err) {
       const apiError = err as AuthErrorResponse;
-      setErrorMsg(apiError.message ?? t('common.error'));
+      setErrorMsg(apiError.message ?? 'common.error');
     }
   };
 
@@ -254,7 +255,7 @@ export default function SignupPage() {
           </div>
         </div>
 
-        {errorMsg ? <StatusMessage>{errorMsg}</StatusMessage> : null}
+        {errorMsg ? <StatusMessage>{t(errorMsg)}</StatusMessage> : null}
 
         <Button
           type="submit"

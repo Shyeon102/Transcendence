@@ -39,17 +39,18 @@ export default function PasswordChangeForm({
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  // 언어 변경 시에도 갱신되도록 번역된 문자열이 아닌 i18n 키를 반환한다.
   const validate = () => {
     if (
       !form.currentPassword.trim() ||
       !form.newPassword.trim() ||
       !form.confirmNewPassword.trim()
     ) {
-      return t('validation.required');
+      return 'validation.required';
     }
 
     if (form.newPassword.length < 8) {
-      return t('validation.passwordTooShort');
+      return 'validation.passwordTooShort';
     }
 
     if (
@@ -58,15 +59,15 @@ export default function PasswordChangeForm({
       !/\d/.test(form.newPassword) ||
       !/[^a-zA-Z0-9]/.test(form.newPassword)
     ) {
-      return t('validation.passwordWeak');
+      return 'validation.passwordWeak';
     }
 
     if (form.newPassword !== form.confirmNewPassword) {
-      return t('validation.passwordMismatch');
+      return 'validation.passwordMismatch';
     }
 
     if (form.currentPassword === form.newPassword) {
-      return t('home.passwordSameAsCurrent');
+      return 'home.passwordSameAsCurrent';
     }
 
     return '';
@@ -85,7 +86,7 @@ export default function PasswordChangeForm({
         currentPassword: form.currentPassword,
         newPassword: form.newPassword,
       }).unwrap();
-      setSuccessMsg(t('home.passwordChangeSuccess'));
+      setSuccessMsg('home.passwordChangeSuccess');
       setForm({
         currentPassword: '',
         newPassword: '',
@@ -93,7 +94,7 @@ export default function PasswordChangeForm({
       });
     } catch (error) {
       const apiError = error as { message?: string };
-      setErrorMsg(apiError.message ?? t('common.error'));
+      setErrorMsg(apiError.message ?? 'common.error');
     }
   };
 
@@ -132,11 +133,11 @@ export default function PasswordChangeForm({
       </div>
 
       {errorMsg ? (
-        <StatusMessage className="mt-4">{errorMsg}</StatusMessage>
+        <StatusMessage className="mt-4">{t(errorMsg)}</StatusMessage>
       ) : null}
 
       {successMsg ? (
-        <StatusMessage tone="success" className="mt-4">{successMsg}</StatusMessage>
+        <StatusMessage tone="success" className="mt-4">{t(successMsg)}</StatusMessage>
       ) : null}
 
       <Button onClick={handleSubmit} disabled={isSubmitting} className="mt-4 w-full">
