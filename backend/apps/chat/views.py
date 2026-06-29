@@ -72,7 +72,7 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         try:
             invited_user = User.objects.get(id=invited_user_id)
         except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=404)
+            return Response({"error": "User not found"}, status=200)
 
         current_members = ChatRoomMember.objects.filter(room=room).count()
         if current_members >= room.max_members:

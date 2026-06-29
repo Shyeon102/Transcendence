@@ -49,7 +49,11 @@ const ChatRoomPage = () => {
     const userId = Number(inviteUserId);
     if (!userId) return;
     try {
-      await inviteToRoom({ roomId, userId }).unwrap();
+      const res = await inviteToRoom({ roomId, userId }).unwrap();
+      if (res?.error) {
+        alert(t("chat.inviteError"));
+        return;
+      }
       alert(t("chat.inviteSuccess"));
       setInviteUserId("");
     } catch {
@@ -108,7 +112,8 @@ const ChatRoomPage = () => {
           <button
             onClick={handleSend}
             className="ml-2 bg-[#e8d5b7] text-black px-4 py-2 rounded"
-          >{t("chat.send")}
+          >
+            {t("chat.send")}
           </button>
         </div>
       </div>
