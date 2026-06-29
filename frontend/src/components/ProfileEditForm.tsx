@@ -27,6 +27,7 @@ type ToggleSetting = {
 };
 
 type ProfileEditFormProps = {
+  apiError?: string;
   avatarUrl: string;
   avatarUrlLabel: string;
   avatarUrlPlaceholder: string;
@@ -52,6 +53,7 @@ type ProfileEditFormProps = {
 };
 
 export default function ProfileEditForm({
+  apiError,
   avatarUrl,
   avatarUrlLabel,
   avatarUrlPlaceholder,
@@ -164,7 +166,9 @@ export default function ProfileEditForm({
             />
           </div>
 
-          {saveError ? <StatusMessage className="mb-3">{saveError}</StatusMessage> : null}
+          {saveError || apiError ? (
+            <StatusMessage className="mb-3">{saveError || apiError || ''}</StatusMessage>
+          ) : null}
 
           <Button onClick={handleSave} className="w-full">
             {saveLabel}

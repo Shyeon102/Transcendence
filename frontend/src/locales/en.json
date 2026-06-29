@@ -272,10 +272,12 @@
     "required": "Please fill in every field.",
     "invalidEmail": "Please enter a valid email address.",
     "passwordTooShort": "Password must be at least 8 characters.",
-    "passwordWeak": "Password must include at least one uppercase letter, one lowercase letter, and one number.",
+    "passwordWeak": "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character.",
     "passwordMismatch": "Passwords do not match.",
     "usernameInvalid": "Username must be 3+ chars using letters, numbers, or underscores.",
-    "usernameRequired": "Username cannot be empty."
+    "usernameRequired": "Username cannot be empty.",
+    "usernameTaken": "That username is already taken.",
+    "avatarUrlInvalid": "Please enter a valid image URL."
   },
   "oauth": {
     "callbackEyebrow": "42 OAuth",

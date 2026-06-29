@@ -272,10 +272,12 @@
     "required": "Veuillez remplir tous les champs.",
     "invalidEmail": "Veuillez saisir une adresse email valide.",
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caracteres.",
-    "passwordWeak": "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.",
+    "passwordWeak": "Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial.",
     "passwordMismatch": "Les mots de passe ne correspondent pas.",
     "usernameInvalid": "Le nom d'utilisateur doit contenir au moins 3 caracteres et utiliser lettres, chiffres ou tirets bas.",
-    "usernameRequired": "Le nom d'utilisateur ne peut pas etre vide."
+    "usernameRequired": "Le nom d'utilisateur ne peut pas etre vide.",
+    "usernameTaken": "Ce nom d'utilisateur est deja pris.",
+    "avatarUrlInvalid": "Veuillez saisir une URL d'image valide."
   },
   "oauth": {
     "callbackEyebrow": "42 OAuth",
