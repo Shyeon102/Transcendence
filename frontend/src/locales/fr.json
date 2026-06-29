@@ -264,6 +264,8 @@
       "latest": "Récent",
       "rating": "Note"
     },
+    "save": "Enregistrer",
+    "cancel": "Annuler",
     "editDraftSuffix": "(UI de modification en attente)"
   },
   "validation": {

@@ -7,6 +7,7 @@ export type ReviewVisibility = 'public' | 'followers' | 'private';
 export type ReviewItem = {
   date: string;
   id: string;
+  mediaId: number;
   isOwn?: boolean;
   poster: string;
   rating: number;
@@ -17,7 +18,7 @@ export type ReviewItem = {
 };
 
 type ReviewCardProps = {
-  onDelete?: (reviewId: string) => void;
+  onDelete?: (review: ReviewItem) => void;
   onEdit?: (review: ReviewItem) => void;
   review: ReviewItem;
 };
@@ -53,7 +54,7 @@ export default function ReviewCard({ onDelete, onEdit, review }: ReviewCardProps
             <Button size="sm" variant="ghost" className="px-2" onClick={() => onEdit?.(review)}>
               {t('review.edit')}
             </Button>
-            <Button size="sm" variant="danger" className="px-2" onClick={() => onDelete?.(review.id)}>
+            <Button size="sm" variant="danger" className="px-2" onClick={() => onDelete?.(review)}>
               {t('review.delete')}
             </Button>
           </div>

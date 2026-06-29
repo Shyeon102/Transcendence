@@ -257,6 +257,8 @@
       "followers": "Followers",
       "private": "Private"
     },
+    "save": "Save",
+    "cancel": "Cancel",
     "edit": "Edit",
     "delete": "Delete",
     "sortLabel": "Sort",
