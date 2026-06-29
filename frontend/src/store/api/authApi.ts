@@ -611,37 +611,46 @@ export const authApi = createApi({
     }),
     signup: builder.mutation<SignupResponse, SignupRequest>({
       async queryFn({ passwordConfirm, firstName, lastName, ...payload }, api) {
-        const result = await rawBaseQuery(
-          {
-            url: '/auth/register/',
-            method: 'POST',
-            body: {
-              ...payload,
-              first_name: firstName,
-              last_name: lastName,
-              passwordConfirm,
-            },
+      const result = await baseQuery(
+        {
+          url: '/auth/register/',
+          method: 'POST',
+          body: {
+            ...payload,
+            first_name: firstName,
+            last_name: lastName,
+            passwordConfirm,
           },
-          api,
-          {}
-        );
+        },
+        api,
+        {}
+      );
 
-        if (result.data) {
-          return { data: normalizeSession(result.data as RawAuthResponse) };
-        }
+      if (result.error) {
+        return { error: result.error };
+      }
 
-        const error = result.error as FetchBaseQueryError;
-        const data = 'data' in error ? error.data : undefined;
+      const data = result.data as RawAuthResponse;
+
+      // 200 with error fields means validation failed
+      if (!data?.user || !data?.access) {
         return {
           error: {
             message: toMessage(data) ?? 'Request failed.',
             fields: toFieldErrors(data),
           },
         };
-      },
+      }
+
+      return { data: normalizeSession(data) };
+    },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        const { data } = await queryFulfilled;
-        dispatch(setCredentials(data));
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(setCredentials(data));
+        } catch{
+          // mutation errors are handled by the caller
+        } 
       },
     }),
     logout: builder.mutation<{ success: boolean }, string | null | undefined>({
