@@ -115,5 +115,5 @@ We may update this Privacy Policy from time to time. The latest version will be 
 
 For questions or requests about this Privacy Policy, contact:
 
-Transcendence Team
-[contact email]
+Global Warming Team
+lucas.larrey@gmail.com
