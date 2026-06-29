@@ -443,7 +443,7 @@ export default function ProfilePage() {
               closeEditLabel={t("home.closeEdit")}
               displayName={profileDisplayName}
               displayUsername={displayUsername}
-              userId={isPublicProfile ? viewedProfile?.id : profileUser.id}
+              userId={viewedProfile?.id ?? profileUser.id}
               editProfileLabel={t("home.editProfile")}
               followLabel={t("home.follow")}
               initials={initials}
