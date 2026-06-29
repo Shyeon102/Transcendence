@@ -52,6 +52,7 @@ class Media(models.Model):
             models.Index(fields=['-created_at']),
         ]
 
+
 class ReviewQuerySet(models.QuerySet):
     def visible_to(self, user):
         return self.filter(
@@ -59,6 +60,7 @@ class ReviewQuerySet(models.QuerySet):
             models.Q(visibility="followers", user__followers__follower=user) |
             models.Q(visibility="private", user=user)
         )
+
 
 class Review(models.Model):
     """Media review (My Space)"""
