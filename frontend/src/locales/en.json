@@ -257,6 +257,8 @@
     "submit": "Add Review",
     "validation": "Please enter the title, type, star rating, and review text.",
     "duplicate": "A review already exists.",
+    "deleteError": "Failed to delete the review. Please try again.",
+    "updateError": "Failed to update the review. Please try again.",
     "visibilityLabel": "Visibility",
     "visibility": {
       "public": "Public",
@@ -356,6 +358,8 @@
     "roomNamePlaceholder": "Title",
     "create": "Create",
     "cancel": "Cancel",
-    "maxMembersRange": "Members must be between 4 and 10."
+    "maxMembersRange": "Members must be between 4 and 10.",
+    "createRoomValidation": "Please enter a room name.",
+    "createRoomError": "Failed to create the room. Please try again."
   }
 }

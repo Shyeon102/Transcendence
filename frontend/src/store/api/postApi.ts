@@ -59,7 +59,7 @@ export const postApi = apiSlice.injectEndpoints({
     }),
     deletePost: builder.mutation<void, number>({
       query: (id) => ({ url: `/community/posts/${id}/`, method: 'DELETE' }),
-      invalidatesTags: ['Posts'],
+      invalidatesTags: (_result, _error, id) => [{ type: 'Posts', id }],
     }),
     getComments: builder.query<CommentListResponse, number>({
       query: (postId) => `/community/posts/${postId}/comments/`,

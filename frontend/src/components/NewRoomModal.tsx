@@ -1,6 +1,7 @@
 import { useI18n } from "../lib/i18n";
 import { useState } from "react";
 import { useCreateChatRoomMutation } from "../store/api/chatApi";
+import StatusMessage from "./ui/StatusMessage";
 
 type Props = {
   isOpen: boolean;
@@ -13,14 +14,30 @@ const NewRoomModal = ({ isOpen, onClose }: Props) => {
   const [isPrivate, setIsPrivate] = useState(false);
   const [description, setDescription] = useState("");
   const [maxMembers, setMaxMembers] = useState(4);
+  const [errorKey, setErrorKey] = useState("");
   const [createChatRoom, { isLoading }] = useCreateChatRoomMutation(); // createChatRoom: trigger:호출하면 백엔드에 POST 요청, isLoading: 결과상태(로딩, 에러 등): 요청 중인지
 
   if (!isOpen) return null; // 모달 닫힌 상태면 아무것도 안 그림
 
+  const clearError = () => {
+    if (errorKey) {
+      setErrorKey("");
+    }
+  };
+
+  const handleClose = () => {
+    setErrorKey("");
+    onClose();
+  };
+
   const handleSubmit = async () => {
-    if (!title.trim()) return;
+    setErrorKey("");
+    if (!title.trim()) {
+      setErrorKey("chat.createRoomValidation");
+      return;
+    }
     if (maxMembers < 4 || maxMembers > 10) {
-      alert(t("chat.maxMembersRange"));
+      setErrorKey("chat.maxMembersRange");
       return;
     }
     try {
@@ -34,9 +51,9 @@ const NewRoomModal = ({ isOpen, onClose }: Props) => {
       setDescription("");
       setMaxMembers(4);
       setIsPrivate(false);
-      onClose();
-    } catch (err) {
-      console.error("방 생성 실패:", err);
+      handleClose();
+    } catch {
+      setErrorKey("chat.createRoomError");
     }
   };
 
@@ -47,7 +64,10 @@ const NewRoomModal = ({ isOpen, onClose }: Props) => {
         <div className="flex gap-2 mb-3">
           <button
             type="button"
-            onClick={() => setIsPrivate(false)}
+            onClick={() => {
+              clearError();
+              setIsPrivate(false);
+            }}
             className={`flex-1 py-2 rounded text-sm font-semibold transition ${
               !isPrivate
                 ? "bg-[#e8d5b7] text-black"
@@ -58,7 +78,10 @@ const NewRoomModal = ({ isOpen, onClose }: Props) => {
           </button>
           <button
             type="button"
-            onClick={() => setIsPrivate(true)}
+            onClick={() => {
+              clearError();
+              setIsPrivate(true);
+            }}
             className={`flex-1 py-2 rounded text-sm font-semibold transition ${
               isPrivate
                 ? "bg-[#e8d5b7] text-black"
@@ -70,13 +93,19 @@ const NewRoomModal = ({ isOpen, onClose }: Props) => {
         </div>
         <input
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => {
+            clearError();
+            setTitle(e.target.value);
+          }}
           placeholder={t("chat.roomNamePlaceholder")}
           className="w-full bg-[#0c0c0b] px-3 py-2 rounded mb-2"
         />
         <input
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => {
+            clearError();
+            setDescription(e.target.value);
+          }}
           placeholder={t("chat.descriptionPlaceholder")}
           className="w-full bg-[#0c0c0b] px-3 py-2 rounded mb-2"
         />
@@ -84,13 +113,19 @@ const NewRoomModal = ({ isOpen, onClose }: Props) => {
           <input
             type="number"
             value={maxMembers}
-            onChange={(e) => setMaxMembers(Number(e.target.value))}
+            onChange={(e) => {
+              clearError();
+              setMaxMembers(Number(e.target.value));
+            }}
             placeholder={t("chat.maxMembersPlaceholder")}
             className="w-full bg-[#0c0c0b] px-3 py-2 rounded mb-2"
             min={4}
             max={10}
           />
         )}
+        {errorKey ? (
+          <StatusMessage className="mt-2">{t(errorKey)}</StatusMessage>
+        ) : null}
         <div className="flex gap-2 mt-4">
           <button
             onClick={handleSubmit}
@@ -100,7 +135,7 @@ const NewRoomModal = ({ isOpen, onClose }: Props) => {
             {isLoading ? t("chat.creating") : t("chat.create")}
           </button>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="flex-1 bg-[#3a3a3a] py-2 rounded"
           >
             {t("chat.cancel")}

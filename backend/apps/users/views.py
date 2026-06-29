@@ -150,6 +150,7 @@ class UserActivityView(APIView):
             data["interactions"][i.action].append({
                 "media_id": i.media.id,
                 "media_title": i.media.title,
+                "media_image_url": i.media.image_url,
             })
 
         return Response(data)
@@ -175,6 +176,9 @@ class PublicUserActivityView(APIView):
     def get(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
 
+        watched = user.interactions.select_related("media").filter(
+            action="watched"
+        )
         reviews = user.reviews.visible_to(request.user).select_related(
             "media",
             "user",
@@ -182,6 +186,16 @@ class PublicUserActivityView(APIView):
 
         return Response({
             "user": UserSerializer(user).data,
+            "interactions": {
+                "watched": [
+                    {
+                        "media_id": interaction.media.id,
+                        "media_title": interaction.media.title,
+                        "media_image_url": interaction.media.image_url,
+                    }
+                    for interaction in watched
+                ],
+            },
             "reviews": ReviewSerializer(reviews, many=True).data
         })
 

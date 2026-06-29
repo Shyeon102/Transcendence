@@ -15,8 +15,8 @@ export default function PostDetailPage() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const user = useSelector((state: RootState) => state.auth.user);
-  const { data: post, isLoading, isError } = useGetPostQuery(postId, { skip: !postId });
   const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation();
+  const { data: post, isLoading, isError } = useGetPostQuery(postId, { skip: !postId || isDeleting});
   const [likePost] = useLikePostMutation();
   const [editing, setEditing] = useState(false);
   const [reporting, setReporting] = useState(false);

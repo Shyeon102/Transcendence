@@ -19,6 +19,7 @@ import type {
   AdminReportStatus,
   AdminReportTargetType,
   AdminReportType,
+  DashboardMediaItem,
   AuthUser,
   DashboardReview,
   LoginRequest,
@@ -103,6 +104,7 @@ type RawActivityReview = {
   note?: string;
   when?: string;
   media_title?: string;
+  media_image_url?: string;
   content?: string;
   created_at?: string;
   rating: number;
@@ -112,6 +114,7 @@ type RawActivityReview = {
 type RawDashboardInteraction = {
   media_id?: number;
   media_title?: string;
+  media_image_url?: string;
 };
 
 type RawDashboard = {
@@ -134,8 +137,10 @@ type RawReview = {
   user?: RawAuthUser;
   user_id?: number;
   username?: string;
+  media?: number;
   media_id?: number;
   media_title?: string;
+  media_image_url?: string;
   rating: number;
   comment?: string;
   content?: string;
@@ -366,21 +371,28 @@ const normalizeDashboardReview = (
   id: review.id,
   mediaId: review.media ?? 0,
   title: review.title ?? review.media_title ?? `Review #${review.id}`,
-  note: review.note ?? review.content ?? "",
-  text: review.note ?? review.content ?? "",
-  when: review.when ?? review.created_at ?? "",
-  date: review.when ?? review.created_at ?? "",
+  note: review.note ?? review.content ?? '',
+  text: review.note ?? review.content ?? '',
+  when: review.when ?? review.created_at ?? '',
+  date: review.when ?? review.created_at ?? '',
+  poster: review.media_image_url ?? '',
   rating: review.rating,
   visibility: review.visibility,
+});
+
+const normalizeDashboardInteraction = (
+  item: RawDashboardInteraction,
+): DashboardMediaItem => ({
+  mediaId: item.media_id ?? 0,
+  title: item.media_title ?? `Media #${item.media_id ?? '-'}`,
+  poster: item.media_image_url ?? '',
 });
 
 const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
   reviews: (payload.reviews ?? []).map(normalizeDashboardReview),
   watchlist:
-    payload.watchlist ??
-    payload.interactions?.watchlist?.map(
-      (item) => item.media_title ?? `Media #${item.media_id ?? "-"}`,
-    ) ??
+    payload.interactions?.watched?.map(normalizeDashboardInteraction) ??
+    payload.watchlist?.map((title) => ({ mediaId: 0, title, poster: '' })) ??
     [],
   activities:
     payload.activities ?? payload.activity ?? payload.recent_activity ?? [],
@@ -389,9 +401,10 @@ const normalizeDashboard = (payload: RawDashboard): MyPageDashboardData => ({
 const normalizeReview = (review: RawReview): MediaReview => ({
   id: review.id,
   userId: review.user_id ?? review.user?.id ?? 0,
-  username: review.username ?? review.user?.username ?? "",
-  mediaId: review.media_id ?? 0,
-  mediaTitle: review.media_title ?? "",
+  username: review.username ?? review.user?.username ?? '',
+  mediaId: review.media_id ?? review.media ?? 0,
+  mediaTitle: review.media_title ?? '',
+  posterUrl: review.media_image_url,
   rating: review.rating,
   content: review.content ?? review.comment ?? "",
   visibility: review.visibility ?? "public",
@@ -562,9 +575,12 @@ const baseQuery: BaseQueryFn<
       );
       if (!refreshResult.data) {
         api.dispatch(logout());
+        const error = refreshResult.error as FetchBaseQueryError;
+        const data = error && 'data' in error ? error.data : undefined;
         return {
           error: {
-            message: "Session expired. Please log in again.",
+            message: toMessage(data) ?? 'Request failed.',
+            fields: toFieldErrors(data),
           },
         };
       }
