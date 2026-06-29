@@ -65,7 +65,7 @@ class RegisterView(APIView):
                 "access": str(refresh.access_token),
                 "refresh": str(refresh)
             })
-        return Response(serializer.errors, status=400)
+        return Response(serializer.errors, status=200)
 
 
 class ChangePasswordView(APIView):
