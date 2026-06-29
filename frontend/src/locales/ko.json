@@ -118,7 +118,6 @@
     "emailPlaceholder": "name@example.com",
     "password": "비밀번호",
     "passwordPlaceholder": "비밀번호를 입력하세요",
-    "forgotPassword": "비밀번호를 잊으셨나요?",
     "invalidCredentials": "아이디 또는 비밀번호가 올바르지 않습니다.",
     "submit": "로그인",
     "submitDisplay": "로그인 →",

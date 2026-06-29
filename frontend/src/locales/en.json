@@ -118,7 +118,6 @@
     "emailPlaceholder": "name@example.com",
     "password": "Password",
     "passwordPlaceholder": "Enter your password",
-    "forgotPassword": "Forgot password?",
     "invalidCredentials": "Incorrect username or password.",
     "submit": "Log in",
     "submitDisplay": "Sign In →",

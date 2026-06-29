@@ -118,7 +118,6 @@
     "emailPlaceholder": "name@example.com",
     "password": "Mot de passe",
     "passwordPlaceholder": "Entrez votre mot de passe",
-    "forgotPassword": "Mot de passe oublie ?",
     "invalidCredentials": "Identifiant ou mot de passe incorrect.",
     "submit": "Connexion",
     "submitDisplay": "Connexion →",
