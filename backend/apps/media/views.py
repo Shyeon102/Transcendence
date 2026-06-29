@@ -3,20 +3,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
-from django.db import models
 from apps.media.models import Media, MediaInteraction
 from apps.media.serializers import (
     MediaSerializer, ReviewSerializer, MediaInteractionSerializer
 )
-
-
-class ReviewQuerySet(models.QuerySet):
-    def visible_to(self, user):
-        return self.filter(
-            models.Q(visibility="public") |
-            models.Q(visibility="followers", user__followers__follower=user) |
-            models.Q(visibility="private", user=user)
-        )
 
 
 class MediaView(APIView):
