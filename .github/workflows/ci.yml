@@ -46,7 +46,7 @@ jobs:
       POSTGRES_HOST: localhost
       POSTGRES_PORT: "5432"
       REDIS_URL: redis://localhost:6379/0
-      CORS_ALLOWED_ORIGINS: http://localhost:5173
+      CORS_ALLOWED_ORIGINS: https://localhost
 
     steps:
       - uses: actions/checkout@v4

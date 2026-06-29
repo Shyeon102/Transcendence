@@ -8,7 +8,7 @@ export const chatApi = createApi({
   tagTypes: ["ChatRoom"],
   // fetchBaseQuery: 기본 URL 설정
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_BASE_URL || "https://localhost:8443/api", // 서버 요청 보낼 때 기본 URL: .env 파일에 정의된 URL을 가져오는 부분. 만약 없으면 || 뒤의 기본값(localhost:8443/api) 사용
+    baseUrl: import.meta.env.VITE_API_BASE_URL || "https://localhost/api", // 서버 요청 보낼 때 기본 URL: .env 파일에 정의된 URL을 가져오는 부분. 만약 없으면 || 뒤의 기본값(localhost/api) 사용
     prepareHeaders: (headers, { getState }) => {
       const state = (getState as () => RootState)();
       const token = state.auth.accessToken;
