@@ -14,6 +14,7 @@ type ProfileCardProps = {
   closeEditLabel: string;
   displayName: string;
   displayUsername: string;
+  userId: number;
   editProfileLabel: string;
   followLabel?: string;
   initials: string;
@@ -37,6 +38,7 @@ export default function ProfileCard({
   closeEditLabel,
   displayName,
   displayUsername,
+  userId,
   editProfileLabel,
   followLabel = 'Follow',
   initials,
@@ -83,7 +85,7 @@ export default function ProfileCard({
         <h1 className="mb-2 font-['Bebas_Neue'] text-[46px] leading-none tracking-[0.03em]">
           {displayName.toUpperCase()}
         </h1>
-        <p className="mb-3 text-xs tracking-[0.08em] text-[#8a8474]">@{displayUsername} · {joinedYearLabel}</p>
+        <p className="mb-3 text-xs tracking-[0.08em] text-[#8a8474]">@{displayUsername} · {joinedYearLabel} · ID: <span className="text-[#e8d5b7] select-all">{userId}</span></p>
         <p className="max-w-[440px] font-['IBM_Plex_Serif'] text-sm font-light italic leading-7 text-[#c8c2a8]">
           {bio}
         </p>

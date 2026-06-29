@@ -88,6 +88,7 @@ type GoogleLoginRequest = {
 
 type RawActivityReview = {
   id: number;
+  media?: number;
   title?: string;
   note?: string;
   when?: string;
@@ -306,9 +307,12 @@ const normalizeRefreshTokens = (payload: RawAuthResponse): RefreshTokenResponse 
 
 const normalizeDashboardReview = (review: RawActivityReview): DashboardReview => ({
   id: review.id,
+  mediaId: review.media ?? 0,
   title: review.title ?? review.media_title ?? `Review #${review.id}`,
   note: review.note ?? review.content ?? '',
+  text: review.note ?? review.content ?? '',
   when: review.when ?? review.created_at ?? '',
+  date: review.when ?? review.created_at ?? '',
   rating: review.rating,
   visibility: review.visibility,
 });
@@ -366,6 +370,7 @@ const normalizePublicUserProfile = (profile: RawPublicUserProfile): PublicUserPr
 const toReviewRequestBody = (review: MediaReviewRequest) => ({
   rating: review.rating,
   content: review.content,
+  visibility: review.visibility,
 });
 
 const getTargetData = (target: number | RawAdminReportTarget | null | undefined) => {

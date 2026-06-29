@@ -52,6 +52,13 @@ class Media(models.Model):
             models.Index(fields=['-created_at']),
         ]
 
+class ReviewQuerySet(models.QuerySet):
+    def visible_to(self, user):
+        return self.filter(
+            models.Q(visibility="public") |
+            models.Q(visibility="followers", user__followers__follower=user) |
+            models.Q(visibility="private", user=user)
+        )
 
 class Review(models.Model):
     """Media review (My Space)"""
@@ -63,6 +70,7 @@ class Review(models.Model):
     rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
     content = models.TextField()
     images = models.JSONField(default=list)
+    objects = ReviewQuerySet.as_manager()
 
     VISIBILITY = (
         ('public', 'Public'),

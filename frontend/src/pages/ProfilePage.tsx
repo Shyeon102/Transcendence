@@ -1,38 +1,43 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import ProfileCard from '../components/ProfileCard';
-import ProfileEditForm from '../components/ProfileEditForm';
-import ReviewForm from '../components/ReviewForm';
-import ReviewList from '../components/ReviewList';
-import EmptyState from '../components/ui/EmptyState';
-import type { ReviewItem } from '../components/ReviewCard';
-import { useI18n } from '../lib/i18n';
-import type { RootState } from '../store';
+import ReviewEditModal from "../components/ReviewEditModal";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import ProfileCard from "../components/ProfileCard";
+import ProfileEditForm from "../components/ProfileEditForm";
+import ReviewForm from "../components/ReviewForm";
+import ReviewList from "../components/ReviewList";
+import EmptyState from "../components/ui/EmptyState";
+import type { ReviewItem, ReviewVisibility } from "../components/ReviewCard";
+import { useI18n } from "../lib/i18n";
+import type { RootState } from "../store";
 import {
   useFollowUserMutation,
   useGetPublicProfileQuery,
   useUnfollowUserMutation,
   useGetMyPageDashboardQuery,
+  useCreateMediaReviewMutation,
+  useDeleteMediaReviewMutation,
+  useUpdateMediaReviewMutation,
   useUpdateMeMutation,
-} from '../store/api/authApi';
-import { updateProfile } from '../store/slices/authSlice';
-import type { MediaReview } from '../types';
+} from "../store/api/authApi";
+import { updateProfile } from "../store/slices/authSlice";
+import type { MediaReview } from "../types";
 
-type TabKey = 'reviews' | 'watchlist';
+type TabKey = "reviews" | "watchlist";
 
 const toReviewItem = (review: MediaReview): ReviewItem => ({
   id: String(review.id),
-  title: review.mediaTitle || 'Review',
-  type: 'review',
+  mediaId: review.mediaId,
+  title: review.mediaTitle || "Review",
+  type: "review",
   date: review.createdAt,
-  poster: '🎬',
+  poster: "🎬",
   text: review.content,
   rating: review.rating,
   visibility: review.visibility,
 });
 
-type AuthUser = NonNullable<RootState['auth']['user']>;
+type AuthUser = NonNullable<RootState["auth"]["user"]>;
 
 type AuthUserWithDates = AuthUser & {
   createdAt?: string;
@@ -54,39 +59,39 @@ type ProfileFormState = {
 const EMPTY_REVIEWS: ReviewItem[] = [];
 
 const dateLocaleByLanguage = {
-  ko: 'ko-KR',
-  en: 'en-US',
-  fr: 'fr-FR',
+  ko: "ko-KR",
+  en: "en-US",
+  fr: "fr-FR",
 } as const;
 
 const formatJoinedDate = (
   value: string | undefined,
-  language: keyof typeof dateLocaleByLanguage
+  language: keyof typeof dateLocaleByLanguage,
 ) => {
   if (!value) {
-    return '';
+    return "";
   }
 
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return '';
+    return "";
   }
 
   return date.toLocaleDateString(dateLocaleByLanguage[language], {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   });
 };
 
 const buildProfileForm = (
   user: Partial<AuthUser> | null | undefined,
-  defaultBio: string
+  defaultBio: string,
 ): ProfileFormState => ({
-  username: user?.username ?? '',
-  firstName: user?.firstName ?? '',
-  lastName: user?.lastName ?? '',
+  username: user?.username ?? "",
+  firstName: user?.firstName ?? "",
+  lastName: user?.lastName ?? "",
   bio: user?.bio ?? defaultBio,
 });
 
@@ -98,12 +103,13 @@ export default function ProfilePage() {
   const [updateMe] = useUpdateMeMutation();
   const [followUser, followState] = useFollowUserMutation();
   const [unfollowUser, unfollowState] = useUnfollowUserMutation();
+  const [editingReview, setEditingReview] = useState<ReviewItem | null>(null);
 
-  const defaultProfileBio = t('home.profileBioDefault');
+  const defaultProfileBio = t("home.profileBioDefault");
 
   const isOwnProfile =
     !profileId ||
-    profileId === 'me' ||
+    profileId === "me" ||
     profileId === String(user?.id) ||
     profileId === user?.username;
 
@@ -115,7 +121,7 @@ export default function ProfilePage() {
   const cannotLoadPublicProfile = isPublicProfile && !routeUserId;
 
   const shouldFetchViewedProfile = Boolean(
-    user && isPublicProfile && routeUserId
+    user && isPublicProfile && routeUserId,
   );
 
   const {
@@ -130,20 +136,26 @@ export default function ProfilePage() {
     skip: !shouldFetchViewedProfile,
   });
 
-  const { data: dashboard } = useGetMyPageDashboardQuery(undefined, {
-    skip: !user || !isOwnProfile,
-  });
+  const [createReview] = useCreateMediaReviewMutation();
+
+  const [deleteReviewMutation] = useDeleteMediaReviewMutation();
+  const [updateReviewMutation] = useUpdateMediaReviewMutation();
+
+  const { data: dashboard, refetch: refetchDashboard } =
+    useGetMyPageDashboardQuery(undefined, {
+      refetchOnMountOrArgChange: true,
+      skip: !user || !isOwnProfile,
+    });
 
   const dashboardData = dashboard as DashboardShape | undefined;
   const dashboardUser = dashboardData?.user ?? null;
   const dashboardReviews = dashboardData?.reviews ?? EMPTY_REVIEWS;
 
-  const [activeTab, setActiveTab] = useState<TabKey>('reviews');
+  const [activeTab, setActiveTab] = useState<TabKey>("reviews");
   const [isEditing, setIsEditing] = useState(false);
-  const [localReviews, setLocalReviews] = useState<ReviewItem[] | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [profileForm, setProfileForm] = useState<ProfileFormState>(() =>
-    buildProfileForm(user, defaultProfileBio)
+    buildProfileForm(user, defaultProfileBio),
   );
 
   useEffect(() => {
@@ -161,36 +173,36 @@ export default function ProfilePage() {
 
   const safeLanguage = Object.prototype.hasOwnProperty.call(
     dateLocaleByLanguage,
-    language
+    language,
   )
     ? (language as keyof typeof dateLocaleByLanguage)
-    : 'en';
+    : "en";
 
-  const savedDisplayUsername = profileUser.username?.trim() || '';
+  const savedDisplayUsername = profileUser.username?.trim() || "";
   const formDisplayUsername =
     profileForm.username.trim() || savedDisplayUsername;
 
   const savedDisplayName =
     [profileUser.firstName, profileUser.lastName]
       .filter(Boolean)
-      .join(' ')
+      .join(" ")
       .trim() ||
     savedDisplayUsername ||
-    t('home.defaultDisplayName');
+    t("home.defaultDisplayName");
 
   const formDisplayName =
     [profileForm.firstName, profileForm.lastName]
       .filter(Boolean)
-      .join(' ')
+      .join(" ")
       .trim() ||
     formDisplayUsername ||
-    t('home.defaultDisplayName');
+    t("home.defaultDisplayName");
 
   const ownDisplayUsername = isEditing
     ? formDisplayUsername
     : savedDisplayUsername;
 
-  const publicDisplayUsername = viewedProfile?.username?.trim() || '';
+  const publicDisplayUsername = viewedProfile?.username?.trim() || "";
 
   const displayUsername = isPublicProfile
     ? publicDisplayUsername
@@ -199,34 +211,34 @@ export default function ProfilePage() {
   const ownDisplayName = isEditing ? formDisplayName : savedDisplayName;
 
   const publicDisplayName =
-    publicDisplayUsername || t('home.defaultDisplayName');
+    publicDisplayUsername || t("home.defaultDisplayName");
 
   const profileDisplayName = isPublicProfile
     ? publicDisplayName
     : ownDisplayName;
 
   const profileBio = isPublicProfile
-    ? viewedProfile?.bio ?? ''
+    ? (viewedProfile?.bio ?? "")
     : isEditing
       ? profileForm.bio || defaultProfileBio
       : profileUser.bio || defaultProfileBio;
 
   const profileAvatarUrl = isPublicProfile
-    ? viewedProfile?.avatarUrl ?? ''
-    : (isEditing ? avatarPreview : null) ?? profileUser.avatarUrl ?? '';
+    ? (viewedProfile?.avatarUrl ?? "")
+    : ((isEditing ? avatarPreview : null) ?? profileUser.avatarUrl ?? "");
 
   const joinedLabel = isPublicProfile
-    ? t('home.joinedYear')
+    ? t("home.joinedYear")
     : formatJoinedDate(
         profileUserWithDates.createdAt ?? profileUserWithDates.joinedAt,
-        safeLanguage
+        safeLanguage,
       );
 
-  const userReviews = localReviews ?? dashboardReviews;
+  const userReviews = dashboardReviews;
 
   const visibleReviews = isPublicProfile
-    ? viewedProfile?.reviews.map(toReviewItem) ?? []
-    : userReviews;
+    ? (viewedProfile?.reviews.map(toReviewItem) ?? [])
+    : userReviews.map((r) => ({ ...r, isOwn: true }));
 
   const userWatchlist: readonly (readonly [string, string])[] = [];
 
@@ -236,16 +248,16 @@ export default function ProfilePage() {
     cannotLoadPublicProfile || (isPublicProfile && isViewedProfileError);
 
   const displayedFollowersCount = isPublicProfile
-    ? viewedProfile?.followersCount ?? 0
-    : profileUserWithDates.followersCount ?? 0;
+    ? (viewedProfile?.followersCount ?? 0)
+    : (profileUserWithDates.followersCount ?? 0);
 
   const initials =
     profileDisplayName
-      .split(' ')
+      .split(" ")
       .filter(Boolean)
       .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase() ?? '')
-      .join('') || displayUsername.slice(0, 2).toUpperCase();
+      .map((part) => part[0]?.toUpperCase() ?? "")
+      .join("") || displayUsername.slice(0, 2).toUpperCase();
 
   const handleToggleFollow = async () => {
     if (!routeUserId || !viewedProfile || isOwnProfile) {
@@ -302,61 +314,97 @@ export default function ProfilePage() {
 
   const handleProfileFormChange = (
     field: keyof typeof profileForm,
-    value: string
+    value: string,
   ) => {
     setProfileForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const profileStats = [
-    { label: t('home.reviews'), value: String(visibleReviews.length) },
-    { label: t('home.watchlist'), value: String(userWatchlist.length) },
-    { label: t('home.followers'), value: String(displayedFollowersCount) },
+    { label: t("home.reviews"), value: String(visibleReviews.length) },
+    { label: t("home.watchlist"), value: String(userWatchlist.length) },
+    { label: t("home.followers"), value: String(displayedFollowersCount) },
   ];
 
-  const handleReviewSubmit = (review: ReviewItem) => {
-    setLocalReviews((prev) => [review, ...(prev ?? dashboardReviews)]);
+  const handleReviewSubmit = async (review: {
+    mediaId: number;
+    rating: number;
+    content: string;
+    visibility: ReviewVisibility;
+  }) => {
+    try {
+      await createReview({
+        mediaId: review.mediaId,
+        review: {
+          rating: review.rating,
+          content: review.content,
+          visibility: review.visibility,
+        },
+      }).unwrap();
+      refetchDashboard?.();
+    } catch (err) {
+      console.error("리뷰 작성 실패:", err);
+    }
   };
 
-  const handleReviewDelete = (reviewId: string) => {
-    setLocalReviews((prev) =>
-      (prev ?? dashboardReviews).filter((review) => review.id !== reviewId)
-    );
+  const handleReviewDelete = async (review: ReviewItem) => {
+    try {
+      await deleteReviewMutation({
+        mediaId: review.mediaId,
+        reviewId: Number(review.id),
+      }).unwrap();
+      refetchDashboard();
+    } catch (err) {
+      console.error("리뷰 삭제 실패:", err);
+    }
   };
 
   const handleReviewEdit = (review: ReviewItem) => {
-    setLocalReviews((prev) =>
-      (prev ?? dashboardReviews).map((item) =>
-        item.id === review.id
-          ? { ...item, text: `${item.text} ${t('review.editDraftSuffix')}` }
-          : item
-      )
-    );
+    setEditingReview(review);
+  };
+
+  const handleReviewUpdate = async (data: {
+    rating: number;
+    content: string;
+  }) => {
+    if (!editingReview) return;
+    try {
+      await updateReviewMutation({
+        mediaId: editingReview.mediaId,
+        reviewId: Number(editingReview.id),
+        review: { rating: data.rating, content: data.content },
+      }).unwrap();
+      setEditingReview(null);
+      refetchDashboard();
+    } catch (err) {
+      console.error("리뷰 수정 실패:", err);
+    }
   };
 
   return (
     <section className="min-h-[calc(100vh-85px)] bg-[#0c0c0b] px-6 py-14 text-[#f0ead0]">
       <div className="mx-auto max-w-7xl">
         {shouldBlockForProfileLoad ? (
-          <EmptyState title={t('main.loading')} />
+          <EmptyState title={t("main.loading")} />
         ) : null}
 
         {shouldBlockForProfileError ? (
-          <EmptyState title={t('home.profileLoadError')} />
+          <EmptyState title={t("home.profileLoadError")} />
         ) : null}
 
         {!shouldBlockForProfileLoad && !shouldBlockForProfileError ? (
           <>
             <ProfileCard
-              avatarAlt={t('home.avatarAlt')}
+              avatarAlt={t("home.avatarAlt")}
               avatarUrl={profileAvatarUrl || undefined}
               bio={profileBio}
               canEdit={isOwnProfile}
               canFollow={isPublicProfile && Boolean(viewedProfile)}
-              closeEditLabel={t('home.closeEdit')}
+              closeEditLabel={t("home.closeEdit")}
               displayName={profileDisplayName}
               displayUsername={displayUsername}
-              editProfileLabel={t('home.editProfile')}
-              followLabel={t('home.follow')}
+              userId={profileUser.id}
+              editProfileLabel={t("home.editProfile")}
+              followLabel={t("home.follow")}
               initials={initials}
               isEditing={isEditing}
               isFollowLoading={followState.isLoading || unfollowState.isLoading}
@@ -365,16 +413,24 @@ export default function ProfilePage() {
               onToggleEdit={handleToggleEdit}
               onToggleFollow={handleToggleFollow}
               stats={profileStats}
-              unfollowLabel={t('home.following')}
-              verifiedLabel={t('home.verifiedMember')}
+              unfollowLabel={t("home.following")}
+              verifiedLabel={t("home.verifiedMember")}
             />
 
             <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_320px]">
               <div>
                 <div className="mb-7 flex border-b border-[#f0ead0]/10">
                   {[
-                    ['reviews', t('home.reviews'), String(visibleReviews.length)],
-                    ['watchlist', t('home.watchlist'), String(userWatchlist.length)],
+                    [
+                      "reviews",
+                      t("home.reviews"),
+                      String(visibleReviews.length),
+                    ],
+                    [
+                      "watchlist",
+                      t("home.watchlist"),
+                      String(userWatchlist.length),
+                    ],
                   ].map(([key, label, count]) => (
                     <button
                       key={key}
@@ -382,14 +438,16 @@ export default function ProfilePage() {
                       onClick={() => setActiveTab(key as TabKey)}
                       className={`relative -bottom-px shrink-0 border-b-2 px-5 py-3 text-[10px] uppercase tracking-[0.12em] transition ${
                         activeTab === key
-                          ? 'border-[#d63e2a] text-[#f0ead0]'
-                          : 'border-transparent text-[#8a8474] hover:text-[#c8c2a8]'
+                          ? "border-[#d63e2a] text-[#f0ead0]"
+                          : "border-transparent text-[#8a8474] hover:text-[#c8c2a8]"
                       }`}
                     >
-                      {label}{' '}
+                      {label}{" "}
                       <span
                         className={
-                          activeTab === key ? 'text-[#d63e2a]' : 'text-[#8a8474]'
+                          activeTab === key
+                            ? "text-[#d63e2a]"
+                            : "text-[#8a8474]"
                         }
                       >
                         {count}
@@ -398,7 +456,7 @@ export default function ProfilePage() {
                   ))}
                 </div>
 
-                {activeTab === 'reviews' ? (
+                {activeTab === "reviews" ? (
                   <>
                     {isOwnProfile ? (
                       <ReviewForm onSubmit={handleReviewSubmit} />
@@ -412,7 +470,7 @@ export default function ProfilePage() {
                   </>
                 ) : null}
 
-                {activeTab === 'watchlist' ? (
+                {activeTab === "watchlist" ? (
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {userWatchlist.length ? (
                       userWatchlist.map(([icon, label]) => (
@@ -428,7 +486,7 @@ export default function ProfilePage() {
                         </div>
                       ))
                     ) : (
-                      <EmptyState title={t('mypage.empty')} />
+                      <EmptyState title={t("mypage.empty")} />
                     )}
                   </div>
                 ) : null}
@@ -436,38 +494,45 @@ export default function ProfilePage() {
 
               {isOwnProfile ? (
                 <ProfileEditForm
-                  avatarUrl={avatarPreview ?? ''}
-                  avatarUrlLabel={t('home.avatarUrl')}
-                  avatarUrlPlaceholder={t('home.avatarUrlPlaceholder')}
-                  bioLabel={t('home.bio')}
-                  changePasswordLabel={t('home.changePassword')}
-                  confirmNewPasswordLabel={t('home.confirmNewPassword')}
-                  currentPasswordLabel={t('home.currentPassword')}
-                  deleteAccountLabel={t('home.deleteAccount')}
-                  firstNameLabel={t('signup.firstName')}
+                  avatarUrl={avatarPreview ?? ""}
+                  avatarUrlLabel={t("home.avatarUrl")}
+                  avatarUrlPlaceholder={t("home.avatarUrlPlaceholder")}
+                  bioLabel={t("home.bio")}
+                  changePasswordLabel={t("home.changePassword")}
+                  confirmNewPasswordLabel={t("home.confirmNewPassword")}
+                  currentPasswordLabel={t("home.currentPassword")}
+                  deleteAccountLabel={t("home.deleteAccount")}
+                  firstNameLabel={t("signup.firstName")}
                   form={profileForm}
                   isEditing={isEditing}
-                  lastNameLabel={t('signup.lastName')}
-                  newPasswordLabel={t('home.newPassword')}
+                  lastNameLabel={t("signup.lastName")}
+                  newPasswordLabel={t("home.newPassword")}
                   onAvatarUrlChange={(value) => setAvatarPreview(value)}
                   onChange={handleProfileFormChange}
                   onSave={handleProfileSave}
-                  passwordSectionLabel={t('home.passwordSection')}
-                  saveLabel={t('home.saveChanges')}
-                  sectionTitle={t('home.editPanelTitle')}
-                  settingsTitle={t('home.accountSettings')}
+                  passwordSectionLabel={t("home.passwordSection")}
+                  saveLabel={t("home.saveChanges")}
+                  sectionTitle={t("home.editPanelTitle")}
+                  settingsTitle={t("home.accountSettings")}
                   toggles={[]}
-                  usernameLabel={t('home.username')}
+                  usernameLabel={t("home.username")}
                 />
               ) : (
                 <aside className="border border-[#f0ead0]/10 bg-[#141412] p-6 text-sm leading-6 text-[#8a8474]">
-                  {t('home.publicProfilePlaceholder')}
+                  {t("home.publicProfilePlaceholder")}
                 </aside>
               )}
             </div>
           </>
         ) : null}
       </div>
+      {editingReview && (
+        <ReviewEditModal
+          review={editingReview}
+          onClose={() => setEditingReview(null)}
+          onSave={handleReviewUpdate}
+        />
+      )}
     </section>
   );
 }

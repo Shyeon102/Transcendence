@@ -83,9 +83,12 @@ export interface PasswordChangeRequest {
 
 export interface DashboardReview {
   id: number;
+   mediaId: number;
   title: string;
   note: string;
+  text: string;
   when: string;
+  date: string;
   rating: number;
   visibility?: 'public' | 'followers' | 'private';
 }

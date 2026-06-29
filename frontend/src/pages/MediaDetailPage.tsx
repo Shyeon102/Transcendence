@@ -1,13 +1,21 @@
 /* eslint-disable */
 import { useI18n } from "../lib/i18n";
-import { useCreateMediaReviewMutation, useGetMediaReviewsQuery, useUpdateMediaReviewMutation } from "../store/api/authApi";
+import {
+  useCreateMediaReviewMutation,
+  useGetMediaReviewsQuery,
+  useUpdateMediaReviewMutation,
+} from "../store/api/authApi";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useGetMediaDetailQuery } from "../store/api/mediaApi";
-import { useGetMediaInteractionsQuery, useToggleMediaInteractionMutation, useDeleteMediaReviewMutation } from "../store/api/authApi";
+import {
+  useGetMediaInteractionsQuery,
+  useToggleMediaInteractionMutation,
+  useDeleteMediaReviewMutation,
+} from "../store/api/authApi";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store";
-import defaultPoster from '/src/assets/images/defaultposter.png';
+import defaultPoster from "/src/assets/images/defaultposter.png";
 import type { MediaReview } from "../types";
 import { useNavigate } from "react-router-dom";
 
@@ -22,17 +30,16 @@ const MediaDetailPage = () => {
   const media = data;
   const reviewList = reviews ?? [];
 
-  const { data: interactions, refetch: refetchInteractions } = useGetMediaInteractionsQuery(mediaId);  // 추가
-  const [toggleInteraction] = useToggleMediaInteractionMutation();        // 추가
-  const [createReview] = useCreateMediaReviewMutation();                  // 추가
-  const [updateReview] = useUpdateMediaReviewMutation();   
+  const { data: interactions, refetch: refetchInteractions } =
+    useGetMediaInteractionsQuery(mediaId); // 추가
+  const [toggleInteraction] = useToggleMediaInteractionMutation(); // 추가
+  const [createReview] = useCreateMediaReviewMutation(); // 추가
+  const [updateReview] = useUpdateMediaReviewMutation();
   const [deleteReview] = useDeleteMediaReviewMutation();
 
   //const navigate = useNavigate(); // 미디어 탭 이동
   //const { id } = useParams(); // React Router에서  URL 파라미터 읽는 훅. URL: /media/:id
-  //useParams(); // // TODO: 백엔드 연동 후 useParams()로 id 받아서 API 호출
 
-  // TODO) setActive 초기값 : 홈에서 필터 선택하고 들어오면 그 타입이 기본값. 추후 백엔드 연동 후에 URL params에서 읽어와서 초기값 설정하기 : "" 이건 백엔드 연동전 초기값
   //const [_tab, setActiveTab] = useState(""); // Movie / Series / Animation
   const [icon, setActiveIcon] = useState({
     eye: false,
@@ -42,27 +49,23 @@ const MediaDetailPage = () => {
   });
   useEffect(() => {
     refetchInteractions();
-  }, [mediaId, refetchInteractions])
-
+  }, [mediaId, refetchInteractions]);
 
   useEffect(() => {
     if (!interactions) return;
     setActiveIcon({
-      eye: interactions.some(i => i.action === 'watched'),
-      like: interactions.some(i => i.action === 'like'),
-      dislike: interactions.some(i => i.action === 'dislike'),
-      wish: interactions.some(i => i.action === 'watchlist'),
+      eye: interactions.some((i) => i.action === "watched"),
+      like: interactions.some((i) => i.action === "like"),
+      dislike: interactions.some((i) => i.action === "dislike"),
+      wish: interactions.some((i) => i.action === "watchlist"),
     });
   }, [interactions]);
-
 
   const [myReview, setMyReview] = useState<MediaReview | null>(null);
 
   useEffect(() => {
     if (!reviews || !user) return;
-    setMyReview(
-      reviews.find((r) => r.username === user.username) ?? null
-    );
+    setMyReview(reviews.find((r) => r.username === user.username) ?? null);
   }, [reviews, user]);
 
   const [myRating, setMyRating] = useState(0);
@@ -71,7 +74,6 @@ const MediaDetailPage = () => {
       setMyRating(myReview.rating);
     }
   }, [myReview?.rating]);
-
 
   if (isLoading) {
     return (
@@ -96,7 +98,7 @@ const MediaDetailPage = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="bg-[#0c0c0b] min-h-screen text-white flex flex-col">
       <div className="px-6 pt-4">
@@ -172,13 +174,23 @@ const MediaDetailPage = () => {
                     if (myReview) {
                       if (newRating === 0) {
                         await deleteReview({ mediaId, reviewId: myReview.id });
-                        setMyReview(null);  // 로컬 즉시 반영
+                        setMyReview(null); // 로컬 즉시 반영
                       } else {
-                        await updateReview({ mediaId, reviewId: myReview.id, review: { rating: newRating, content: myReview.content } });
+                        await updateReview({
+                          mediaId,
+                          reviewId: myReview.id,
+                          review: {
+                            rating: newRating,
+                            content: myReview.content,
+                          },
+                        });
                       }
                     } else if (newRating > 0) {
-                      const result = await createReview({ mediaId, review: { rating: newRating, content: '' } }).unwrap();
-                      setMyReview(result);  // 생성된 리뷰 즉시 반영
+                      const result = await createReview({
+                        mediaId,
+                        review: { rating: newRating, content: "" },
+                      }).unwrap();
+                      setMyReview(result); // 생성된 리뷰 즉시 반영
                     }
                   }}
                   className="w-[1.6vw] h-[1.6vw] cursor-pointer"
@@ -199,6 +211,11 @@ const MediaDetailPage = () => {
               <p className="text-[1.2vw] font-semibold self-end mb-[0.2vh] ml-[-0.8vw]">
                 / 5
               </p>
+              {myReview?.content && (
+                <p className="mt-[1vh] text-[0.9vw] italic text-gray-300 leading-relaxed">
+                  {myReview.content}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -243,11 +260,17 @@ const MediaDetailPage = () => {
 
           {/* 아이콘 인터렉션 */}
           <div className="flex max-w-[31.5vw] justify-end gap-[0.3vw] mt-[2vh]">
-            <button onClick={async () => {
-              const next = !icon.eye;
-              setActiveIcon({ ...icon, eye: next });
-              await toggleInteraction({ mediaId, action: 'watched', active: next });
-            }}>
+            <button
+              onClick={async () => {
+                const next = !icon.eye;
+                setActiveIcon({ ...icon, eye: next });
+                await toggleInteraction({
+                  mediaId,
+                  action: "watched",
+                  active: next,
+                });
+              }}
+            >
               {/* 이미지 교체 (삼항연산자): 조건 ? 참일 때 : 거짓일 때 */}
               <img
                 src={icon.eye ? "/view.png" : "/non-view.png"}
@@ -257,8 +280,16 @@ const MediaDetailPage = () => {
             <button
               onClick={async () => {
                 const next = !icon.like;
-                setActiveIcon({ ...icon, like: next, dislike: next ? false : icon.dislike });
-                await toggleInteraction({ mediaId, action: 'like', active: next });
+                setActiveIcon({
+                  ...icon,
+                  like: next,
+                  dislike: next ? false : icon.dislike,
+                });
+                await toggleInteraction({
+                  mediaId,
+                  action: "like",
+                  active: next,
+                });
               }}
             >
               <img
@@ -269,8 +300,16 @@ const MediaDetailPage = () => {
             <button
               onClick={async () => {
                 const next = !icon.dislike;
-                setActiveIcon({ ...icon, dislike: next, like: next ? false : icon.like });
-                await toggleInteraction({ mediaId, action: 'dislike', active: next });
+                setActiveIcon({
+                  ...icon,
+                  dislike: next,
+                  like: next ? false : icon.like,
+                });
+                await toggleInteraction({
+                  mediaId,
+                  action: "dislike",
+                  active: next,
+                });
               }}
             >
               <img
@@ -291,8 +330,9 @@ const MediaDetailPage = () => {
                   className="flex gap-4 text-[0.8vw] items-start"
                 >
                   {/* 유저명 */}
-                  <p className="w-[5vw] truncate whitespace-nowrap overflow-hidden">{review.username}</p>
-
+                  <p className="w-[5vw] truncate whitespace-nowrap overflow-hidden">
+                    {review.username}
+                  </p>
 
                   {/* 별점 + 숫자 */}
                   <div className="flex items-center ml-[7vw]">
@@ -325,7 +365,6 @@ const MediaDetailPage = () => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };
