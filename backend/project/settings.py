@@ -101,10 +101,13 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
 CELERY_BEAT_SCHEDULE = {
-    "run-svd-training-every-midnight": {
-        "task": "apps.ai.service.recommendation.cf.tasks.run_svd_training",
+    "run-cf-training-regularly": {
+        "task": "apps.ai.service.recommendation.tasks.maybe_retrain_svd_task",
         "schedule": crontab(hour=3, minute=0),
-        # "schedule": crontab(minute=0),
+    },
+    "run-cbf-score-computation-regularly": {
+        "task": "apps.ai.service.recommendation.tasks.maybe_refresh_user_embedding_all_users_task",
+        "schedule": crontab(hour=4, minute=0),
     },
 }
 
