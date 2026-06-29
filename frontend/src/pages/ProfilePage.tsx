@@ -142,6 +142,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [localReviews, setLocalReviews] = useState<ReviewItem[] | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState('');
   const [profileForm, setProfileForm] = useState<ProfileFormState>(() =>
     buildProfileForm(user, defaultProfileBio)
   );
@@ -261,6 +262,7 @@ export default function ProfilePage() {
   };
 
   const handleToggleEdit = () => {
+    setSaveError('');
     if (isEditing) {
       setProfileForm(buildProfileForm(profileUser, defaultProfileBio));
       setAvatarPreview(null);
@@ -292,11 +294,21 @@ export default function ProfilePage() {
         (response as AuthUser);
 
       dispatch(updateProfile(updatedUser));
-    } catch {
-      // Keep the edit panel behavior consistent even when the API reports an error.
-    } finally {
+      setSaveError('');
       setAvatarPreview(null);
       setIsEditing(false);
+    } catch (err) {
+      // 저장 실패: 편집 패널은 열어두고, 알려진 백엔드 영문 에러는 i18n으로 현지화해 노출.
+      const message = (err as { message?: string }).message ?? '';
+      let localized = message || t('common.error');
+      if (/already exists/i.test(message)) {
+        localized = t('validation.usernameTaken');
+      } else if (/valid url/i.test(message)) {
+        localized = t('validation.avatarUrlInvalid');
+      } else if (/may not be blank/i.test(message)) {
+        localized = t('validation.usernameRequired');
+      }
+      setSaveError(localized);
     }
   };
 
@@ -304,6 +316,9 @@ export default function ProfilePage() {
     field: keyof typeof profileForm,
     value: string
   ) => {
+    if (saveError) {
+      setSaveError('');
+    }
     setProfileForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -436,6 +451,7 @@ export default function ProfilePage() {
 
               {isOwnProfile ? (
                 <ProfileEditForm
+                  apiError={saveError}
                   avatarUrl={avatarPreview ?? ''}
                   avatarUrlLabel={t('home.avatarUrl')}
                   avatarUrlPlaceholder={t('home.avatarUrlPlaceholder')}
@@ -449,7 +465,12 @@ export default function ProfilePage() {
                   isEditing={isEditing}
                   lastNameLabel={t('signup.lastName')}
                   newPasswordLabel={t('home.newPassword')}
-                  onAvatarUrlChange={(value) => setAvatarPreview(value)}
+                  onAvatarUrlChange={(value) => {
+                    if (saveError) {
+                      setSaveError('');
+                    }
+                    setAvatarPreview(value);
+                  }}
                   onChange={handleProfileFormChange}
                   onSave={handleProfileSave}
                   passwordSectionLabel={t('home.passwordSection')}
