@@ -14,6 +14,13 @@ SVD_RETRAIN_THRESHOLD = 30
 
 
 @shared_task
+def refresh_user_embedding_all_users_task():
+    User = get_user_model()
+    for user_id in User.objects.values_list("id", flat=True):
+        maybe_refresh_user_embedding_task.delay(user_id)
+
+
+@shared_task
 def maybe_refresh_user_embedding_task(user_id: int):
 
     activity_count = get_activity_count(user_id=user_id)

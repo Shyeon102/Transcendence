@@ -76,7 +76,7 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
 
         current_members = ChatRoomMember.objects.filter(room=room).count()
         if current_members >= room.max_members:
-            return Response({"error": "Room is full"}, status=400)
+            return Response({"error": "Room is full"}, status=200)
 
         ChatRoomInvite.objects.get_or_create(
             room=room,
@@ -130,7 +130,7 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         if current_members >= room.max_members:
             return Response(
                 {"error": "Room is full"},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_200_OK
             )
 
         user = request.user
