@@ -95,6 +95,7 @@ export interface DashboardReview {
   text: string;
   when: string;
   date: string;
+  poster: string;
   rating: number;
   visibility?: 'public' | 'followers' | 'private';
 }
@@ -111,6 +112,7 @@ export interface MediaReview {
   username: string;
   mediaId: number;
   mediaTitle: string;
+  posterUrl?: string;
   rating: number;
   content: string;
   visibility: 'public' | 'followers' | 'private';

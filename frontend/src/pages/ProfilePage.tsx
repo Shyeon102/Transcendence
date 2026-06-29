@@ -7,6 +7,7 @@ import ProfileEditForm from "../components/ProfileEditForm";
 import ReviewForm from "../components/ReviewForm";
 import ReviewList from "../components/ReviewList";
 import EmptyState from "../components/ui/EmptyState";
+import StatusMessage from "../components/ui/StatusMessage";
 import type { ReviewItem, ReviewVisibility } from "../components/ReviewCard";
 import { useI18n } from "../lib/i18n";
 import type { RootState } from "../store";
@@ -33,7 +34,7 @@ const toReviewItem = (review: MediaReview): ReviewItem => ({
   title: review.mediaTitle || "Review",
   type: "review",
   date: review.createdAt,
-  poster: "🎬",
+  poster: review.posterUrl ?? "",
   text: review.content,
   rating: review.rating,
   visibility: review.visibility,
@@ -96,6 +97,43 @@ const buildProfileForm = (
   lastName: user?.lastName ?? "",
   bio: user?.bio ?? defaultBio,
 });
+
+const normalizeAvatarUrl = (value: string | null | undefined) => {
+  const trimmed = value?.trim() ?? "";
+  return trimmed;
+};
+
+const isValidAvatarUrl = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed !== value) {
+    return false;
+  }
+
+  try {
+    const url = new URL(trimmed);
+    const labels = url.hostname.toLowerCase().split(".");
+    const isValidDomain =
+      labels.length >= 2 &&
+      labels.every((label) =>
+        /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label),
+      ) &&
+      /^[a-z]{2,63}$/.test(labels[labels.length - 1] ?? "");
+
+    return (
+      url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      isValidDomain
+    );
+  } catch {
+    return false;
+  }
+};
+
+const getValidatedAvatarUrl = (value: string | null | undefined) => {
+  const avatarUrl = normalizeAvatarUrl(value);
+  return avatarUrl && isValidAvatarUrl(avatarUrl) ? avatarUrl : undefined;
+};
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
@@ -173,6 +211,7 @@ export default function ProfilePage() {
   const dashboardReviews = dashboardData?.reviews ?? EMPTY_REVIEWS;
 
   const [reviewSearch, setReviewSearch] = useState('');
+  const [reviewActionError, setReviewActionError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [saveError, setSaveError] = useState('');
@@ -256,8 +295,10 @@ export default function ProfilePage() {
       : profileUser.bio || defaultProfileBio;
 
   const profileAvatarUrl = isPublicProfile
-    ? (viewedProfile?.avatarUrl ?? "")
-    : ((isEditing ? avatarPreview : null) ?? profileUser.avatarUrl ?? "");
+    ? getValidatedAvatarUrl(viewedProfile?.avatarUrl)
+    : isEditing
+      ? getValidatedAvatarUrl(avatarPreview)
+      : getValidatedAvatarUrl(profileUser.avatarUrl);
 
   const joinedLabel = isPublicProfile
     ? t("home.joinedYear")
@@ -325,7 +366,11 @@ export default function ProfilePage() {
   };
 
   const handleProfileSave = async () => {
-    const avatarUrl = avatarPreview?.trim() ?? undefined;
+    const avatarUrl = normalizeAvatarUrl(avatarPreview);
+    if (avatarUrl && !isValidAvatarUrl(avatarUrl)) {
+      setSaveError(t("validation.avatarUrlInvalid"));
+      return;
+    }
 
     const payload = {
       username: profileForm.username,
@@ -433,18 +478,20 @@ export default function ProfilePage() {
   };
 
   const handleReviewDelete = async (review: ReviewItem) => {
+    setReviewActionError('');
     try {
       await deleteReviewMutation({
         mediaId: review.mediaId,
         reviewId: Number(review.id),
       }).unwrap();
       refetchDashboard();
-    } catch (err) {
-      console.error("리뷰 삭제 실패:", err);
+    } catch {
+      setReviewActionError(t("review.deleteError"));
     }
   };
 
   const handleReviewEdit = (review: ReviewItem) => {
+    setReviewActionError('');
     setEditingReview(review);
   };
 
@@ -453,6 +500,7 @@ export default function ProfilePage() {
     content: string;
   }) => {
     if (!editingReview) return;
+    setReviewActionError('');
     try {
       await updateReviewMutation({
         mediaId: editingReview.mediaId,
@@ -461,8 +509,8 @@ export default function ProfilePage() {
       }).unwrap();
       setEditingReview(null);
       refetchDashboard();
-    } catch (err) {
-      console.error("리뷰 수정 실패:", err);
+    } catch {
+      setReviewActionError(t("review.updateError"));
     }
   };
 
@@ -562,6 +610,12 @@ export default function ProfilePage() {
                       className="mb-4 w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[12px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
                     />
 
+                    {reviewActionError ? (
+                      <StatusMessage className="mb-4">
+                        {reviewActionError}
+                      </StatusMessage>
+                    ) : null}
+
                     <ReviewList
                       onDelete={isOwnProfile ? handleReviewDelete : undefined}
                       onEdit={isOwnProfile ? handleReviewEdit : undefined}
@@ -605,6 +659,9 @@ export default function ProfilePage() {
                           follower.id === user.id
                             ? "/profile"
                             : `/profile/${follower.id}`;
+                        const followerAvatarUrl = getValidatedAvatarUrl(
+                          follower.avatarUrl,
+                        );
 
                         return (
                           <Link
@@ -613,9 +670,9 @@ export default function ProfilePage() {
                             className="flex items-center gap-4 border border-[#f0ead0]/10 bg-[#141412] px-4 py-3 transition hover:border-[#f0ead0]/25 hover:bg-[#1c1c19]"
                           >
                             <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden border border-[#f0ead0]/15 bg-[#1c1c19] font-['Bebas_Neue'] text-xl tracking-[0.04em] text-[#c8c2a8]">
-                              {follower.avatarUrl ? (
+                              {followerAvatarUrl ? (
                                 <img
-                                  src={follower.avatarUrl}
+                                  src={followerAvatarUrl}
                                   alt={follower.username}
                                   className="h-full w-full object-cover"
                                 />

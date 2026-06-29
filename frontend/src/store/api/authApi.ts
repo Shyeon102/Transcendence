@@ -94,6 +94,7 @@ type RawActivityReview = {
   note?: string;
   when?: string;
   media_title?: string;
+  media_image_url?: string;
   content?: string;
   created_at?: string;
   rating: number;
@@ -125,8 +126,10 @@ type RawReview = {
   user?: RawAuthUser;
   user_id?: number;
   username?: string;
+  media?: number;
   media_id?: number;
   media_title?: string;
+  media_image_url?: string;
   rating: number;
   comment?: string;
   content?: string;
@@ -320,6 +323,7 @@ const normalizeDashboardReview = (review: RawActivityReview): DashboardReview =>
   text: review.note ?? review.content ?? '',
   when: review.when ?? review.created_at ?? '',
   date: review.when ?? review.created_at ?? '',
+  poster: review.media_image_url ?? '',
   rating: review.rating,
   visibility: review.visibility,
 });
@@ -338,8 +342,9 @@ const normalizeReview = (review: RawReview): MediaReview => ({
   id: review.id,
   userId: review.user_id ?? review.user?.id ?? 0,
   username: review.username ?? review.user?.username ?? '',
-  mediaId: review.media_id ?? 0,
+  mediaId: review.media_id ?? review.media ?? 0,
   mediaTitle: review.media_title ?? '',
+  posterUrl: review.media_image_url,
   rating: review.rating,
   content: review.content ?? review.comment ?? '',
   visibility: review.visibility ?? 'public',
@@ -484,7 +489,14 @@ const baseQuery: BaseQueryFn<string | FetchArgs, unknown, AuthErrorResponse> = a
       );
       if (!refreshResult.data) {
         api.dispatch(logout());
-        return result;
+        const error = refreshResult.error as FetchBaseQueryError;
+        const data = error && 'data' in error ? error.data : undefined;
+        return {
+          error: {
+            message: toMessage(data) ?? 'Request failed.',
+            fields: toFieldErrors(data),
+          },
+        };
       }
 
       if (refreshResult.data) {
