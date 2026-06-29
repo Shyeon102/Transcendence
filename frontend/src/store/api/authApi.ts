@@ -506,7 +506,7 @@ export const authApi = createApi({
       async queryFn(credentials, api) {
         const tokenResult = await rawBaseQuery(
           {
-            url: '/auth/token/',
+            url: '/auth/login/',
             method: 'POST',
             body: credentials,
           },

@@ -185,6 +185,10 @@ export default function ProfilePage() {
     return null;
   }
 
+  if (isPublicProfile && !viewedProfile) {
+    return <EmptyState title={t("main.loading")} />;
+  }
+
   const profileUser = meProfile ?? dashboardUser ?? user;
   const profileUserWithDates = profileUser as AuthUserWithDates;
 
@@ -439,7 +443,7 @@ export default function ProfilePage() {
               closeEditLabel={t("home.closeEdit")}
               displayName={profileDisplayName}
               displayUsername={displayUsername}
-              userId={profileUser.id}
+              userId={isPublicProfile ? viewedProfile?.id : profileUser.id}
               editProfileLabel={t("home.editProfile")}
               followLabel={t("home.follow")}
               initials={initials}
