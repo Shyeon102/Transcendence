@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from .services import login_user
 from django.conf import settings
 from .serializer import RegisterSerializer
-from rest_framework import serializers
+from rest_framework import serializers, status
 from apps.users.serializers import UserSerializer
 from apps.authentication.serializer import validate_password_strength
 
@@ -40,16 +40,30 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        user = login_user(
-            request.data.get("username"),
-            request.data.get("password")
-        )
-        refresh = RefreshToken.for_user(user)
+        try:
+            user = login_user(
+                request.data.get("username"),
+                request.data.get("password")
+            )
 
-        return Response({
-            "access": str(refresh.access_token),
-            "refresh": str(refresh)
-        })
+            if not user:
+                return Response(
+                    {"error": "Invalid username or password"},
+                    status=status.HTTP_200_OK
+                )
+
+            refresh = RefreshToken.for_user(user)
+
+            return Response({
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+            })
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_200_OK
+            )
 
 
 class RegisterView(APIView):

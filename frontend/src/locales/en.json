@@ -7,7 +7,10 @@
     "logout": "Log out",
     "profile": "Profile",
     "mypage": "My Page",
-    "info": "Info"
+    "info": "Info",
+    "liveChat": "Live Chat",
+    "forum": "Forum",
+    "admin": "Admin"
   },
   "admin": {
     "eyebrow": "Moderation workspace",
@@ -235,6 +238,7 @@
     "title": "My Activity",
     "description": "Review your activity, saved titles, and recent updates in one place.",
     "reviewSection": "My Reviews",
+    "reviewSearchPlaceholder": "Search reviews by title",
     "watchlistSection": "Watchlist",
     "recentActivity": "Recent Activity",
     "entries": "entries",
@@ -251,6 +255,7 @@
     "textPlaceholder": "Write a short reaction or recommendation point.",
     "submit": "Add Review",
     "validation": "Please enter the title, type, star rating, and review text.",
+    "duplicate": "A review already exists.",
     "visibilityLabel": "Visibility",
     "visibility": {
       "public": "Public",

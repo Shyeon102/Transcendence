@@ -12,6 +12,7 @@ import { useI18n } from "../lib/i18n";
 import type { RootState } from "../store";
 import {
   useFollowUserMutation,
+  useGetMeQuery,
   useGetPublicProfileQuery,
   useUnfollowUserMutation,
   useGetMyPageDashboardQuery,
@@ -136,6 +137,14 @@ export default function ProfilePage() {
     skip: !shouldFetchViewedProfile,
   });
 
+  const { data: meProfile } = useGetMeQuery(undefined, {
+    pollingInterval: 3000,
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+    refetchOnReconnect: true,
+    skip: !user || !isOwnProfile,
+  });
+
   const [createReview] = useCreateMediaReviewMutation();
 
   const [deleteReviewMutation] = useDeleteMediaReviewMutation();
@@ -152,6 +161,7 @@ export default function ProfilePage() {
   const dashboardReviews = dashboardData?.reviews ?? EMPTY_REVIEWS;
 
   const [activeTab, setActiveTab] = useState<TabKey>("reviews");
+  const [reviewSearch, setReviewSearch] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [saveError, setSaveError] = useState('');
@@ -165,11 +175,21 @@ export default function ProfilePage() {
     }
   }, [dispatch, dashboardUser]);
 
+  useEffect(() => {
+    if (meProfile) {
+      dispatch(updateProfile(meProfile));
+    }
+  }, [dispatch, meProfile]);
+
   if (!user) {
     return null;
   }
 
-  const profileUser = dashboardUser ?? user;
+  if (isPublicProfile && !viewedProfile) {
+    return <EmptyState title={t("main.loading")} />;
+  }
+
+  const profileUser = meProfile ?? dashboardUser ?? user;
   const profileUserWithDates = profileUser as AuthUserWithDates;
 
   const safeLanguage = Object.prototype.hasOwnProperty.call(
@@ -240,6 +260,12 @@ export default function ProfilePage() {
   const visibleReviews = isPublicProfile
     ? (viewedProfile?.reviews.map(toReviewItem) ?? [])
     : userReviews.map((r) => ({ ...r, isOwn: true }));
+
+  // 리뷰를 미디어 제목으로 검색 (ReviewItem.title = mediaTitle).
+  const reviewQuery = reviewSearch.trim().toLowerCase();
+  const searchedReviews = reviewQuery
+    ? visibleReviews.filter((r) => r.title.toLowerCase().includes(reviewQuery))
+    : visibleReviews;
 
   const userWatchlist: readonly (readonly [string, string])[] = [];
 
@@ -346,6 +372,10 @@ export default function ProfilePage() {
     content: string;
     visibility: ReviewVisibility;
   }) => {
+    if (dashboardReviews.some((item) => item.mediaId === review.mediaId)) {
+      throw new Error("review.duplicate");
+    }
+
     try {
       await createReview({
         mediaId: review.mediaId,
@@ -357,7 +387,12 @@ export default function ProfilePage() {
       }).unwrap();
       refetchDashboard?.();
     } catch (err) {
-      console.error("리뷰 작성 실패:", err);
+      const message = (err as { message?: string }).message ?? "";
+      throw new Error(
+        /already exists/i.test(message)
+          ? "review.duplicate"
+          : message || "common.error",
+      );
     }
   };
 
@@ -417,7 +452,7 @@ export default function ProfilePage() {
               closeEditLabel={t("home.closeEdit")}
               displayName={profileDisplayName}
               displayUsername={displayUsername}
-              userId={profileUser.id}
+              userId={isPublicProfile ? viewedProfile?.id : profileUser.id}
               editProfileLabel={t("home.editProfile")}
               followLabel={t("home.follow")}
               initials={initials}
@@ -477,10 +512,18 @@ export default function ProfilePage() {
                       <ReviewForm onSubmit={handleReviewSubmit} />
                     ) : null}
 
+                    <input
+                      type="search"
+                      value={reviewSearch}
+                      onChange={(e) => setReviewSearch(e.target.value)}
+                      placeholder={t("mypage.reviewSearchPlaceholder")}
+                      className="mb-4 w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[12px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
+                    />
+
                     <ReviewList
                       onDelete={isOwnProfile ? handleReviewDelete : undefined}
                       onEdit={isOwnProfile ? handleReviewEdit : undefined}
-                      reviews={visibleReviews}
+                      reviews={searchedReviews}
                     />
                   </>
                 ) : null}

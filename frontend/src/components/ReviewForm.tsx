@@ -14,7 +14,7 @@ type ReviewFormProps = {
     rating: number;
     content: string;
     visibility: ReviewVisibility;
-  }) => void;
+  }) => Promise<void> | void;
 };
 
 const visibilityOptions: ReviewVisibility[] = [
@@ -32,7 +32,9 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
     rating: 0,
     visibility: "public" as ReviewVisibility,
   });
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorKey, setErrorKey] = useState("");
+  const [errorText, setErrorText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [triggerSearch, { data: results = [], isFetching }] =
     useLazySearchMediaQuery();
@@ -52,8 +54,9 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
     field: keyof typeof form,
     value: boolean | string | number,
   ) => {
-    if (errorMsg) {
-      setErrorMsg("");
+    if (errorKey || errorText) {
+      setErrorKey("");
+      setErrorText("");
     }
 
     setForm((prev) => ({
@@ -62,22 +65,43 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedMediaId || !form.text.trim() || form.rating < 1) {
-      setErrorMsg(t("review.validation"));
+      setErrorKey("review.validation");
       return;
     }
 
-    onSubmit({
-      mediaId: selectedMediaId,
-      rating: form.rating,
-      content: form.text,
-      visibility: form.visibility,
-    });
+    setIsSubmitting(true);
+    try {
+      await onSubmit({
+        mediaId: selectedMediaId,
+        rating: form.rating,
+        content: form.text,
+        visibility: form.visibility,
+      });
 
-    setForm({ title: "", type: "", text: "", rating: 0, visibility: "public" });
-    setSelectedMediaId(null);
+      setForm({
+        title: "",
+        type: "",
+        text: "",
+        rating: 0,
+        visibility: "public",
+      });
+      setSelectedMediaId(null);
+    } catch (err) {
+      const message = (err as { message?: string }).message;
+      if (message === "review.duplicate" || message === "common.error") {
+        setErrorKey(message);
+      } else {
+        setErrorText(message || "");
+        setErrorKey(message ? "" : "common.error");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const errorMsg = errorKey ? t(errorKey) : errorText;
 
   return (
     <SectionCard className="mb-6 p-5">
@@ -174,7 +198,12 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
         <StatusMessage className="mt-4">{errorMsg}</StatusMessage>
       ) : null}
 
-      <Button onClick={handleSubmit} variant="primary" className="mt-4">
+      <Button
+        onClick={handleSubmit}
+        variant="primary"
+        className="mt-4"
+        disabled={isSubmitting}
+      >
         {t("review.submit")}
       </Button>
     </SectionCard>

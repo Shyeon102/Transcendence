@@ -7,7 +7,10 @@
     "logout": "로그아웃",
     "profile": "프로필",
     "mypage": "마이페이지",
-    "info": "소개"
+    "info": "소개",
+    "liveChat": "라이브 채팅",
+    "forum": "포럼",
+    "admin": "관리자"
   },
   "admin": {
     "eyebrow": "운영 관리",
@@ -235,6 +238,7 @@
     "title": "내 활동",
     "description": "내 리뷰, 찜한 작품, 최근 활동을 한 화면에서 확인합니다.",
     "reviewSection": "내 리뷰",
+    "reviewSearchPlaceholder": "작품 제목으로 리뷰 검색",
     "watchlistSection": "찜 목록",
     "recentActivity": "최근 활동",
     "entries": "개",
@@ -245,12 +249,13 @@
   },
   "review": {
     "formEyebrow": "리뷰 작성",
-    "formTitle": "WRITE A QUICK TAKE",
+    "formTitle": "간단한 리뷰 작성",
     "titlePlaceholder": "작품 제목",
     "typePlaceholder": "movie / anime / drama",
     "textPlaceholder": "짧은 감상이나 추천 포인트를 적어주세요.",
     "submit": "리뷰 추가",
     "validation": "제목, 타입, 별점, 내용을 모두 입력해주세요.",
+    "duplicate": "이미 리뷰가 존재합니다.",
     "visibilityLabel": "공개 범위",
     "visibility": {
       "public": "전체 공개",
