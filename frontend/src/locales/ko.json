@@ -236,10 +236,10 @@
   "mypage": {
     "eyebrow": "내 공간",
     "title": "내 활동",
-    "description": "내 리뷰, 찜한 작품, 최근 활동을 한 화면에서 확인합니다.",
+    "description": "내 리뷰, 시청한 작품, 최근 활동을 한 화면에서 확인합니다.",
     "reviewSection": "내 리뷰",
     "reviewSearchPlaceholder": "작품 제목으로 리뷰 검색",
-    "watchlistSection": "찜 목록",
+    "watchlistSection": "시청 목록",
     "recentActivity": "최근 활동",
     "entries": "개",
     "queue": "대기열",
@@ -251,7 +251,7 @@
     "formEyebrow": "리뷰 작성",
     "formTitle": "간단한 리뷰 작성",
     "titlePlaceholder": "작품 제목",
-    "typePlaceholder": "movie / anime / drama",
+    "typePlaceholder": "영화 / 애니 / 드라마",
     "textPlaceholder": "짧은 감상이나 추천 포인트를 적어주세요.",
     "submit": "리뷰 추가",
     "validation": "제목, 타입, 별점, 내용을 모두 입력해주세요.",
@@ -303,9 +303,9 @@
   },
   "main": {
     "search": "검색...",
-    "noData": "아직 미디어가 없어요.",
+    "noData": "아직 미디어가 없습니다.",
     "loading": "불러오는 중...",
-    "loadError": "미디어를 불러오지 못했어요.",
+    "loadError": "미디어를 불러오지 못했습니다.",
     "myFav": "내 최애",
     "random": "랜덤",
     "trending": "인기",
@@ -324,7 +324,7 @@
     "cast": "출연:",
     "reviews": "리뷰",
     "readMore": "더 보기",
-    "noData": "미디어 정보가 아직 없어요.",
+    "noData": "미디어 정보가 아직 없습니다.",
     "loading": "불러오는 중..."
   },
   "chat": {
