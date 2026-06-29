@@ -110,11 +110,6 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[13px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
           />
-          <p className="mt-1.5 text-[9px] tracking-[0.08em] text-[#8a8474]">
-            <Button size="sm" variant="ghost" className="border-b border-[#f0ead0]/10 px-0 py-0 normal-case tracking-[0.08em]">
-              {t('login.forgotPassword')}
-            </Button>
-          </p>
         </div>
 
         {errorMsg ? <StatusMessage>{errorMsg}</StatusMessage> : null}

@@ -1,6 +1,8 @@
 import Button from './ui/Button';
 
 type ProfileStat = {
+  id: string;
+  clickable?: boolean;
   label: string;
   value: string;
 };
@@ -22,6 +24,7 @@ type ProfileCardProps = {
   isFollowing?: boolean;
   isEditing: boolean;
   joinedYearLabel: string;
+  onStatClick?: (statId: string) => void;
   onToggleFollow?: () => void;
   onToggleEdit: () => void;
   stats: ProfileStat[];
@@ -46,6 +49,7 @@ export default function ProfileCard({
   isFollowing = false,
   isEditing,
   joinedYearLabel,
+  onStatClick,
   onToggleFollow,
   onToggleEdit,
   stats,
@@ -115,12 +119,33 @@ export default function ProfileCard({
           </Button>
         ) : null}
 
-        {stats.map((stat) => (
-          <div key={stat.label} className="min-w-[88px] text-left lg:text-right">
-            <div className="font-['Bebas_Neue'] text-4xl leading-none tracking-[0.05em]">{stat.value}</div>
-            <div className="mt-0.5 text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">{stat.label}</div>
-          </div>
-        ))}
+        {stats.map((stat) => {
+          const content = (
+            <>
+              <div className="font-['Bebas_Neue'] text-4xl leading-none tracking-[0.05em]">
+                {stat.value}
+              </div>
+              <div className="mt-0.5 text-[9px] uppercase tracking-[0.15em] text-[#8a8474]">
+                {stat.label}
+              </div>
+            </>
+          );
+
+          return stat.clickable ? (
+            <button
+              key={stat.id}
+              type="button"
+              onClick={() => onStatClick?.(stat.id)}
+              className="min-w-[88px] text-left transition hover:text-[#ff4f38] lg:text-right"
+            >
+              {content}
+            </button>
+          ) : (
+            <div key={stat.id} className="min-w-[88px] text-left lg:text-right">
+              {content}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
