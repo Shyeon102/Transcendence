@@ -12,6 +12,13 @@
     "forum": "포럼",
     "admin": "관리자"
   },
+  "media": {
+    "releaseDate": "개봉일",
+    "country": "국가",
+    "language": "언어",
+    "cast": "출연",
+    "goToDetail": "상세 보기"
+  },
   "admin": {
     "eyebrow": "운영 관리",
     "title": "관리자 콘솔",

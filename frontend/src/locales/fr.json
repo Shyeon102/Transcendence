@@ -12,6 +12,13 @@
     "forum": "Forum",
     "admin": "Admin"
   },
+  "media": {
+    "releaseDate": "Date de sortie",
+    "country": "Pays",
+    "language": "Langue",
+    "cast": "Distribution",
+    "goToDetail": "Voir les détails"
+  },
   "admin": {
     "eyebrow": "Espace de modération",
     "title": "Console admin",

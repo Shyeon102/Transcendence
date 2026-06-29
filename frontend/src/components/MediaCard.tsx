@@ -1,5 +1,6 @@
+import { useI18n } from "../lib/i18n";
 import type { Media } from "../types/media";
-import defaultPoster from '/src/assets/images/defaultposter.png';
+import defaultPoster from "/src/assets/images/defaultposter.png";
 
 interface MediaCardProps {
   media: Media;
@@ -14,6 +15,7 @@ const MediaCard = ({
   isSelected,
   onDetailClick,
 }: MediaCardProps) => {
+  const { t } = useI18n();
   return (
     // // 바깥 div: 카드(왼쪽) + 정보패널(오른쪽) 가로 나열
     // // isSelected일 때만 gap 적용
@@ -62,20 +64,20 @@ const MediaCard = ({
     //       )}
     //     </div>
     <div className={`flex items-start ${isSelected ? "gap-[1.5vw]" : ""}`}>
-
       {/* LEFT: poster + text */}
       <div className="flex flex-col items-center">
         <div
           onClick={() => onSelect(media)}
           className={`relative cursor-pointer flex-shrink-0 transition-shadow duration-300
-            ${isSelected
-              ? "w-[15vw] h-[55vh] mx-[3vw] z-10"
-              : "w-[8vw] h-[55vh]"
+            ${
+              isSelected
+                ? "w-[15vw] h-[55vh] mx-[3vw] z-10"
+                : "w-[8vw] h-[55vh]"
             }`}
         >
           <img
             src={media.frontPosterUrl}
-            onError={(e) => { 
+            onError={(e) => {
               e.currentTarget.src = defaultPoster;
             }}
             alt={media.title}
@@ -115,33 +117,49 @@ const MediaCard = ({
           <div className="flex flex-col gap-[1vh]">
             <div className="flex gap-[1.5vw]">
               <span className="font-bold w-[7vw] text-[0.9vw]">
-                Release Date
+                {t("media.releaseDate")}
               </span>
-              <span className="min-w-0 flex-1 break-words text-[0.9vw]">{media.releaseDate}</span>
+              <span className="min-w-0 flex-1 break-words text-[0.9vw]">
+                {media.releaseDate}
+              </span>
             </div>
             <div className="flex gap-[1.5vw]">
-              <span className="font-bold w-[7vw] text-[0.9vw]">Country</span>
-              <span className="min-w-0 flex-1 break-words text-[0.9vw]">{media.country}</span>
+              <span className="font-bold w-[7vw] text-[0.9vw]">
+                {t("media.country")}
+              </span>
+              <span className="min-w-0 flex-1 break-words text-[0.9vw]">
+                {media.country}
+              </span>
             </div>
             <div className="flex gap-[1.5vw]">
-              <span className="font-bold w-[7vw] text-[0.9vw]">Language</span>
-              <span className="min-w-0 flex-1 break-words text-[0.9vw]">{media.language}</span>
+              <span className="font-bold w-[7vw] text-[0.9vw]">
+                {t("media.language")}
+              </span>
+              <span className="min-w-0 flex-1 break-words text-[0.9vw]">
+                {media.language}
+              </span>
             </div>
             <div className="flex gap-[1.5vw]">
-              <span className="font-bold w-[7vw] text-[0.9vw]">Cast</span>
-              <span className="min-w-0 flex-1 break-words text-[0.9vw]">{media.cast.join(", ")}</span>
+              <span className="font-bold w-[7vw] text-[0.9vw]">
+                {t("media.cast")}
+              </span>
+              <span className="min-w-0 flex-1 break-words text-[0.9vw]">
+                {media.cast.join(", ")}
+              </span>
             </div>
           </div>
 
           {/* 줄거리 */}
-          <p className="mt-[2vh] max-w-full whitespace-normal break-words text-[0.9vw] leading-[1.6] text-gray-300 line-clamp-10">{media.story.replace(/<br\s*\/?>/gi, "\n")}</p>
+          <p className="mt-[2vh] max-w-full whitespace-normal break-words text-[0.9vw] leading-[1.6] text-gray-300 line-clamp-10">
+            {media.story.replace(/<br\s*\/?>/gi, "\n")}
+          </p>
 
           {/* 상세 페이지 이동 버튼 */}
           <button
             onClick={() => onDetailClick(media.id)}
             className="mt-[2vh] px-[1.5vw] py-[1vh] bg-teal-600 text-white rounded text-[0.9vw]"
           >
-            Go to detail
+            {t("media.goToDetail")}
           </button>
         </div>
       )}
