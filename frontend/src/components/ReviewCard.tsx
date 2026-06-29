@@ -1,6 +1,8 @@
+import type { KeyboardEvent } from 'react';
 import { useI18n } from '../lib/i18n';
 import StarRating from './StarRating';
 import Button from './ui/Button';
+import defaultPoster from '/src/assets/images/defaultposter.png';
 
 export type ReviewVisibility = 'public' | 'followers' | 'private';
 
@@ -20,17 +22,53 @@ export type ReviewItem = {
 type ReviewCardProps = {
   onDelete?: (review: ReviewItem) => void;
   onEdit?: (review: ReviewItem) => void;
+  onOpen?: (review: ReviewItem) => void;
   review: ReviewItem;
 };
 
-export default function ReviewCard({ onDelete, onEdit, review }: ReviewCardProps) {
+export default function ReviewCard({
+  onDelete,
+  onEdit,
+  onOpen,
+  review,
+}: ReviewCardProps) {
   const { t } = useI18n();
   const visibility = review.visibility ?? 'public';
+  const canOpen = Boolean(onOpen && review.mediaId);
+
+  const handleOpen = () => {
+    if (canOpen) {
+      onOpen?.(review);
+    }
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (!canOpen) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleOpen();
+    }
+  };
 
   return (
-    <article className="grid gap-4 border border-[#f0ead0]/10 bg-[#141412] px-5 py-4 transition hover:border-[#f0ead0]/25 md:grid-cols-[42px_1fr_auto]">
-      <div className="flex h-[60px] w-[42px] items-center justify-center border border-[#f0ead0]/10 bg-[#1c1c19] text-lg">
-        {review.poster}
+    <article
+      role={canOpen ? 'link' : undefined}
+      tabIndex={canOpen ? 0 : undefined}
+      onClick={handleOpen}
+      onKeyDown={handleKeyDown}
+      className={`grid gap-4 border border-[#f0ead0]/10 bg-[#141412] px-5 py-4 transition hover:border-[#f0ead0]/25 md:grid-cols-[42px_1fr_auto] ${
+        canOpen ? 'cursor-pointer' : ''
+      }`}
+    >
+      <div className="flex h-[60px] w-[42px] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] text-lg">
+        <img
+          src={review.poster || defaultPoster}
+          alt={review.title}
+          onError={(event) => {
+            event.currentTarget.src = defaultPoster;
+          }}
+          className="h-full w-full object-cover"
+        />
       </div>
       <div>
         <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -51,10 +89,26 @@ export default function ReviewCard({ onDelete, onEdit, review }: ReviewCardProps
         </p>
         {review.isOwn ? (
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" variant="ghost" className="px-2" onClick={() => onEdit?.(review)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="px-2"
+              onClick={(event) => {
+                event.stopPropagation();
+                onEdit?.(review);
+              }}
+            >
               {t('review.edit')}
             </Button>
-            <Button size="sm" variant="danger" className="px-2" onClick={() => onDelete?.(review)}>
+            <Button
+              size="sm"
+              variant="danger"
+              className="px-2"
+              onClick={(event) => {
+                event.stopPropagation();
+                onDelete?.(review);
+              }}
+            >
               {t('review.delete')}
             </Button>
           </div>

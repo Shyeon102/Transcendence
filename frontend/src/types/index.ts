@@ -89,19 +89,26 @@ export interface PasswordChangeRequest {
 
 export interface DashboardReview {
   id: number;
-   mediaId: number;
+  mediaId: number;
   title: string;
   note: string;
   text: string;
   when: string;
   date: string;
+  poster: string;
   rating: number;
   visibility?: 'public' | 'followers' | 'private';
 }
 
+export interface DashboardMediaItem {
+  mediaId: number;
+  title: string;
+  poster: string;
+}
+
 export interface MyPageDashboardData {
   reviews: DashboardReview[];
-  watchlist: string[];
+  watchlist: DashboardMediaItem[];
   activities: string[];
 }
 
@@ -111,6 +118,7 @@ export interface MediaReview {
   username: string;
   mediaId: number;
   mediaTitle: string;
+  posterUrl?: string;
   rating: number;
   content: string;
   visibility: 'public' | 'followers' | 'private';

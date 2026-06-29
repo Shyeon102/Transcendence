@@ -7,6 +7,7 @@ import ProfileEditForm from "../components/ProfileEditForm";
 import ReviewForm from "../components/ReviewForm";
 import ReviewList from "../components/ReviewList";
 import EmptyState from "../components/ui/EmptyState";
+import StatusMessage from "../components/ui/StatusMessage";
 import type { ReviewItem, ReviewVisibility } from "../components/ReviewCard";
 import { useI18n } from "../lib/i18n";
 import type { RootState } from "../store";
@@ -14,6 +15,7 @@ import {
   useFollowUserMutation,
   useGetMeQuery,
   useGetPublicProfileQuery,
+  useGetUserActivityQuery,
   useGetUserFollowersQuery,
   useUnfollowUserMutation,
   useGetMyPageDashboardQuery,
@@ -23,7 +25,8 @@ import {
   useUpdateMeMutation,
 } from "../store/api/authApi";
 import { updateProfile } from "../store/slices/authSlice";
-import type { MediaReview } from "../types";
+import type { DashboardMediaItem, MediaReview } from "../types";
+import defaultPoster from "/src/assets/images/defaultposter.png";
 
 type TabKey = "reviews" | "watchlist" | "followers";
 
@@ -33,7 +36,7 @@ const toReviewItem = (review: MediaReview): ReviewItem => ({
   title: review.mediaTitle || "Review",
   type: "review",
   date: review.createdAt,
-  poster: "🎬",
+  poster: review.posterUrl ?? "",
   text: review.content,
   rating: review.rating,
   visibility: review.visibility,
@@ -49,6 +52,7 @@ type AuthUserWithDates = AuthUser & {
 type DashboardShape = {
   user?: AuthUser | null;
   reviews?: ReviewItem[];
+  watchlist?: DashboardMediaItem[];
 };
 
 type ProfileFormState = {
@@ -96,6 +100,43 @@ const buildProfileForm = (
   lastName: user?.lastName ?? "",
   bio: user?.bio ?? defaultBio,
 });
+
+const normalizeAvatarUrl = (value: string | null | undefined) => {
+  const trimmed = value?.trim() ?? "";
+  return trimmed;
+};
+
+const isValidAvatarUrl = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed !== value) {
+    return false;
+  }
+
+  try {
+    const url = new URL(trimmed);
+    const labels = url.hostname.toLowerCase().split(".");
+    const isValidDomain =
+      labels.length >= 2 &&
+      labels.every((label) =>
+        /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label),
+      ) &&
+      /^[a-z]{2,63}$/.test(labels[labels.length - 1] ?? "");
+
+    return (
+      url.protocol === "https:" &&
+      !url.username &&
+      !url.password &&
+      isValidDomain
+    );
+  } catch {
+    return false;
+  }
+};
+
+const getValidatedAvatarUrl = (value: string | null | undefined) => {
+  const avatarUrl = normalizeAvatarUrl(value);
+  return avatarUrl && isValidAvatarUrl(avatarUrl) ? avatarUrl : undefined;
+};
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
@@ -160,6 +201,11 @@ export default function ProfilePage() {
       skip: !user || !isOwnProfile,
     });
 
+  const { data: publicActivity } = useGetUserActivityQuery(routeUserId ?? 0, {
+    refetchOnMountOrArgChange: true,
+    skip: !user || !isPublicProfile || !routeUserId,
+  });
+
   const {
     data: followers = [],
     isError: isFollowersError,
@@ -173,6 +219,7 @@ export default function ProfilePage() {
   const dashboardReviews = dashboardData?.reviews ?? EMPTY_REVIEWS;
 
   const [reviewSearch, setReviewSearch] = useState('');
+  const [reviewActionError, setReviewActionError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [saveError, setSaveError] = useState('');
@@ -256,8 +303,10 @@ export default function ProfilePage() {
       : profileUser.bio || defaultProfileBio;
 
   const profileAvatarUrl = isPublicProfile
-    ? (viewedProfile?.avatarUrl ?? "")
-    : ((isEditing ? avatarPreview : null) ?? profileUser.avatarUrl ?? "");
+    ? getValidatedAvatarUrl(viewedProfile?.avatarUrl)
+    : isEditing
+      ? getValidatedAvatarUrl(avatarPreview)
+      : getValidatedAvatarUrl(profileUser.avatarUrl);
 
   const joinedLabel = isPublicProfile
     ? t("home.joinedYear")
@@ -278,7 +327,9 @@ export default function ProfilePage() {
     ? visibleReviews.filter((r) => r.title.toLowerCase().includes(reviewQuery))
     : visibleReviews;
 
-  const userWatchlist: readonly (readonly [string, string])[] = [];
+  const userWatchlist = isPublicProfile
+    ? (publicActivity?.watchlist ?? [])
+    : (dashboardData?.watchlist ?? []);
 
   const shouldBlockForProfileLoad = isPublicProfile && isViewedProfileLoading;
 
@@ -325,7 +376,11 @@ export default function ProfilePage() {
   };
 
   const handleProfileSave = async () => {
-    const avatarUrl = avatarPreview?.trim() ?? undefined;
+    const avatarUrl = normalizeAvatarUrl(avatarPreview);
+    if (avatarUrl && !isValidAvatarUrl(avatarUrl)) {
+      setSaveError(t("validation.avatarUrlInvalid"));
+      return;
+    }
 
     const payload = {
       username: profileForm.username,
@@ -374,11 +429,13 @@ export default function ProfilePage() {
   const profileStats = [
     {
       id: "reviews",
+      clickable: true,
       label: t("home.reviews"),
       value: String(visibleReviews.length),
     },
     {
       id: "watchlist",
+      clickable: true,
       label: t("home.watchlist"),
       value: String(userWatchlist.length),
     },
@@ -393,6 +450,10 @@ export default function ProfilePage() {
   const handleStatClick = (statId: string) => {
     if (statId === "followers") {
       setActiveTab("followers");
+    } else if (statId === "watchlist") {
+      setActiveTab("watchlist");
+    } else if (statId === "reviews") {
+      setActiveTab("reviews");
     }
   };
 
@@ -427,18 +488,20 @@ export default function ProfilePage() {
   };
 
   const handleReviewDelete = async (review: ReviewItem) => {
+    setReviewActionError('');
     try {
       await deleteReviewMutation({
         mediaId: review.mediaId,
         reviewId: Number(review.id),
       }).unwrap();
       refetchDashboard();
-    } catch (err) {
-      console.error("리뷰 삭제 실패:", err);
+    } catch {
+      setReviewActionError(t("review.deleteError"));
     }
   };
 
   const handleReviewEdit = (review: ReviewItem) => {
+    setReviewActionError('');
     setEditingReview(review);
   };
 
@@ -447,6 +510,7 @@ export default function ProfilePage() {
     content: string;
   }) => {
     if (!editingReview) return;
+    setReviewActionError('');
     try {
       await updateReviewMutation({
         mediaId: editingReview.mediaId,
@@ -455,8 +519,8 @@ export default function ProfilePage() {
       }).unwrap();
       setEditingReview(null);
       refetchDashboard();
-    } catch (err) {
-      console.error("리뷰 수정 실패:", err);
+    } catch {
+      setReviewActionError(t("review.updateError"));
     }
   };
 
@@ -556,6 +620,12 @@ export default function ProfilePage() {
                       className="mb-4 w-full border border-[#f0ead0]/10 bg-[#1c1c19] px-4 py-3 text-[12px] text-[#f0ead0] outline-none transition placeholder:text-[#8a8474] focus:border-[#f0ead0]/25"
                     />
 
+                    {reviewActionError ? (
+                      <StatusMessage className="mb-4">
+                        {reviewActionError}
+                      </StatusMessage>
+                    ) : null}
+
                     <ReviewList
                       onDelete={isOwnProfile ? handleReviewDelete : undefined}
                       onEdit={isOwnProfile ? handleReviewEdit : undefined}
@@ -567,17 +637,24 @@ export default function ProfilePage() {
                 {activeTab === "watchlist" ? (
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {userWatchlist.length ? (
-                      userWatchlist.map(([icon, label]) => (
-                        <div
-                          key={label}
-                          className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] text-[22px] transition hover:border-[#f0ead0]/25"
+                      userWatchlist.map((item) => (
+                        <Link
+                          key={item.mediaId ? item.mediaId : item.title}
+                          to={item.mediaId ? `/media/${item.mediaId}` : "#"}
+                          className="relative flex aspect-[2/3] items-center justify-center overflow-hidden border border-[#f0ead0]/10 bg-[#1c1c19] transition hover:border-[#f0ead0]/25"
                         >
-                          <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_4px,rgba(240,234,210,0.02)_4px,rgba(240,234,210,0.02)_8px)]" />
-                          <span className="relative z-10">{icon}</span>
-                          <span className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-1 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
-                            {label}
-                          </span>
-                        </div>
+                          <img
+                            src={item.poster || defaultPoster}
+                            alt={item.title}
+                            onError={(event) => {
+                              event.currentTarget.src = defaultPoster;
+                            }}
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
+                          <div className="absolute inset-x-0 bottom-0 bg-[#0c0c0b]/85 px-2 py-2 text-center text-[8px] uppercase tracking-[0.1em] text-[#c8c2a8]">
+                            {item.title}
+                          </div>
+                        </Link>
                       ))
                     ) : (
                       <EmptyState title={t("mypage.empty")} />
@@ -599,6 +676,9 @@ export default function ProfilePage() {
                           follower.id === user.id
                             ? "/profile"
                             : `/profile/${follower.id}`;
+                        const followerAvatarUrl = getValidatedAvatarUrl(
+                          follower.avatarUrl,
+                        );
 
                         return (
                           <Link
@@ -607,9 +687,9 @@ export default function ProfilePage() {
                             className="flex items-center gap-4 border border-[#f0ead0]/10 bg-[#141412] px-4 py-3 transition hover:border-[#f0ead0]/25 hover:bg-[#1c1c19]"
                           >
                             <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden border border-[#f0ead0]/15 bg-[#1c1c19] font-['Bebas_Neue'] text-xl tracking-[0.04em] text-[#c8c2a8]">
-                              {follower.avatarUrl ? (
+                              {followerAvatarUrl ? (
                                 <img
-                                  src={follower.avatarUrl}
+                                  src={followerAvatarUrl}
                                   alt={follower.username}
                                   className="h-full w-full object-cover"
                                 />

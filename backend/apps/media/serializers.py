@@ -21,6 +21,10 @@ class MediaSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     user = SimpleUserSerializer(read_only=True)
     media_title = serializers.CharField(source="media.title", read_only=True)
+    media_image_url = serializers.CharField(
+        source="media.image_url",
+        read_only=True,
+    )
     content = serializers.CharField(required=False,
                                     allow_blank=True, default='')
 
@@ -31,6 +35,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             "user",
             "media",
             "media_title",
+            "media_image_url",
             "rating",
             "content",
             "images",
@@ -42,6 +47,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             "user",
             "media",
             "media_title",
+            "media_image_url",
             "images",
             "created_at",
             "updated_at"
