@@ -42,7 +42,7 @@ class MediaSearchView(APIView):
         if not query:
             return Response(
                 {'error': 'Query parameter "q" is required.'}, status=status.
-                HTTP_400_BAD_REQUEST)
+                HTTP_200_BAD_REQUEST)
 
         queryset = Media.objects.filter(
             title__icontains=query).prefetch_related('genres')
@@ -94,7 +94,7 @@ class ReviewCreateView(APIView):
             )
         return Response(
             {'errors': serializer.errors},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_200_OK
         )
 
     def patch(self, request, media_id, review_id):
@@ -107,7 +107,7 @@ class ReviewCreateView(APIView):
             return Response({'review': serializer.data},
                             status=status.HTTP_200_OK)
         return Response({'errors': serializer.errors},
-                        status=status.HTTP_400_BAD_REQUEST)
+                        status=status.HTTP_200_OK)
 
     def delete(self, request, media_id, review_id):
         media = get_object_or_404(Media, pk=media_id)
@@ -122,7 +122,7 @@ class MediaInteractionView(APIView):
         serializer = MediaInteractionSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({'errors': serializer.errors},
-                            status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_200_OK)
         action = serializer.validated_data['action']
 
         media = get_object_or_404(Media, pk=media_id)

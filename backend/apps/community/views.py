@@ -67,7 +67,7 @@ class PostView(APIView):
 
         return Response(
             {"errors": serializer.errors},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_200_OK
         )
 
 
@@ -105,7 +105,7 @@ class PostDetailView(APIView):
 
         return Response(
             {"errors": serializer.errors},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status._BAD_REQUEST
         )
 
     def delete(self, request, pk):
@@ -171,7 +171,7 @@ class PostCommentView(APIView):
 
         return Response(
             {"errors": serializer.errors},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_200_OK
         )
 
 
@@ -258,7 +258,7 @@ class CommentDetailView(APIView):
 
         return Response(
             {"errors": serializer.errors},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_200_OK
         )
 
     def delete(self, request, pk):

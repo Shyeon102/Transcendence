@@ -128,15 +128,12 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
 
         room = self.get_object()
 
-        if self.is_member(room, request.user):
-            return Response({"error": "Already a member"}, status=400)
-
         current_members = ChatRoomMember.objects.filter(room=room).count()
 
         if current_members >= room.max_members:
             return Response(
                 {"error": "Room is full"},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_200_OK
             )
 
         user = request.user

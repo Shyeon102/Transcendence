@@ -51,7 +51,7 @@ class HybridRecommendationView(APIView):
             logger.exception("Recommendation error: user=%s", user_id)
             return Response(
                 {"error": "Internal server error."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_200_OK
             )
 
 
@@ -66,7 +66,7 @@ class RAGRecommendationView(APIView):
             query = request.query_params.get('q', '').strip()
             if not query:
                 return Response({"error": "Query parameter is required"},
-                                status=status.HTTP_400_BAD_REQUEST)
+                                status=status.HTTP_200_OK)
             rag_series = rag_recommendations(query)
             if rag_series.empty:
                 return Response({"media": []},
@@ -88,5 +88,5 @@ class RAGRecommendationView(APIView):
             logger.exception("RAGRecommendationView error: query=%s", query)
             return Response(
                 {"error": "Error occurred while searching."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status=status.HTTP_5_INTERNAL_SERVER_ERROR,
             )

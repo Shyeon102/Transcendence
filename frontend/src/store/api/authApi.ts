@@ -504,7 +504,7 @@ export const authApi = createApi({
       async queryFn(credentials, api) {
         const tokenResult = await rawBaseQuery(
           {
-            url: '/auth/token/',
+            url: '/auth/login/',
             method: 'POST',
             body: credentials,
           },
@@ -513,11 +513,22 @@ export const authApi = createApi({
         );
 
         if (tokenResult.data) {
-          const tokenPayload = tokenResult.data as RawTokenResponse;
-          if (!tokenPayload.access) {
+          if (tokenResult.error) {
+            const err = tokenResult.error as any;
+
             return {
               error: {
-                message: 'Login response is missing an access token.',
+                message: toMessage(err.data) ?? "Login failed",
+                status: err.status,
+              },
+            };
+          }
+
+          const tokenPayload = tokenResult.data as RawTokenResponse;
+          if (!tokenPayload?.access) {
+            return {
+              error: {
+                message: "Invalid login",
               },
             };
           }
@@ -555,8 +566,11 @@ export const authApi = createApi({
         };
       },
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
-        const { data } = await queryFulfilled;
-        dispatch(setCredentials(data));
+        try {
+            const { data } = await queryFulfilled;
+            dispatch(setCredentials(data));
+          } catch (err) {
+        }
       },
     }),
     googleLogin: builder.mutation<LoginResponse, GoogleLoginRequest>({
