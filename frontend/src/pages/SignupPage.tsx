@@ -36,6 +36,8 @@ export default function SignupPage() {
     if (
       !formData.email.trim() ||
       !formData.username.trim() ||
+      !formData.firstName.trim() ||
+      !formData.lastName.trim() ||
       !formData.password.trim() ||
       !formData.passwordConfirm.trim()
     ) {
