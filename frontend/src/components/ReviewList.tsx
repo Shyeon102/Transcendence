@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useI18n } from "../lib/i18n";
 import ReviewCard, { type ReviewItem } from "./ReviewCard";
 import Button from "./ui/Button";
@@ -23,6 +24,7 @@ export default function ReviewList({
   reviews,
 }: ReviewListProps) {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [sortKey, setSortKey] = useState<SortKey>("latest");
 
   const sortedReviews = useMemo(() => {
@@ -36,6 +38,12 @@ export default function ReviewList({
       (left, right) => getReviewTimestamp(right) - getReviewTimestamp(left),
     );
   }, [reviews, sortKey]);
+
+  const handleOpenReview = (review: ReviewItem) => {
+    if (review.mediaId > 0) {
+      navigate(`/media/${review.mediaId}`);
+    }
+  };
 
   if (!reviews.length) {
     return <EmptyState title={t("mypage.empty")} />;
@@ -67,6 +75,7 @@ export default function ReviewList({
             key={review.id}
             onDelete={onDelete}
             onEdit={onEdit}
+            onOpen={handleOpenReview}
             review={review}
           />
         ))}
